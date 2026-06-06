@@ -105,7 +105,7 @@ nav {
   animation:fadeUp 0.9s ease both;
 }
 .hero-logo {
-  height:120px; width:auto; margin-bottom:2rem;
+  height:80px; width:auto; margin-bottom:2rem;
   filter:drop-shadow(0 0 30px rgba(201,168,76,0.2));
   animation:fadeUp 0.9s ease 0.1s both;
 }
