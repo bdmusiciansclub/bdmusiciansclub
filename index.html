@@ -6,7 +6,7 @@
   <title>Bangladesh Musician's Club — Official Website</title>
   <meta name="description" content="Bangladesh Musician's Club — We Are The Soul Of Music. Est. 2022, Dhaka.">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="images/logo.jpg">
+  <link rel="icon" href="images/logo.png">
 </head>
 <body>
 
@@ -14,7 +14,7 @@
 <nav>
   <a href="#" class="nav-logo" onclick="navigate('home'); return false;">
     <div class="hero-logo-wrap" style="width:48px;height:48px;border:none;background:transparent;box-shadow:none;">
-      <img src="images/logo.jpg" alt="BMC Logo" style="width:44px;height:44px;">
+      <img src="images/logo.png" alt="BMC Logo" style="width:44px;height:44px;">
     </div>
     <div class="nav-logo-text">
       <span class="club-name">Bangladesh Musician's Club</span>
@@ -69,7 +69,7 @@
     <div class="music-notes"></div>
     <div class="hero-content">
       <div class="hero-logo-wrap">
-        <img src="images/logo.jpg" alt="Bangladesh Musician's Club">
+        <img src="images/logo.png" alt="Bangladesh Musician's Club">
       </div>
       <div class="hero-badge">Est. 2022 · Dhaka, Bangladesh</div>
       <h1 class="hero-title">Bangladesh<br><span>Musician's Club</span></h1>
@@ -98,10 +98,24 @@
         <p class="section-desc">From artists to the crew behind the scenes — every sector plays an equal and essential role.</p>
       </div>
       <div class="sectors-grid">
-        <div class="sector-card s1"><div class="sector-icon">🎵</div><div class="sector-name">Artists & Musicians</div><div class="sector-desc">Singers, instrumentalists and composers who bring the stage to life with sound and soul.</div></div>
-        <div class="sector-card s2"><div class="sector-icon">🔊</div><div class="sector-name">Sound & Light</div><div class="sector-desc">Sound engineers and lighting designers who craft the perfect atmosphere for every performance.</div></div>
-        <div class="sector-card s3"><div class="sector-icon">📺</div><div class="sector-name">LED & Stage</div><div class="sector-desc">LED screen operators and stage management teams who build the visual world of the event.</div></div>
-        <div class="sector-card s4"><div class="sector-icon">🎬</div><div class="sector-name">Behind the Scenes</div><div class="sector-desc">Production managers and logistics teams without whom no show would ever go on.</div></div>
+        <div class="sector-card s1">
+          <span class="sector-icon">🎵</span>
+          <div class="sector-name">Musicians</div>
+          <div class="sector-desc">All artists, singers, vocalists, and instrumentalists — guitarists, keyboardists, drummers, flutists, violinists, tabla players, harmonium players, and every other instrument. The heartbeat of every performance.</div>
+          <span class="sector-tag">শিল্পী ও যন্ত্রী</span>
+        </div>
+        <div class="sector-card s2">
+          <span class="sector-icon">🔊</span>
+          <div class="sector-name">Sound Engineers</div>
+          <div class="sector-desc">Sound engineers, audio technicians, PA system operators, mixing engineers, and lighting designers — the technical masters who craft the perfect atmosphere for every show.</div>
+          <span class="sector-tag">সাউন্ড ইঞ্জিনিয়ার</span>
+        </div>
+        <div class="sector-card s3">
+          <span class="sector-icon">🎬</span>
+          <div class="sector-name">Logistic Supporters</div>
+          <div class="sector-desc">LED screen operators, stage managers, set designers, production managers, equipment handlers, and all behind-the-scenes crew. The backbone without whom no show can go on.</div>
+          <span class="sector-tag">লজিস্টিক সাপোর্টার</span>
+        </div>
       </div>
     </div>
   </section>
@@ -200,10 +214,9 @@
         <input type="text" class="search-input" id="memberSearch" placeholder="Search by name or profession...">
         <select class="filter-select" id="sectorFilter">
           <option value="">All Sectors</option>
-          <option value="Artists & Musicians">Artists & Musicians</option>
-          <option value="Sound & Light">Sound & Light</option>
-          <option value="LED & Stage">LED & Stage</option>
-          <option value="Behind the Scenes">Behind the Scenes</option>
+          <option value="Musicians">Musicians</option>
+          <option value="Sound Engineers">Sound Engineers</option>
+          <option value="Logistic Supporters">Logistic Supporters</option>
         </select>
       </div>
       <div class="members-grid" id="membersGrid"><div class="loading">Loading members</div></div>
@@ -315,10 +328,9 @@
           <div class="form-group">
             <label class="form-label">Select Your Sector <span>*</span></label>
             <div class="sector-options">
-              <div class="sector-option" data-value="Artists & Musicians"><input type="radio" name="sector" value="Artists & Musicians"><div class="sector-option-icon">🎵</div><div class="sector-option-name">Artists & Musicians</div></div>
-              <div class="sector-option" data-value="Sound & Light"><input type="radio" name="sector" value="Sound & Light"><div class="sector-option-icon">🔊</div><div class="sector-option-name">Sound & Light</div></div>
-              <div class="sector-option" data-value="LED & Stage"><input type="radio" name="sector" value="LED & Stage"><div class="sector-option-icon">📺</div><div class="sector-option-name">LED & Stage</div></div>
-              <div class="sector-option" data-value="Behind the Scenes"><input type="radio" name="sector" value="Behind the Scenes"><div class="sector-option-icon">🎬</div><div class="sector-option-name">Behind the Scenes</div></div>
+              <div class="sector-option" data-value="Musicians"><input type="radio" name="sector" value="Musicians"><div class="sector-option-icon">🎵</div><div class="sector-option-name">Musicians</div></div>
+              <div class="sector-option" data-value="Sound Engineers"><input type="radio" name="sector" value="Sound Engineers"><div class="sector-option-icon">🔊</div><div class="sector-option-name">Sound Engineers</div></div>
+              <div class="sector-option" data-value="Logistic Supporters"><input type="radio" name="sector" value="Logistic Supporters"><div class="sector-option-icon">🎬</div><div class="sector-option-name">Logistic Supporters</div></div>
             </div>
           </div>
           <div class="form-row">
@@ -391,7 +403,7 @@
         </div>
         <div class="contact-card" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
           <div style="width:120px;height:120px;border-radius:50%;border:2px solid rgba(184,150,12,0.3);display:flex;align-items:center;justify-content:center;background:var(--dark);">
-            <img src="images/logo.jpg" style="width:100px;height:100px;object-fit:contain;mix-blend-mode:multiply;">
+            <img src="images/logo.png" style="width:100px;height:100px;object-fit:contain;mix-blend-mode:multiply;">
           </div>
           <p style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--text);font-style:italic;">"We Are The Soul Of Music"</p>
           <p style="font-size:11px;color:var(--text-light);letter-spacing:2px;text-transform:uppercase;">Bangladesh Musician's Club · Est. 2022</p>
@@ -408,7 +420,7 @@
     <div class="footer-brand">
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:0.8rem;">
         <div style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(184,150,12,0.3);display:flex;align-items:center;justify-content:center;background:rgba(27,67,50,0.3);">
-          <img src="images/logo.jpg" style="width:36px;height:36px;object-fit:contain;mix-blend-mode:screen;filter:brightness(1.2);">
+          <img src="images/logo.png" style="width:36px;height:36px;object-fit:contain;mix-blend-mode:screen;filter:brightness(1.2);">
         </div>
         <div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--gold2);font-weight:700;">Bangladesh Musician's Club</div>
