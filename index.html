@@ -4,19 +4,21 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bangladesh Musician's Club — Official Website</title>
-  <meta name="description" content="Bangladesh Musician's Club — Where Music Becomes Brotherhood. Est. 2022, Dhaka.">
+  <meta name="description" content="Bangladesh Musician's Club — We Are The Soul Of Music. Est. 2022, Dhaka.">
   <link rel="stylesheet" href="css/style.css">
-  <link rel="icon" href="images/logo.jpg" type="image/jpeg">
+  <link rel="icon" href="images/logo.jpg">
 </head>
 <body>
 
 <!-- NAVBAR -->
 <nav>
   <a href="#" class="nav-logo" onclick="navigate('home'); return false;">
-    <img src="images/logo.jpg" alt="BMC Logo">
+    <div class="hero-logo-wrap" style="width:48px;height:48px;border:none;background:transparent;box-shadow:none;">
+      <img src="images/logo.jpg" alt="BMC Logo" style="width:44px;height:44px;">
+    </div>
     <div class="nav-logo-text">
-      <span class="club-name">BANGLADESH MUSICIAN'S CLUB</span>
-      <span class="club-sub">EST. 2022 · DHAKA, BANGLADESH</span>
+      <span class="club-name">Bangladesh Musician's Club</span>
+      <span class="club-sub">Est. 2022 · Dhaka, Bangladesh</span>
     </div>
   </a>
   <ul class="nav-menu">
@@ -42,502 +44,329 @@
   <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
 </nav>
 
-<!-- MOBILE MENU -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#" onclick="navigate('home'); return false;">🏠 Home</a>
-  <a href="#" onclick="navigate('about'); return false;">ℹ️ About Us</a>
-  <a href="#" onclick="navigate('founders'); return false;">👑 Founders</a>
-  <a href="#" onclick="navigate('managing'); return false;">🏛️ Managing Board</a>
-  <a href="#" onclick="navigate('committee'); return false;">📋 Executive Committee</a>
-  <a href="#" onclick="navigate('subcommittee'); return false;">📌 Sub-Committees</a>
-  <a href="#" onclick="navigate('members'); return false;">👥 Members</a>
-  <a href="#" onclick="navigate('events'); return false;">📅 Events</a>
-  <a href="#" onclick="navigate('gallery'); return false;">🖼️ Gallery</a>
-  <a href="#" onclick="navigate('tribute'); return false;">🕯️ In Memoriam</a>
-  <a href="#" onclick="navigate('feedback'); return false;">💬 Feedback</a>
-  <a href="#" onclick="navigate('contact'); return false;">📞 Contact</a>
-  <a href="#" class="mobile-join" onclick="navigate('register'); return false;">✦ Join Us</a>
+  <a href="#" onclick="navigate('home'); return false;">♩ Home</a>
+  <a href="#" onclick="navigate('about'); return false;">♩ About Us</a>
+  <a href="#" onclick="navigate('founders'); return false;">♩ Founders</a>
+  <a href="#" onclick="navigate('managing'); return false;">♩ Managing Board</a>
+  <a href="#" onclick="navigate('committee'); return false;">♩ Executive Committee</a>
+  <a href="#" onclick="navigate('subcommittee'); return false;">♩ Sub-Committees</a>
+  <a href="#" onclick="navigate('members'); return false;">♩ Members</a>
+  <a href="#" onclick="navigate('events'); return false;">♩ Events</a>
+  <a href="#" onclick="navigate('gallery'); return false;">♩ Gallery</a>
+  <a href="#" onclick="navigate('tribute'); return false;">♩ In Memoriam</a>
+  <a href="#" onclick="navigate('feedback'); return false;">♩ Feedback</a>
+  <a href="#" onclick="navigate('contact'); return false;">♩ Contact</a>
+  <a href="#" class="mobile-join" onclick="navigate('register'); return false;">♪ Join Us</a>
 </div>
 
 
-<!-- ═══════════ HOME ═══════════ -->
+<!-- ═══ HOME ═══ -->
 <div id="page-home" class="page active">
   <section id="home">
-    <div class="hero-shapes"></div>
+    <div class="hero-bg"></div>
+    <div class="hero-staff"></div>
+    <div class="music-notes"></div>
     <div class="hero-content">
-      <img src="images/logo.jpg" alt="Bangladesh Musician's Club Logo" class="hero-logo">
-      <div class="hero-badge">EST. 2022 · DHAKA, BANGLADESH</div>
+      <div class="hero-logo-wrap">
+        <img src="images/logo.jpg" alt="Bangladesh Musician's Club">
+      </div>
+      <div class="hero-badge">Est. 2022 · Dhaka, Bangladesh</div>
       <h1 class="hero-title">Bangladesh<br><span>Musician's Club</span></h1>
-      <p class="hero-tagline">"Where Music Becomes Brotherhood"</p>
+      <p class="hero-slogan">"We Are The Soul Of Music"</p>
+      <p class="hero-tagline">Where Music Becomes Brotherhood</p>
+      <div class="hero-divider"><span>♪</span></div>
       <div class="hero-stats">
-        <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">SECTORS</div></div>
-        <div class="hero-stat"><div class="hero-stat-num">2022</div><div class="hero-stat-label">FOUNDED</div></div>
-        <div class="hero-stat"><div class="hero-stat-num">Dhaka</div><div class="hero-stat-label">HEADQUARTERS</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">4</div><div class="hero-stat-label">Sectors</div></div>
+        <div class="hero-stat"><div class="hero-stat-num" id="heroMemberCount">—</div><div class="hero-stat-label">Members</div></div>
+        <div class="hero-stat"><div class="hero-stat-num">2022</div><div class="hero-stat-label">Founded</div></div>
       </div>
       <div class="hero-btns">
         <a href="#" class="btn-primary" onclick="navigate('register'); return false;">Become a Member</a>
         <a href="#" class="btn-outline" onclick="navigate('about'); return false;">Learn More</a>
       </div>
     </div>
+    <div class="music-wave"></div>
   </section>
 
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
       <div class="section-header">
-        <span class="section-label">Our Sectors</span>
+        <span class="section-label">♪ Our Sectors</span>
         <h2 class="section-title">United in Music</h2>
-        <div class="section-divider"></div>
-        <p class="section-desc">From artists to the crew behind the scenes — every sector plays an equal role in making an event unforgettable.</p>
+        <div class="section-divider"><span>♫</span></div>
+        <p class="section-desc">From artists to the crew behind the scenes — every sector plays an equal and essential role.</p>
       </div>
       <div class="sectors-grid">
-        <div class="sector-card s1">
-          <div class="sector-icon">🎵</div>
-          <div class="sector-name">Artists & Musicians</div>
-          <div class="sector-desc">Singers, instrumentalists, composers — those who bring the stage to life with sound and soul.</div>
-        </div>
-        <div class="sector-card s2">
-          <div class="sector-icon">🔊</div>
-          <div class="sector-name">Sound & Light</div>
-          <div class="sector-desc">Sound engineers and lighting designers who create the perfect atmosphere for every performance.</div>
-        </div>
-        <div class="sector-card s3">
-          <div class="sector-icon">📺</div>
-          <div class="sector-name">LED & Stage</div>
-          <div class="sector-desc">LED screen operators and stage management teams that build the visual world of the event.</div>
-        </div>
-        <div class="sector-card s4">
-          <div class="sector-icon">🎬</div>
-          <div class="sector-name">Behind the Scenes</div>
-          <div class="sector-desc">Production managers and logistics teams without whom no show would ever go on.</div>
-        </div>
+        <div class="sector-card s1"><div class="sector-icon">🎵</div><div class="sector-name">Artists & Musicians</div><div class="sector-desc">Singers, instrumentalists and composers who bring the stage to life with sound and soul.</div></div>
+        <div class="sector-card s2"><div class="sector-icon">🔊</div><div class="sector-name">Sound & Light</div><div class="sector-desc">Sound engineers and lighting designers who craft the perfect atmosphere for every performance.</div></div>
+        <div class="sector-card s3"><div class="sector-icon">📺</div><div class="sector-name">LED & Stage</div><div class="sector-desc">LED screen operators and stage management teams who build the visual world of the event.</div></div>
+        <div class="sector-card s4"><div class="sector-icon">🎬</div><div class="sector-name">Behind the Scenes</div><div class="sector-desc">Production managers and logistics teams without whom no show would ever go on.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest Events on Home -->
+  <section class="section section-dark">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label white">♪ Upcoming</span>
+        <h2 class="section-title white">Events & Programs</h2>
+        <div class="section-divider"><span>♫</span></div>
+      </div>
+      <div id="homeEvents"><div class="loading">Loading events</div></div>
+      <div style="text-align:center;margin-top:2rem;">
+        <a href="#" class="btn-outline" onclick="navigate('events'); return false;">View All Events</a>
       </div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ ABOUT ═══════════ -->
+<!-- ═══ ABOUT ═══ -->
 <div id="page-about" class="page">
-  <div class="page-hero">
-    <h1>About Us</h1>
-    <p>Bangladesh Musician's Club · Est. 2022</p>
-  </div>
+  <div class="page-hero"><h1>About Us</h1><p>Bangladesh Musician's Club · Est. 2022</p></div>
   <section class="section section-white">
     <div class="container" style="max-width:760px;">
-      <div class="about-highlight">
-        <p>"Where Music Becomes Brotherhood"</p>
+      <div style="background:var(--dark);padding:2.5rem;margin-bottom:2.5rem;position:relative;">
+        <div style="position:absolute;top:1.5rem;left:1.5rem;font-size:3rem;opacity:0.1;color:var(--gold);">♬</div>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:1.5rem;color:var(--gold2);font-style:italic;text-align:center;">"We Are The Soul Of Music"</p>
       </div>
-      <p style="font-size:15px;color:var(--text-muted);line-height:1.9;margin-bottom:1.5rem;">Bangladesh Musician's Club (BMC) was established in 2022 with a vision to bring all music industry professionals under one unified platform. We believe every successful event is a collective achievement — from the artist on stage to the crew working tirelessly behind it.</p>
-      <p style="font-size:15px;color:var(--text-muted);line-height:1.9;margin-bottom:2.5rem;">From artists and sound engineers to lighting designers, LED operators, and production managers — BMC ensures that every professional is recognized and valued equally.</p>
-      <h3 style="font-family:'Montserrat',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:1.2rem;">Our Goals</h3>
+      <p style="font-size:15px;color:var(--text-muted);line-height:2;margin-bottom:1.5rem;">Bangladesh Musician's Club (BMC) was established in 2022 with a vision to bring all music industry professionals under one unified platform in Bangladesh. We believe every successful event is a collective achievement.</p>
+      <p style="font-size:15px;color:var(--text-muted);line-height:2;margin-bottom:2.5rem;">From artists and sound engineers to lighting designers, LED operators, and production managers — BMC ensures every professional is recognized and valued equally across all four sectors.</p>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;font-weight:700;color:var(--text);margin-bottom:1.2rem;letter-spacing:0.5px;">Our Goals</h3>
       <ul style="list-style:none;display:flex;flex-direction:column;gap:0.8rem;">
-        <li style="display:flex;gap:12px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--primary);font-weight:700;margin-top:2px;">✦</span> Build a strong professional network among music industry workers</li>
-        <li style="display:flex;gap:12px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--primary);font-weight:700;margin-top:2px;">✦</span> Support skill development for emerging professionals</li>
-        <li style="display:flex;gap:12px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--primary);font-weight:700;margin-top:2px;">✦</span> Help qualified professionals find career opportunities</li>
-        <li style="display:flex;gap:12px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--primary);font-weight:700;margin-top:2px;">✦</span> Establish dignity and recognition for music arts and culture</li>
-        <li style="display:flex;gap:12px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--primary);font-weight:700;margin-top:2px;">✦</span> Ensure fair recognition for all four sectors of the industry</li>
+        <li style="display:flex;gap:14px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--gold);margin-top:3px;">♦</span>Build a strong professional network across the music industry</li>
+        <li style="display:flex;gap:14px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--gold);margin-top:3px;">♦</span>Support skill development for emerging professionals</li>
+        <li style="display:flex;gap:14px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--gold);margin-top:3px;">♦</span>Help qualified professionals find career opportunities</li>
+        <li style="display:flex;gap:14px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--gold);margin-top:3px;">♦</span>Establish dignity and recognition for music arts and culture</li>
+        <li style="display:flex;gap:14px;font-size:15px;color:var(--text-muted);align-items:flex-start;"><span style="color:var(--gold);margin-top:3px;">♦</span>Ensure fair recognition for all four sectors of the industry</li>
       </ul>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ FOUNDERS ═══════════ -->
+<!-- ═══ FOUNDERS ═══ -->
 <div id="page-founders" class="page">
   <div class="page-hero"><h1>Founders</h1><p>The visionaries who built Bangladesh Musician's Club</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
-      <div class="committee-grid">
-        <div class="person-card">
-          <div class="person-avatar">👤</div>
-          <div class="person-name">Founder Name</div>
-          <div class="person-role">Founder</div>
-          <div class="person-sector">Sector</div>
-        </div>
-      </div>
-      <p style="text-align:center;color:var(--text-light);font-size:13px;margin-top:2rem;">* Founders' details will be added soon.</p>
+      <div id="foundersGrid"><div class="loading">Loading founders</div></div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ MANAGING BOARD ═══════════ -->
+<!-- ═══ MANAGING ═══ -->
 <div id="page-managing" class="page">
   <div class="page-hero"><h1>Managing Board</h1><p>Leadership guiding our club forward</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
-      <div class="committee-grid">
-        <div class="person-card"><div class="person-avatar">👤</div><div class="person-name">Name</div><div class="person-role">Position</div><div class="person-sector">Sector</div></div>
-      </div>
-      <p style="text-align:center;color:var(--text-light);font-size:13px;margin-top:2rem;">* Managing Board details will be added soon.</p>
+      <div id="managingGrid"><div class="loading">Loading</div></div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ COMMITTEE ═══════════ -->
+<!-- ═══ COMMITTEE ═══ -->
 <div id="page-committee" class="page">
   <div class="page-hero"><h1>Executive Committee</h1><p>Our operational leadership team</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
-      <div class="committee-grid">
-        <div class="person-card"><div class="person-avatar">👤</div><div class="person-name">Name</div><div class="person-role">Position</div><div class="person-sector">Sector</div></div>
-      </div>
-      <p style="text-align:center;color:var(--text-light);font-size:13px;margin-top:2rem;">* Executive Committee details will be added soon.</p>
+      <div id="committeeGrid"><div class="loading">Loading</div></div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ SUB-COMMITTEE ═══════════ -->
+<!-- ═══ SUBCOMMITTEE ═══ -->
 <div id="page-subcommittee" class="page">
   <div class="page-hero"><h1>Sub-Committees</h1><p>Specialized teams within our club</p></div>
-  <section class="section section-white">
-    <div class="container" style="text-align:center;">
-      <p style="color:var(--text-muted);">Sub-committee details will be added soon.</p>
+  <section class="section section-cream">
+    <div class="container">
+      <div id="subcommitteeGrid"><div class="loading">Loading</div></div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ MEMBERS ═══════════ -->
+<!-- ═══ MEMBERS ═══ -->
 <div id="page-members" class="page">
   <div class="page-hero"><h1>Our Members</h1><p>The talented professionals of Bangladesh Musician's Club</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
       <div class="members-search">
-        <input type="text" class="search-input" id="memberSearch" placeholder="🔍  Search by name or profession...">
+        <input type="text" class="search-input" id="memberSearch" placeholder="Search by name or profession...">
         <select class="filter-select" id="sectorFilter">
           <option value="">All Sectors</option>
-          <option value="Artists">Artists</option>
+          <option value="Artists & Musicians">Artists & Musicians</option>
           <option value="Sound & Light">Sound & Light</option>
           <option value="LED & Stage">LED & Stage</option>
           <option value="Behind the Scenes">Behind the Scenes</option>
         </select>
       </div>
-      <div class="members-grid" id="membersGrid"></div>
+      <div class="members-grid" id="membersGrid"><div class="loading">Loading members</div></div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ EVENTS ═══════════ -->
+<!-- ═══ EVENTS ═══ -->
 <div id="page-events" class="page">
   <div class="page-hero"><h1>Events</h1><p>Programs & activities of Bangladesh Musician's Club</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
-      <h3 style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;color:var(--primary);margin-bottom:1rem;text-transform:uppercase;">Upcoming Events</h3>
-      <div class="events-list" style="margin-bottom:3rem;">
-        <div class="event-item">
-          <div class="event-date-box"><div class="day">01</div><div class="month">SEP</div></div>
-          <div class="event-info">
-            <div class="event-title">Musicians' Get-Together 2026</div>
-            <div class="event-location">📍 Bashundhara Convention City, Dhaka</div>
-            <span class="event-tag">Get-Together</span>
-          </div>
-          <span class="event-status">Upcoming</span>
-        </div>
-      </div>
-      <h3 style="font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;letter-spacing:2px;color:var(--text-light);margin-bottom:1rem;text-transform:uppercase;">Past Events</h3>
-      <div class="events-list">
-        <div class="event-item" style="border-left-color:var(--text-light);">
-          <div class="event-date-box" style="background:var(--light2);"><div class="day" style="color:var(--text-muted);">—</div><div class="month" style="color:var(--text-light);">2022</div></div>
-          <div class="event-info">
-            <div class="event-title">Founding Ceremony</div>
-            <div class="event-location">📍 Dhaka</div>
-            <span class="event-tag">Foundation</span>
-          </div>
-          <span class="event-status past">Completed</span>
-        </div>
-      </div>
-      <p style="color:var(--text-light);font-size:13px;margin-top:1.5rem;text-align:center;">* More events will be added over time.</p>
+      <h3 style="font-size:10px;font-weight:700;letter-spacing:3px;color:var(--green);text-transform:uppercase;margin-bottom:1rem;">Upcoming Events</h3>
+      <div id="upcomingEvents" style="margin-bottom:3rem;"><div class="loading">Loading</div></div>
+      <h3 style="font-size:10px;font-weight:700;letter-spacing:3px;color:var(--text-light);text-transform:uppercase;margin-bottom:1rem;">Past Events</h3>
+      <div id="pastEvents"><div class="loading">Loading</div></div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ GALLERY ═══════════ -->
+<!-- ═══ GALLERY ═══ -->
 <div id="page-gallery" class="page">
   <div class="page-hero"><h1>Gallery</h1><p>Memories from our events and programs</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
-      <div class="gallery-grid">
-        <div class="gallery-item"><div class="gallery-placeholder"><span>🎵</span><p>Add Photo</p></div></div>
-        <div class="gallery-item"><div class="gallery-placeholder"><span>🎸</span><p>Add Photo</p></div></div>
-        <div class="gallery-item"><div class="gallery-placeholder"><span>🔊</span><p>Add Photo</p></div></div>
-        <div class="gallery-item"><div class="gallery-placeholder"><span>🎤</span><p>Add Photo</p></div></div>
-        <div class="gallery-item"><div class="gallery-placeholder"><span>🎬</span><p>Add Photo</p></div></div>
-        <div class="gallery-item"><div class="gallery-placeholder"><span>📺</span><p>Add Photo</p></div></div>
-      </div>
-      <p style="color:var(--text-light);font-size:13px;margin-top:1.5rem;text-align:center;">* Event photos will be added gradually.</p>
+      <div class="gallery-grid" id="galleryGrid"><div class="loading">Loading gallery</div></div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ IN MEMORIAM ═══════════ -->
+<!-- ═══ IN MEMORIAM ═══ -->
 <div id="page-tribute" class="page">
   <div class="page-hero"><h1>In Memoriam</h1><p>Remembering those who are no longer with us</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
       <div class="section-header">
         <p class="section-desc">Members of our club who have passed away — their contributions remain forever in our hearts.</p>
       </div>
-      <div class="tribute-grid">
-        <div class="tribute-card">
-          <div class="tribute-avatar">👤</div>
-          <div class="tribute-name">Member Name</div>
-          <div class="tribute-role">Role / Profession</div>
-          <div class="tribute-dates">Birth — Passing</div>
-          <div class="tribute-msg">"Their memory is our inspiration."</div>
-        </div>
-      </div>
-      <p style="text-align:center;color:var(--text-light);font-size:13px;margin-top:2rem;">* To add a member to this page, please contact the admin.</p>
+      <div class="tribute-grid" id="tributeGrid"><div class="loading">Loading</div></div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ REGISTRATION ═══════════ -->
+<!-- ═══ REGISTRATION ═══ -->
 <div id="page-register" class="page">
   <div class="page-hero"><h1>Join Us</h1><p>Apply for membership in Bangladesh Musician's Club</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container reg-container">
       <div class="reg-form" id="regFormWrap">
         <form id="regForm">
-
-          <!-- Membership Type -->
           <div class="form-section-title">Membership Type</div>
           <div class="membership-options" style="margin-bottom:1.5rem;">
-            <div class="membership-option" data-value="General">
-              <input type="radio" name="membership" value="General">
-              <div class="membership-type">General Member</div>
-              <div class="membership-fee">Annual <span>Renewable</span></div>
-            </div>
-            <div class="membership-option" data-value="Lifetime">
-              <input type="radio" name="membership" value="Lifetime">
-              <div class="membership-type">Lifetime Member</div>
-              <div class="membership-fee">One-time <span>Forever</span></div>
-            </div>
+            <div class="membership-option" data-value="General"><input type="radio" name="membership" value="General"><div class="membership-type">General Member</div><div class="membership-fee">Annual · Renewable</div></div>
+            <div class="membership-option" data-value="Lifetime"><input type="radio" name="membership" value="Lifetime"><div class="membership-type">Lifetime Member</div><div class="membership-fee">One-time · Forever</div></div>
           </div>
 
-          <!-- Personal Info -->
           <div class="form-section-title">Personal Information</div>
-          <div class="form-group">
-            <label class="form-label">Full Name (as per National ID) <span>*</span></label>
-            <input type="text" class="form-input" name="fullname" placeholder="Enter your name exactly as on NID" required>
-          </div>
+          <div class="form-group"><label class="form-label">Full Name (as per National ID) <span>*</span></label><input type="text" class="form-input" name="fullname" placeholder="Exact name as on NID" required></div>
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Date of Birth (as per NID) <span>*</span></label>
-              <input type="date" class="form-input" name="dob" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Blood Group <span>*</span></label>
-              <select class="form-select" name="blood" required>
-                <option value="">Select</option>
-                <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-                <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
-              </select>
+            <div class="form-group"><label class="form-label">Date of Birth (NID) <span>*</span></label><input type="date" class="form-input" name="dob" required></div>
+            <div class="form-group"><label class="form-label">Blood Group <span>*</span></label>
+              <select class="form-select" name="blood" required><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">National ID Number <span>*</span></label>
-            <input type="text" class="form-input" name="nid" placeholder="Your NID number" required>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Profile Photo</label>
-            <input type="file" class="form-input" name="photo" accept="image/*">
-          </div>
+          <div class="form-group"><label class="form-label">National ID Number <span>*</span></label><input type="text" class="form-input" name="nid" placeholder="NID number" required></div>
+          <div class="form-group"><label class="form-label">Profile Photo</label><input type="file" class="form-input" name="photo" accept="image/*" id="regPhoto"></div>
 
-          <!-- Current Address -->
           <div class="form-section-title" style="margin-top:1.5rem;">Current Address</div>
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Division <span>*</span></label>
-              <select class="form-select" name="div_c" id="div_c" required>
-                <option value="">-- Select Division --</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">District <span>*</span></label>
-              <select class="form-select" name="dist_c" id="dist_c" required disabled>
-                <option value="">-- Select District --</option>
-              </select>
-            </div>
+            <div class="form-group"><label class="form-label">Division <span>*</span></label><select class="form-select" name="div_c" id="div_c" required><option value="">-- Select Division --</option></select></div>
+            <div class="form-group"><label class="form-label">District <span>*</span></label><select class="form-select" name="dist_c" id="dist_c" required disabled><option value="">-- Select District --</option></select></div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Thana / Upazila <span>*</span></label>
-              <select class="form-select" name="thana_c" id="thana_c" required disabled>
-                <option value="">-- Select Thana --</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Full Address</label>
-              <input type="text" class="form-input" name="addr_c" placeholder="House / Road / Area">
-            </div>
+            <div class="form-group"><label class="form-label">Thana / Upazila <span>*</span></label><select class="form-select" name="thana_c" id="thana_c" required disabled><option value="">-- Select Thana --</option></select></div>
+            <div class="form-group"><label class="form-label">Full Address</label><input type="text" class="form-input" name="addr_c" placeholder="House / Road / Area"></div>
           </div>
 
-          <!-- Permanent Address -->
           <div class="form-section-title" style="margin-top:1.5rem;">Permanent Address</div>
           <div style="margin-bottom:1rem;display:flex;align-items:center;gap:10px;">
-            <input type="checkbox" id="sameAddress" style="width:16px;height:16px;cursor:pointer;accent-color:var(--primary);">
+            <input type="checkbox" id="sameAddress" style="width:16px;height:16px;cursor:pointer;accent-color:var(--green);">
             <label for="sameAddress" style="font-size:13px;color:var(--text-muted);cursor:pointer;font-weight:500;">Same as current address</label>
           </div>
           <div id="permanentAddress">
             <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Division <span>*</span></label>
-                <select class="form-select" name="div_p" id="div_p" required>
-                  <option value="">-- Select Division --</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">District <span>*</span></label>
-                <select class="form-select" name="dist_p" id="dist_p" required disabled>
-                  <option value="">-- Select District --</option>
-                </select>
-              </div>
+              <div class="form-group"><label class="form-label">Division <span>*</span></label><select class="form-select" name="div_p" id="div_p" required><option value="">-- Select Division --</option></select></div>
+              <div class="form-group"><label class="form-label">District <span>*</span></label><select class="form-select" name="dist_p" id="dist_p" required disabled><option value="">-- Select District --</option></select></div>
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Thana / Upazila <span>*</span></label>
-                <select class="form-select" name="thana_p" id="thana_p" required disabled>
-                  <option value="">-- Select Thana --</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label">Full Address</label>
-                <input type="text" class="form-input" name="addr_p" placeholder="House / Road / Area">
-              </div>
+              <div class="form-group"><label class="form-label">Thana / Upazila <span>*</span></label><select class="form-select" name="thana_p" id="thana_p" required disabled><option value="">-- Select Thana --</option></select></div>
+              <div class="form-group"><label class="form-label">Full Address</label><input type="text" class="form-input" name="addr_p" placeholder="House / Road / Area"></div>
             </div>
           </div>
 
-          <!-- Contact -->
           <div class="form-section-title" style="margin-top:1.5rem;">Contact Information</div>
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Mobile Number <span>*</span></label>
-              <input type="tel" class="form-input" name="mobile" placeholder="01XXXXXXXXX" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">WhatsApp Number</label>
-              <input type="tel" class="form-input" name="whatsapp" placeholder="If different from mobile">
-            </div>
+            <div class="form-group"><label class="form-label">Mobile Number <span>*</span></label><input type="tel" class="form-input" name="mobile" placeholder="01XXXXXXXXX" required></div>
+            <div class="form-group"><label class="form-label">WhatsApp Number</label><input type="tel" class="form-input" name="whatsapp" placeholder="If different"></div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Email Address</label>
-              <input type="email" class="form-input" name="email" placeholder="email@example.com">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Facebook Profile Link</label>
-              <input type="url" class="form-input" name="facebook" placeholder="facebook.com/yourprofile">
-            </div>
+            <div class="form-group"><label class="form-label">Email Address</label><input type="email" class="form-input" name="email" placeholder="email@example.com"></div>
+            <div class="form-group"><label class="form-label">Facebook Profile</label><input type="url" class="form-input" name="facebook" placeholder="facebook.com/yourprofile"></div>
           </div>
 
-          <!-- Professional Info -->
           <div class="form-section-title" style="margin-top:1.5rem;">Professional Information</div>
           <div class="form-group">
             <label class="form-label">Select Your Sector <span>*</span></label>
             <div class="sector-options">
-              <div class="sector-option" data-value="Artists">
-                <input type="radio" name="sector" value="Artists">
-                <div class="sector-option-icon">🎵</div>
-                <div class="sector-option-name">Artists & Musicians</div>
-              </div>
-              <div class="sector-option" data-value="Sound & Light">
-                <input type="radio" name="sector" value="Sound & Light">
-                <div class="sector-option-icon">🔊</div>
-                <div class="sector-option-name">Sound & Light</div>
-              </div>
-              <div class="sector-option" data-value="LED & Stage">
-                <input type="radio" name="sector" value="LED & Stage">
-                <div class="sector-option-icon">📺</div>
-                <div class="sector-option-name">LED & Stage</div>
-              </div>
-              <div class="sector-option" data-value="Behind the Scenes">
-                <input type="radio" name="sector" value="Behind the Scenes">
-                <div class="sector-option-icon">🎬</div>
-                <div class="sector-option-name">Behind the Scenes</div>
-              </div>
+              <div class="sector-option" data-value="Artists & Musicians"><input type="radio" name="sector" value="Artists & Musicians"><div class="sector-option-icon">🎵</div><div class="sector-option-name">Artists & Musicians</div></div>
+              <div class="sector-option" data-value="Sound & Light"><input type="radio" name="sector" value="Sound & Light"><div class="sector-option-icon">🔊</div><div class="sector-option-name">Sound & Light</div></div>
+              <div class="sector-option" data-value="LED & Stage"><input type="radio" name="sector" value="LED & Stage"><div class="sector-option-icon">📺</div><div class="sector-option-name">LED & Stage</div></div>
+              <div class="sector-option" data-value="Behind the Scenes"><input type="radio" name="sector" value="Behind the Scenes"><div class="sector-option-icon">🎬</div><div class="sector-option-name">Behind the Scenes</div></div>
             </div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Specialization / Profession <span>*</span></label>
-              <input type="text" class="form-input" name="specialty" placeholder="e.g. Guitarist, Sound Engineer" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Years of Experience</label>
-              <select class="form-select" name="experience">
-                <option>Less than 1 year</option>
-                <option>1–3 years</option>
-                <option>3–5 years</option>
-                <option>5–10 years</option>
-                <option>10+ years</option>
-              </select>
+            <div class="form-group"><label class="form-label">Specialization / Profession <span>*</span></label><input type="text" class="form-input" name="specialty" placeholder="e.g. Guitarist, Sound Engineer" required></div>
+            <div class="form-group"><label class="form-label">Years of Experience</label>
+              <select class="form-select" name="experience"><option>Less than 1 year</option><option>1–3 years</option><option>3–5 years</option><option>5–10 years</option><option>10+ years</option></select>
             </div>
           </div>
-          <div class="form-group">
-            <label class="form-label">Current Organization</label>
-            <input type="text" class="form-input" name="organization" placeholder="Organization name (if applicable)">
-          </div>
+          <div class="form-group"><label class="form-label">Current Organization</label><input type="text" class="form-input" name="organization" placeholder="Organization name (if applicable)"></div>
 
-          <button type="submit" class="form-submit">Submit Application</button>
+          <button type="submit" class="form-submit" id="regSubmitBtn">Submit Application</button>
           <p class="form-note">After submission, your application will be reviewed and approved by the admin. You will be contacted once approved.</p>
         </form>
       </div>
       <div class="success-msg" id="regSuccess">
-        <div style="font-size:3.5rem;margin-bottom:1rem;">🎉</div>
+        <div style="font-size:3rem;margin-bottom:1rem;">♪</div>
         <h3>Application Submitted!</h3>
-        <p style="margin-top:0.5rem;">Your application has been received. It will be reviewed and you will be contacted upon approval.</p>
-        <button onclick="location.reload()" style="margin-top:1.5rem;padding:12px 28px;background:linear-gradient(135deg,var(--primary),#FF6B6B);color:#fff;border:none;cursor:pointer;font-size:14px;font-weight:700;border-radius:50px;">New Application</button>
+        <p style="margin-top:0.5rem;">Your application has been received and will be reviewed by the admin. You will be contacted upon approval.</p>
+        <button onclick="location.reload()" style="margin-top:1.5rem;padding:12px 32px;background:var(--green);color:#fff;border:none;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;">New Application</button>
       </div>
     </div>
   </section>
 </div>
 
 
-<!-- ═══════════ FEEDBACK ═══════════ -->
+<!-- ═══ FEEDBACK ═══ -->
 <div id="page-feedback" class="page">
   <div class="page-hero"><h1>Feedback</h1><p>Your suggestions and complaints help us grow</p></div>
-  <section class="section section-light">
-    <div class="container feedback-container">
+  <section class="section section-cream">
+    <div class="container" style="max-width:600px;">
       <div class="reg-form">
-        <div id="feedbackForm">
+        <div id="feedbackFormWrap">
           <div class="form-section-title">Type of Feedback</div>
           <div class="feedback-type" style="margin-bottom:1.5rem;">
-            <div class="feedback-option selected" data-type="Suggestion">
-              <div class="feedback-option-icon">💡</div>
-              <div class="feedback-option-label">Suggestion</div>
-            </div>
-            <div class="feedback-option" data-type="Complaint">
-              <div class="feedback-option-icon">📢</div>
-              <div class="feedback-option-label">Complaint</div>
-            </div>
+            <div class="feedback-option selected" data-type="Suggestion"><div class="feedback-option-icon">💡</div><div class="feedback-option-label">Suggestion</div></div>
+            <div class="feedback-option" data-type="Complaint"><div class="feedback-option-icon">📢</div><div class="feedback-option-label">Complaint</div></div>
           </div>
-          <form onsubmit="document.getElementById('feedbackForm').style.display='none'; document.getElementById('feedbackSuccess').classList.add('show'); return false;">
-            <div class="form-group">
-              <label class="form-label">Your Name (optional)</label>
-              <input type="text" class="form-input" placeholder="You may leave this blank">
-            </div>
-            <div class="form-group">
-              <label class="form-label">Subject <span style="color:var(--primary);">*</span></label>
-              <input type="text" class="form-input" placeholder="Brief subject of your feedback" required>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Message <span style="color:var(--primary);">*</span></label>
-              <textarea class="form-textarea" rows="5" placeholder="Write your suggestion or complaint in detail..." required style="resize:vertical;"></textarea>
-            </div>
+          <form id="feedbackForm">
+            <div class="form-group"><label class="form-label">Your Name (optional)</label><input type="text" class="form-input" id="fb_name" placeholder="Anonymous is fine"></div>
+            <div class="form-group"><label class="form-label">Subject <span style="color:var(--red);">*</span></label><input type="text" class="form-input" id="fb_subject" placeholder="Brief subject" required></div>
+            <div class="form-group"><label class="form-label">Message <span style="color:var(--red);">*</span></label><textarea class="form-textarea" id="fb_message" rows="5" placeholder="Write your feedback in detail..." required style="resize:vertical;"></textarea></div>
             <button type="submit" class="form-submit">Send Feedback</button>
           </form>
         </div>
         <div class="success-msg" id="feedbackSuccess">
-          <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+          <div style="font-size:3rem;margin-bottom:1rem;">✓</div>
           <h3>Message Sent!</h3>
-          <p>Thank you. We take your feedback seriously and will review it carefully.</p>
+          <p>Thank you. We take your feedback seriously.</p>
         </div>
       </div>
     </div>
@@ -545,76 +374,28 @@
 </div>
 
 
-<!-- ═══════════ CONTACT ═══════════ -->
+<!-- ═══ CONTACT ═══ -->
 <div id="page-contact" class="page">
   <div class="page-hero"><h1>Contact Us</h1><p>We'd love to hear from you</p></div>
-  <section class="section section-light">
+  <section class="section section-cream">
     <div class="container">
       <div class="contact-grid">
         <div class="contact-card">
           <h3>Address & Contact</h3>
-          <div class="contact-item">
-            <div class="contact-icon red">📍</div>
-            <div class="contact-text"><strong>Head Office</strong><span>186, Inner Circular Road, Al-Helal Bhaban, Arambagh, Motijheel, Dhaka-1000</span></div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-icon blue">📍</div>
-            <div class="contact-text"><strong>Central Office</strong><span>12 No. Bicharam Dewri, Payra Chattar, Bangshal, Dhaka-1100</span></div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-icon green">📞</div>
-            <div class="contact-text"><strong>Phone</strong><span>01967860636 / 01819183995</span></div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-icon orange">📧</div>
-            <div class="contact-text"><strong>Email</strong><span>bangladeshmusiciansclub2022@gmail.com</span></div>
-          </div>
-          <div class="contact-item">
-            <div class="contact-icon blue">🌐</div>
-            <div class="contact-text"><strong>Website</strong><span>www.bangladeshmusiciansclub.com</span></div>
-          </div>
-          <div class="social-links">
-            <a href="https://facebook.com/groups/759947698617105" target="_blank" class="social-link">📘 Facebook Group</a>
-          </div>
+          <div class="contact-item"><div class="contact-icon">📍</div><div class="contact-text"><strong>Head Office</strong><span>186, Inner Circular Road, Al-Helal Bhaban, Arambagh, Motijheel, Dhaka-1000</span></div></div>
+          <div class="contact-item"><div class="contact-icon">📍</div><div class="contact-text"><strong>Central Office</strong><span>12 No. Bicharam Dewri, Payra Chattar, Bangshal, Dhaka-1100</span></div></div>
+          <div class="contact-item"><div class="contact-icon">📞</div><div class="contact-text"><strong>Phone</strong><span>01967860636 / 01819183995</span></div></div>
+          <div class="contact-item"><div class="contact-icon">📧</div><div class="contact-text"><strong>Email</strong><span>bangladeshmusiciansclub2022@gmail.com</span></div></div>
+          <div class="contact-item"><div class="contact-icon">🌐</div><div class="contact-text"><strong>Website</strong><span>www.bangladeshmusiciansclub.com</span></div></div>
+          <div class="social-links"><a href="https://facebook.com/groups/759947698617105" target="_blank" class="social-link">Facebook Group</a></div>
         </div>
-        <div class="contact-card" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;">
-          <img src="images/logo.jpg" alt="BMC Logo" style="height:110px;width:auto;margin-bottom:1.5rem;">
-          <p style="font-family:'Montserrat',sans-serif;font-size:1.1rem;font-weight:700;color:var(--text);font-style:italic;margin-bottom:0.5rem;">"Where Music Becomes Brotherhood"</p>
-          <p style="font-size:13px;color:var(--text-light);">Bangladesh Musician's Club · Est. 2022</p>
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
-
-
-<!-- ═══════════ ADMIN ═══════════ -->
-<div id="page-admin" class="page">
-  <div class="page-hero"><h1>Admin Panel</h1><p>Manage membership applications</p></div>
-  <section class="section section-light">
-    <div class="container">
-      <div id="adminLoginBox" style="max-width:380px;margin:0 auto;">
-        <div class="reg-form">
-          <div class="form-section-title">Admin Login</div>
-          <div class="form-group">
-            <label class="form-label">Password</label>
-            <input type="password" class="form-input" id="adminPass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter') adminLogin()">
+        <div class="contact-card" style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;">
+          <div style="width:120px;height:120px;border-radius:50%;border:2px solid rgba(184,150,12,0.3);display:flex;align-items:center;justify-content:center;background:var(--dark);">
+            <img src="images/logo.jpg" style="width:100px;height:100px;object-fit:contain;mix-blend-mode:multiply;">
           </div>
-          <button onclick="adminLogin()" class="form-submit">Login</button>
+          <p style="font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:700;color:var(--text);font-style:italic;">"We Are The Soul Of Music"</p>
+          <p style="font-size:11px;color:var(--text-light);letter-spacing:2px;text-transform:uppercase;">Bangladesh Musician's Club · Est. 2022</p>
         </div>
-      </div>
-      <div id="adminPanel" style="display:none;">
-        <div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;">
-          <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 2rem;box-shadow:var(--shadow);border-left:4px solid var(--primary);">
-            <div style="font-size:11px;color:var(--text-light);font-weight:700;letter-spacing:1px;text-transform:uppercase;">Pending</div>
-            <div style="font-family:'Montserrat',sans-serif;font-size:2rem;font-weight:800;color:var(--primary);" id="pendingCount">0</div>
-          </div>
-          <div style="background:#fff;border-radius:var(--radius-lg);padding:1.2rem 2rem;box-shadow:var(--shadow);border-left:4px solid var(--accent2);">
-            <div style="font-size:11px;color:var(--text-light);font-weight:700;letter-spacing:1px;text-transform:uppercase;">Approved</div>
-            <div style="font-family:'Montserrat',sans-serif;font-size:2rem;font-weight:800;color:var(--accent2);" id="approvedCount">0</div>
-          </div>
-        </div>
-        <div id="adminList"></div>
       </div>
     </div>
   </section>
@@ -623,18 +404,28 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-content">
+  <div class="footer-content" style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem;">
     <div class="footer-brand">
-      <img src="images/logo.jpg" alt="BMC Logo">
-      <p>Bangladesh Musician's Club — A unified platform for all music industry professionals across Bangladesh.</p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:0.8rem;">
+        <div style="width:44px;height:44px;border-radius:50%;border:1px solid rgba(184,150,12,0.3);display:flex;align-items:center;justify-content:center;background:rgba(27,67,50,0.3);">
+          <img src="images/logo.jpg" style="width:36px;height:36px;object-fit:contain;mix-blend-mode:screen;filter:brightness(1.2);">
+        </div>
+        <div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:14px;color:var(--gold2);font-weight:700;">Bangladesh Musician's Club</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:2px;text-transform:uppercase;">Est. 2022</div>
+        </div>
+      </div>
+      <p class="slogan">"We Are The Soul Of Music"</p>
+      <p>A unified platform for all music industry professionals across Bangladesh.</p>
     </div>
     <div class="footer-col">
-      <h4>Quick Links</h4>
+      <h4>Navigation</h4>
       <a href="#" onclick="navigate('about'); return false;">About Us</a>
       <a href="#" onclick="navigate('members'); return false;">Members</a>
       <a href="#" onclick="navigate('events'); return false;">Events</a>
       <a href="#" onclick="navigate('gallery'); return false;">Gallery</a>
       <a href="#" onclick="navigate('tribute'); return false;">In Memoriam</a>
+      <a href="#" onclick="navigate('feedback'); return false;">Feedback</a>
     </div>
     <div class="footer-col">
       <h4>Contact</h4>
@@ -642,16 +433,16 @@
       <a href="tel:01819183995">📞 01819183995</a>
       <a href="mailto:bangladeshmusiciansclub2022@gmail.com">📧 Email Us</a>
       <a href="https://facebook.com/groups/759947698617105" target="_blank">📘 Facebook</a>
-      <a href="#" onclick="navigate('admin'); return false;" style="color:rgba(255,255,255,0.2);font-size:11px;margin-top:1rem;">🔐 Admin</a>
+      <a href="admin/index.html" style="color:rgba(255,255,255,0.15);font-size:10px;margin-top:1.5rem;letter-spacing:1px;">⚙ Admin</a>
     </div>
   </div>
   <div class="footer-bottom">
     <span>© 2022–2026 Bangladesh Musician's Club. All Rights Reserved.</span>
-    <span class="brand">"Where Music Becomes Brotherhood"</span>
+    <span style="color:var(--gold);opacity:0.6;">♪ Where Music Becomes Brotherhood ♪</span>
   </div>
 </footer>
 
 <script src="js/bangladesh.js"></script>
-<script src="js/main.js"></script>
+<script type="module" src="js/app.js"></script>
 </body>
 </html>

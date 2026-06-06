@@ -77,40 +77,27 @@ const BD_DATA = {
   }
 };
 
-function initGeoDropdowns(divSel, distSel, thanaSel) {
-  const divEl = document.getElementById(divSel);
-  const distEl = document.getElementById(distSel);
-  const thanaEl = document.getElementById(thanaSel);
+function initGeo(divId, distId, thanaId) {
+  const divEl = document.getElementById(divId);
+  const distEl = document.getElementById(distId);
+  const thanaEl = document.getElementById(thanaId);
   if (!divEl) return;
-
-  Object.keys(BD_DATA).forEach(div => {
-    const opt = document.createElement('option');
-    opt.value = div; opt.textContent = div;
-    divEl.appendChild(opt);
+  Object.keys(BD_DATA).forEach(d => {
+    const o = document.createElement('option'); o.value = d; o.textContent = d; divEl.appendChild(o);
   });
-
   divEl.addEventListener('change', () => {
     distEl.innerHTML = '<option value="">-- Select District --</option>';
-    thanaEl.innerHTML = '<option value="">-- Select Thana/Upazila --</option>';
-    const divData = BD_DATA[divEl.value];
-    if (!divData) return;
-    Object.keys(divData).forEach(dist => {
-      const opt = document.createElement('option');
-      opt.value = dist; opt.textContent = dist;
-      distEl.appendChild(opt);
-    });
+    thanaEl.innerHTML = '<option value="">-- Select Thana --</option>';
+    distEl.disabled = true; thanaEl.disabled = true;
+    const data = BD_DATA[divEl.value]; if (!data) return;
+    Object.keys(data).forEach(d => { const o = document.createElement('option'); o.value = d; o.textContent = d; distEl.appendChild(o); });
     distEl.disabled = false;
   });
-
   distEl.addEventListener('change', () => {
-    thanaEl.innerHTML = '<option value="">-- Select Thana/Upazila --</option>';
-    const divData = BD_DATA[divEl.value];
-    if (!divData || !divData[distEl.value]) return;
-    divData[distEl.value].forEach(thana => {
-      const opt = document.createElement('option');
-      opt.value = thana; opt.textContent = thana;
-      thanaEl.appendChild(opt);
-    });
+    thanaEl.innerHTML = '<option value="">-- Select Thana --</option>';
+    thanaEl.disabled = true;
+    const data = BD_DATA[divEl.value]?.[distEl.value]; if (!data) return;
+    data.forEach(t => { const o = document.createElement('option'); o.value = t; o.textContent = t; thanaEl.appendChild(o); });
     thanaEl.disabled = false;
   });
 }
