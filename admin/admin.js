@@ -1,4 +1,5 @@
-import { db, storage, auth } from '../js/firebase-config.js';
+import { db, auth } from '../js/firebase-config.js';
+import { uploadToCloudinary } from '../js/cloudinary.js';
 import {
   collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
   query, orderBy, where, serverTimestamp
@@ -6,7 +7,6 @@ import {
 import {
   signInWithEmailAndPassword, signOut, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 // ── AUTH ──
 onAuthStateChanged(auth, (user) => {
@@ -76,7 +76,7 @@ async function loadDashboard() {
 
     const recentSnap = await getDocs(query(collection(db, 'members'), where('status','==','pending'), orderBy('createdAt','desc')));
     const container = document.getElementById('recentApplications');
-    if (recentSnap.empty) { container.innerHTML = '<p style="color:var(--text-light);font-size:13px;">No pending applications.</p>'; return; }
+    if (recentSnap.empty) { container.innerHTML = '<p style="color:#666;font-size:13px;">No pending applications.</p>'; return; }
     container.innerHTML = `<table class="table">
       <tr><th>Name</th><th>Sector</th><th>Mobile</th><th>Action</th></tr>
       ${recentSnap.docs.slice(0,5).map(d => {
@@ -98,17 +98,18 @@ async function loadDashboard() {
 // ── APPLICATIONS ──
 async function loadApplications() {
   const container = document.getElementById('applicationsList');
-  container.innerHTML = '<div style="color:var(--text-light);font-size:13px;">Loading...</div>';
+  container.innerHTML = '<div style="color:#666;font-size:13px;">Loading...</div>';
   try {
     const snap = await getDocs(query(collection(db, 'members'), where('status','==','pending'), orderBy('createdAt','desc')));
     document.getElementById('pendingBadge').textContent = snap.size + ' pending';
-    if (snap.empty) { container.innerHTML = '<p style="color:var(--text-light);font-size:13px;padding:1rem;">No pending applications.</p>'; return; }
+    if (snap.empty) { container.innerHTML = '<p style="color:#666;font-size:13px;padding:1rem;">No pending applications.</p>'; return; }
     container.innerHTML = `<table class="table">
-      <tr><th>Name</th><th>NID</th><th>Sector</th><th>Membership</th><th>Mobile</th><th>District</th><th>Action</th></tr>
+      <tr><th>Photo</th><th>Name</th><th>NID</th><th>Sector</th><th>Membership</th><th>Mobile</th><th>District</th><th>Action</th></tr>
       ${snap.docs.map(d => {
         const m = d.data();
         return `<tr>
-          <td><strong>${m.fullname||'—'}</strong><br><span style="font-size:11px;color:var(--text-light);">${m.specialty||''}</span></td>
+          <td>${m.photoURL ? `<img src="${m.photoURL}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">` : '—'}</td>
+          <td><strong>${m.fullname||'—'}</strong><br><span style="font-size:11px;color:#666;">${m.specialty||''}</span></td>
           <td style="font-size:12px;">${m.nid||'—'}</td>
           <td>${m.sector||''}</td>
           <td>${m.membership||''}</td>
@@ -121,7 +122,7 @@ async function loadApplications() {
         </tr>`;
       }).join('')}
     </table>`;
-  } catch(e) { container.innerHTML = '<p style="color:var(--text-light);">Error loading.</p>'; }
+  } catch(e) { container.innerHTML = '<p style="color:#666;">Error loading.</p>'; }
 }
 
 window.updateStatus = async (id, status) => {
@@ -135,25 +136,26 @@ window.updateStatus = async (id, status) => {
 // ── MEMBERS ──
 async function loadMembers() {
   const container = document.getElementById('membersList');
-  container.innerHTML = '<div style="color:var(--text-light);font-size:13px;">Loading...</div>';
+  container.innerHTML = '<div style="color:#666;font-size:13px;">Loading...</div>';
   try {
     const snap = await getDocs(query(collection(db, 'members'), where('status','==','approved')));
-    if (snap.empty) { container.innerHTML = '<p style="color:var(--text-light);font-size:13px;padding:1rem;">No approved members yet.</p>'; return; }
+    if (snap.empty) { container.innerHTML = '<p style="color:#666;font-size:13px;padding:1rem;">No approved members yet.</p>'; return; }
     container.innerHTML = `<table class="table">
-      <tr><th>Name</th><th>Sector</th><th>Membership</th><th>Mobile</th><th>District</th><th>Action</th></tr>
+      <tr><th>Photo</th><th>Name</th><th>Sector</th><th>Membership</th><th>Mobile</th><th>District</th><th>Action</th></tr>
       ${snap.docs.map(d => {
         const m = d.data();
         return `<tr>
-          <td><strong>${m.fullname||'—'}</strong><br><span style="font-size:11px;color:var(--text-light);">${m.specialty||''}</span></td>
+          <td>${m.photoURL ? `<img src="${m.photoURL}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">` : '—'}</td>
+          <td><strong>${m.fullname||'—'}</strong><br><span style="font-size:11px;color:#666;">${m.specialty||''}</span></td>
           <td>${m.sector||''}</td>
-          <td><span style="font-size:10px;padding:2px 8px;background:${m.membership==='Lifetime'?'rgba(184,150,12,0.1)':'rgba(27,67,50,0.1)'};color:${m.membership==='Lifetime'?'var(--gold)':'var(--green)'};font-weight:700;">${m.membership||''}</span></td>
+          <td>${m.membership||''}</td>
           <td>${m.mobile||''}</td>
           <td>${m.dist_c||''}</td>
           <td><button class="action-btn btn-delete" onclick="deleteMember('${d.id}')">Delete</button></td>
         </tr>`;
       }).join('')}
     </table>`;
-  } catch(e) { container.innerHTML = '<p style="color:var(--text-light);">Error loading.</p>'; }
+  } catch(e) {}
 }
 
 window.deleteMember = async (id) => {
@@ -162,7 +164,7 @@ window.deleteMember = async (id) => {
   loadMembers();
 };
 
-// ── COMMITTEE MANAGER (Founders, Managing, Committee, Sub) ──
+// ── COMMITTEE MANAGER ──
 async function loadCommitteeManager(colName, wrapperId) {
   const wrapper = document.getElementById(wrapperId);
   if (!wrapper) return;
@@ -181,11 +183,11 @@ async function loadCommitteeManager(colName, wrapperId) {
           <input type="number" id="${colName}_order" placeholder="Display Order (1, 2, 3...)" value="1">
         </div>
         <div>
-          <label style="font-size:11px;color:var(--text-light);letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;">Profile Photo</label>
+          <label style="font-size:11px;color:#666;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;">Profile Photo</label>
           <input type="file" id="${colName}_photo" accept="image/*">
         </div>
         <button class="add-btn" onclick="addCommitteeMember('${colName}')">Add Person</button>
-        <p id="${colName}_status" style="font-size:12px;color:var(--text-light);"></p>
+        <p id="${colName}_status" style="font-size:12px;color:#666;margin-top:8px;"></p>
       </div>
     </div>
     <div class="panel">
@@ -203,7 +205,7 @@ async function loadCommitteeManager(colName, wrapperId) {
             <td><button class="action-btn btn-delete" onclick="deleteCommitteeMember('${colName}','${d.id}')">Delete</button></td>
           </tr>`;
         }).join('')}
-      </table>` : '<p style="color:var(--text-light);font-size:13px;">No members added yet.</p>'}</div>
+      </table>` : '<p style="color:#666;font-size:13px;">No members added yet.</p>'}</div>
     </div>`;
 }
 
@@ -222,13 +224,13 @@ window.addCommitteeMember = async (colName) => {
     };
     const photoFile = document.getElementById(`${colName}_photo`)?.files[0];
     if (photoFile) {
-      const photoRef = ref(storage, `committee/${colName}/${Date.now()}_${photoFile.name}`);
-      await uploadBytes(photoRef, photoFile);
-      data.photoURL = await getDownloadURL(photoRef);
+      status.textContent = 'Uploading photo...';
+      data.photoURL = await uploadToCloudinary(photoFile);
     }
     await addDoc(collection(db, colName), data);
     status.textContent = '✓ Added successfully!';
-    setTimeout(() => { loadCommitteeManager(colName, document.getElementById(`${colName}_name`).closest('[id$="Manager"],[id$="ManagerEC"],[id$="ManagerSC"]')?.id || colName + 'Manager'); }, 500);
+    const wrappers = { founders: 'committeeManager', managing: 'managingManager', committee: 'committeeManagerEC', subcommittee: 'subcommitteeManagerSC' };
+    setTimeout(() => loadCommitteeManager(colName, wrappers[colName]), 800);
   } catch(e) { status.textContent = 'Error: ' + e.message; }
 };
 
@@ -244,7 +246,7 @@ async function loadEvents() {
   const container = document.getElementById('eventsList');
   try {
     const snap = await getDocs(query(collection(db, 'events'), orderBy('date', 'desc')));
-    if (snap.empty) { container.innerHTML = '<p style="color:var(--text-light);font-size:13px;">No events yet.</p>'; return; }
+    if (snap.empty) { container.innerHTML = '<p style="color:#666;font-size:13px;">No events yet.</p>'; return; }
     container.innerHTML = `<table class="table">
       <tr><th>Title</th><th>Date</th><th>Location</th><th>Tag</th><th>Status</th><th>Action</th></tr>
       ${snap.docs.map(d => {
@@ -254,7 +256,7 @@ async function loadEvents() {
           <td>${e.date||''}</td>
           <td>${e.location||''}</td>
           <td>${e.tag||''}</td>
-          <td><span style="font-size:10px;padding:2px 8px;background:${e.upcoming?'rgba(27,67,50,0.1)':'rgba(0,0,0,0.05)'};color:${e.upcoming?'var(--green)':'var(--text-light)'};font-weight:700;">${e.upcoming?'Upcoming':'Past'}</span></td>
+          <td><span style="font-size:10px;padding:2px 8px;background:${e.upcoming?'rgba(13,92,46,0.1)':'rgba(0,0,0,0.05)'};color:${e.upcoming?'#0D5C2E':'#666'};font-weight:700;">${e.upcoming?'Upcoming':'Past'}</span></td>
           <td><button class="action-btn btn-delete" onclick="deleteEvent('${d.id}')">Delete</button></td>
         </tr>`;
       }).join('')}
@@ -267,17 +269,15 @@ window.addEvent = async () => {
   if (!title) { alert('Event title is required.'); return; }
   try {
     await addDoc(collection(db, 'events'), {
-      title, location: document.getElementById('ev_location').value,
+      title,
+      location: document.getElementById('ev_location').value,
       date: document.getElementById('ev_date').value,
       tag: document.getElementById('ev_tag').value,
       upcoming: document.getElementById('ev_upcoming').checked,
       createdAt: serverTimestamp()
     });
     alert('✓ Event added!');
-    document.getElementById('ev_title').value = '';
-    document.getElementById('ev_location').value = '';
-    document.getElementById('ev_date').value = '';
-    document.getElementById('ev_tag').value = '';
+    ['ev_title','ev_location','ev_date','ev_tag'].forEach(id => document.getElementById(id).value = '');
     loadEvents();
   } catch(e) { alert('Error: ' + e.message); }
 };
@@ -293,13 +293,13 @@ async function loadGallery() {
   const container = document.getElementById('galleryList');
   try {
     const snap = await getDocs(query(collection(db, 'gallery'), orderBy('createdAt', 'desc')));
-    if (snap.empty) { container.innerHTML = '<p style="color:var(--text-light);font-size:13px;">No photos yet.</p>'; return; }
+    if (snap.empty) { container.innerHTML = '<p style="color:#666;font-size:13px;">No photos yet.</p>'; return; }
     container.innerHTML = snap.docs.map(d => {
       const g = d.data();
-      return `<div style="position:relative;">
+      return `<div style="position:relative;background:#f5f5f5;border-radius:4px;overflow:hidden;">
         <img src="${g.url}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;">
-        <div style="padding:6px;font-size:11px;color:var(--text-muted);">${g.caption||''}</div>
-        <button onclick="deleteGallery('${d.id}','${g.storagePath||''}')" style="position:absolute;top:6px;right:6px;background:var(--red);color:#fff;border:none;cursor:pointer;padding:4px 8px;font-size:10px;font-weight:700;">✕</button>
+        <div style="padding:6px 8px;font-size:11px;color:#666;">${g.caption||''}</div>
+        <button onclick="deleteGallery('${d.id}')" style="position:absolute;top:6px;right:6px;background:#C1121F;color:#fff;border:none;cursor:pointer;padding:4px 10px;font-size:11px;font-weight:700;">✕</button>
       </div>`;
     }).join('');
   } catch(e) {}
@@ -311,12 +311,9 @@ window.uploadGalleryPhoto = async () => {
   if (!file) { alert('Please select a photo.'); return; }
   status.textContent = 'Uploading...';
   try {
-    const path = `gallery/${Date.now()}_${file.name}`;
-    const photoRef = ref(storage, path);
-    await uploadBytes(photoRef, file);
-    const url = await getDownloadURL(photoRef);
+    const url = await uploadToCloudinary(file);
     await addDoc(collection(db, 'gallery'), {
-      url, storagePath: path,
+      url,
       caption: document.getElementById('galleryCaption').value,
       createdAt: serverTimestamp()
     });
@@ -327,13 +324,10 @@ window.uploadGalleryPhoto = async () => {
   } catch(e) { status.textContent = 'Error: ' + e.message; }
 };
 
-window.deleteGallery = async (id, path) => {
+window.deleteGallery = async (id) => {
   if (!confirm('Delete this photo?')) return;
-  try {
-    if (path) await deleteObject(ref(storage, path)).catch(() => {});
-    await deleteDoc(doc(db, 'gallery', id));
-    loadGallery();
-  } catch(e) {}
+  await deleteDoc(doc(db, 'gallery', id));
+  loadGallery();
 };
 
 // ── TRIBUTE ──
@@ -341,7 +335,7 @@ async function loadTribute() {
   const container = document.getElementById('tributeList');
   try {
     const snap = await getDocs(collection(db, 'tribute'));
-    if (snap.empty) { container.innerHTML = '<p style="color:var(--text-light);font-size:13px;">No entries yet.</p>'; return; }
+    if (snap.empty) { container.innerHTML = '<p style="color:#666;font-size:13px;">No entries yet.</p>'; return; }
     container.innerHTML = `<table class="table">
       <tr><th>Photo</th><th>Name</th><th>Role</th><th>Years</th><th>Action</th></tr>
       ${snap.docs.map(d => {
@@ -363,18 +357,15 @@ window.addTribute = async () => {
   if (!name) { alert('Name is required.'); return; }
   try {
     const data = {
-      name, role: document.getElementById('tr_role').value,
+      name,
+      role: document.getElementById('tr_role').value,
       born: document.getElementById('tr_born').value,
       passed: document.getElementById('tr_passed').value,
       message: document.getElementById('tr_message').value,
       createdAt: serverTimestamp()
     };
     const photoFile = document.getElementById('tr_photo')?.files[0];
-    if (photoFile) {
-      const photoRef = ref(storage, `tribute/${Date.now()}_${photoFile.name}`);
-      await uploadBytes(photoRef, photoFile);
-      data.photoURL = await getDownloadURL(photoRef);
-    }
+    if (photoFile) data.photoURL = await uploadToCloudinary(photoFile);
     await addDoc(collection(db, 'tribute'), data);
     alert('✓ Added to In Memoriam.');
     loadTribute();
@@ -392,16 +383,16 @@ async function loadFeedback() {
   const container = document.getElementById('feedbackList');
   try {
     const snap = await getDocs(query(collection(db, 'feedback'), orderBy('createdAt', 'desc')));
-    if (snap.empty) { container.innerHTML = '<p style="color:var(--text-light);font-size:13px;">No feedback yet.</p>'; return; }
+    if (snap.empty) { container.innerHTML = '<p style="color:#666;font-size:13px;">No feedback yet.</p>'; return; }
     container.innerHTML = `<table class="table">
       <tr><th>Type</th><th>Name</th><th>Subject</th><th>Message</th><th>Action</th></tr>
       ${snap.docs.map(d => {
         const f = d.data();
         return `<tr>
-          <td><span style="font-size:10px;padding:2px 8px;background:${f.type==='Complaint'?'rgba(193,18,31,0.1)':'rgba(27,67,50,0.1)'};color:${f.type==='Complaint'?'var(--red)':'var(--green)'};font-weight:700;">${f.type||'Suggestion'}</span></td>
+          <td><span style="font-size:10px;padding:2px 8px;background:${f.type==='Complaint'?'rgba(193,18,31,0.1)':'rgba(13,92,46,0.1)'};color:${f.type==='Complaint'?'#C1121F':'#0D5C2E'};font-weight:700;">${f.type||'Suggestion'}</span></td>
           <td>${f.name||'Anonymous'}</td>
           <td><strong>${f.subject||'—'}</strong></td>
-          <td style="font-size:12px;max-width:300px;">${f.message||''}</td>
+          <td style="font-size:12px;max-width:280px;">${f.message||''}</td>
           <td><button class="action-btn btn-delete" onclick="deleteFeedback('${d.id}')">Delete</button></td>
         </tr>`;
       }).join('')}

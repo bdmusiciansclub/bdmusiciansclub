@@ -1,8 +1,8 @@
-import { db, storage } from './firebase-config.js';
+import { db } from './firebase-config.js';
+import { uploadToCloudinary } from './cloudinary.js';
 import {
   collection, getDocs, addDoc, query, where, orderBy, limit, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 // ── NAVIGATION ──
 const hamburger = document.getElementById('hamburger');
@@ -72,7 +72,7 @@ async function loadMemberCount() {
   try {
     const snap = await getDocs(query(collection(db, 'members'), where('status', '==', 'approved')));
     const el = document.getElementById('heroMemberCount');
-    if (el) el.textContent = snap.size || '—';
+    if (el) el.textContent = snap.size || '0';
   } catch(e) {}
 }
 
@@ -84,7 +84,7 @@ async function loadCommittee(colName, gridId) {
   try {
     const snap = await getDocs(query(collection(db, colName), orderBy('order', 'asc')));
     if (snap.empty) {
-      grid.innerHTML = `<p style="text-align:center;color:var(--text-light);padding:2rem;font-size:13px;letter-spacing:1px;">Details will be added soon by the admin.</p>`;
+      grid.innerHTML = `<p style="text-align:center;color:var(--text-dim);padding:3rem;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Details will be added soon.</p>`;
       return;
     }
     grid.className = 'committee-grid';
@@ -97,28 +97,32 @@ async function loadCommittee(colName, gridId) {
         <div class="person-sector">${d.sector || ''}</div>
       </div>`;
     }).join('');
-  } catch(e) { grid.innerHTML = '<p style="text-align:center;color:var(--text-light);padding:2rem;">Unable to load data.</p>'; }
+  } catch(e) { grid.innerHTML = '<p style="text-align:center;color:var(--text-dim);padding:2rem;">Unable to load.</p>'; }
 }
 
 // ── LOAD MEMBERS ──
+let allMembers = [];
+
 async function loadMembers() {
   const grid = document.getElementById('membersGrid');
   if (!grid) return;
   grid.innerHTML = '<div class="loading">Loading members</div>';
   try {
     const snap = await getDocs(query(collection(db, 'members'), where('status', '==', 'approved')));
-    renderMemberGrid(snap.docs.map(d => ({id: d.id, ...d.data()})));
+    allMembers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    renderMemberGrid();
   } catch(e) { grid.innerHTML = '<div class="no-results">Unable to load members.</div>'; }
 }
 
-function renderMemberGrid(members) {
+function renderMemberGrid() {
   const grid = document.getElementById('membersGrid');
+  if (!grid) return;
   const search = (document.getElementById('memberSearch')?.value || '').toLowerCase();
   const filter = document.getElementById('sectorFilter')?.value || '';
-  const filtered = members.filter(m => {
-    return (!search || (m.fullname||'').toLowerCase().includes(search) || (m.specialty||'').toLowerCase().includes(search)) &&
-           (!filter || m.sector === filter);
-  });
+  const filtered = allMembers.filter(m =>
+    (!search || (m.fullname||'').toLowerCase().includes(search) || (m.specialty||'').toLowerCase().includes(search)) &&
+    (!filter || m.sector === filter)
+  );
   if (!filtered.length) { grid.innerHTML = '<div class="no-results">No members found.</div>'; return; }
   grid.innerHTML = filtered.map(m => {
     const init = (m.fullname||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
@@ -131,9 +135,8 @@ function renderMemberGrid(members) {
   }).join('');
 }
 
-let allMembers = [];
-document.getElementById('memberSearch')?.addEventListener('input', () => renderMemberGrid(allMembers));
-document.getElementById('sectorFilter')?.addEventListener('change', () => renderMemberGrid(allMembers));
+document.getElementById('memberSearch')?.addEventListener('input', renderMemberGrid);
+document.getElementById('sectorFilter')?.addEventListener('change', renderMemberGrid);
 
 // ── LOAD EVENTS ──
 async function loadHomeEvents() {
@@ -141,29 +144,37 @@ async function loadHomeEvents() {
   if (!container) return;
   try {
     const snap = await getDocs(query(collection(db, 'events'), where('upcoming', '==', true), orderBy('date', 'asc'), limit(3)));
-    if (snap.empty) { container.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.4);padding:2rem;font-size:13px;letter-spacing:1px;">No upcoming events at this time.</p>'; return; }
-    container.innerHTML = '<div class="events-list" style="background:rgba(255,255,255,0.05);">' + snap.docs.map(doc => eventCard(doc.data(), false)).join('') + '</div>';
+    if (snap.empty) {
+      container.innerHTML = '<p style="text-align:center;color:var(--text-dim);padding:2rem;font-size:12px;letter-spacing:2px;">No upcoming events at this time.</p>';
+      return;
+    }
+    container.innerHTML = '<div class="events-list" style="background:rgba(255,255,255,0.03);">' + snap.docs.map(doc => eventCard(doc.data(), false)).join('') + '</div>';
   } catch(e) { container.innerHTML = ''; }
 }
 
 async function loadEvents() {
   const upcoming = document.getElementById('upcomingEvents');
   const past = document.getElementById('pastEvents');
+  if (!upcoming) return;
   try {
     const uSnap = await getDocs(query(collection(db, 'events'), where('upcoming', '==', true), orderBy('date', 'asc')));
-    upcoming.innerHTML = uSnap.empty ? '<p style="color:var(--text-light);font-size:13px;letter-spacing:1px;">No upcoming events.</p>' : '<div class="events-list">' + uSnap.docs.map(d => eventCard(d.data(), false)).join('') + '</div>';
+    upcoming.innerHTML = uSnap.empty
+      ? '<p style="color:var(--text-dim);font-size:12px;letter-spacing:1px;">No upcoming events.</p>'
+      : '<div class="events-list">' + uSnap.docs.map(d => eventCard(d.data(), false)).join('') + '</div>';
+
     const pSnap = await getDocs(query(collection(db, 'events'), where('upcoming', '==', false), orderBy('date', 'desc')));
-    past.innerHTML = pSnap.empty ? '<p style="color:var(--text-light);font-size:13px;letter-spacing:1px;">No past events.</p>' : '<div class="events-list">' + pSnap.docs.map(d => eventCard(d.data(), true)).join('') + '</div>';
-  } catch(e) { upcoming.innerHTML = '<p style="color:var(--text-light);">Unable to load.</p>'; }
+    past.innerHTML = pSnap.empty
+      ? '<p style="color:var(--text-dim);font-size:12px;letter-spacing:1px;">No past events.</p>'
+      : '<div class="events-list">' + pSnap.docs.map(d => eventCard(d.data(), true)).join('') + '</div>';
+  } catch(e) { upcoming.innerHTML = '<p style="color:var(--text-dim);">Unable to load.</p>'; }
 }
 
 function eventCard(d, isPast) {
   const date = d.date ? new Date(d.date) : null;
   const day = date ? date.getDate().toString().padStart(2,'0') : '—';
   const month = date ? date.toLocaleString('en',{month:'short'}).toUpperCase() : '—';
-  const boxStyle = isPast ? 'background:var(--text-light);' : '';
   return `<div class="event-item">
-    <div class="event-date-box" style="${boxStyle}"><div class="day">${day}</div><div class="month">${month}</div></div>
+    <div class="event-date-box" ${isPast?'style="background:var(--dark4);"':''}><div class="day">${day}</div><div class="month">${month}</div></div>
     <div class="event-info">
       <div class="event-title">${d.title || '—'}</div>
       <div class="event-location">📍 ${d.location || ''}</div>
@@ -181,14 +192,14 @@ async function loadGallery() {
   try {
     const snap = await getDocs(query(collection(db, 'gallery'), orderBy('createdAt', 'desc')));
     if (snap.empty) {
-      grid.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-light);grid-column:1/-1;font-size:13px;letter-spacing:1px;">Gallery photos will be added soon.</div>`;
+      grid.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--text-dim);grid-column:1/-1;font-size:12px;letter-spacing:2px;text-transform:uppercase;">Gallery photos will be added soon.</div>`;
       return;
     }
     grid.innerHTML = snap.docs.map(doc => {
       const d = doc.data();
       return `<div class="gallery-item"><img src="${d.url}" alt="${d.caption||'Gallery'}"></div>`;
     }).join('');
-  } catch(e) { grid.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-light);">Unable to load gallery.</div>'; }
+  } catch(e) { grid.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-dim);">Unable to load gallery.</div>'; }
 }
 
 // ── LOAD TRIBUTE ──
@@ -199,7 +210,7 @@ async function loadTribute() {
   try {
     const snap = await getDocs(collection(db, 'tribute'));
     if (snap.empty) {
-      grid.innerHTML = `<p style="text-align:center;color:var(--text-light);padding:2rem;font-size:13px;">Members will be added to this page by the admin.</p>`;
+      grid.innerHTML = `<p style="text-align:center;color:var(--text-dim);padding:2rem;font-size:12px;letter-spacing:1px;">Members will be added to this page by the admin.</p>`;
       return;
     }
     grid.className = 'tribute-grid';
@@ -216,7 +227,7 @@ async function loadTribute() {
   } catch(e) {}
 }
 
-// ── REGISTRATION SUBMIT ──
+// ── REGISTRATION ──
 document.getElementById('regForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const sector = document.querySelector('.sector-option.selected')?.dataset.value;
@@ -233,12 +244,11 @@ document.getElementById('regForm')?.addEventListener('submit', async (e) => {
     data.sector = sector; data.membership = membership;
     data.status = 'pending'; data.createdAt = serverTimestamp();
 
-    // Upload photo if provided
+    // Upload photo to Cloudinary
     const photoFile = document.getElementById('regPhoto')?.files[0];
     if (photoFile) {
-      const photoRef = ref(storage, `member-photos/${Date.now()}_${photoFile.name}`);
-      await uploadBytes(photoRef, photoFile);
-      data.photoURL = await getDownloadURL(photoRef);
+      btn.textContent = 'Uploading photo...';
+      data.photoURL = await uploadToCloudinary(photoFile);
     }
     delete data.photo;
 
@@ -251,13 +261,14 @@ document.getElementById('regForm')?.addEventListener('submit', async (e) => {
   }
 });
 
-// ── FEEDBACK SUBMIT ──
+// ── FEEDBACK ──
 document.getElementById('feedbackForm')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const type = document.querySelector('.feedback-option.selected')?.dataset.type || 'Suggestion';
   try {
     await addDoc(collection(db, 'feedback'), {
-      type, name: document.getElementById('fb_name').value,
+      type,
+      name: document.getElementById('fb_name').value,
       subject: document.getElementById('fb_subject').value,
       message: document.getElementById('fb_message').value,
       createdAt: serverTimestamp()
