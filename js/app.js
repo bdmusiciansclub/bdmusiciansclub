@@ -224,25 +224,7 @@ async function loadMembers() {
     renderMembers();
   } catch(e) { grid.innerHTML = '<div class="no-results">Unable to load members.</div>'; }
 }
-function renderMembers() {
-  const grid = document.getElementById('membersGrid');
-  if (!grid) return;
-  const search = (document.getElementById('memberSearch')?.value||'').toLowerCase();
-  const filter = document.getElementById('sectorFilter')?.value||'';
-  const filtered = allMembers.filter(m =>
-    (!search||(m.fullname||'').toLowerCase().includes(search)||(m.specialty||'').toLowerCase().includes(search)) &&
-    (!filter||m.sector===filter)
-  );
-  if (!filtered.length) { grid.innerHTML = '<div class="no-results">No members found.</div>'; return; }
-  grid.innerHTML = filtered.map(m => {
-    const init = (m.fullname||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    return `<div class="member-card">
-      <div class="member-avatar">${m.photoURL?`<img src="${m.photoURL}" alt="${m.fullname}">`:init}</div>
-      <div class="member-name">${m.fullname||'—'}</div>
-      <div class="member-role">${m.specialty||''}</div>
-      <span class="member-badge ${m.membership==='Lifetime'?'lifetime':''}">${m.sector||''}</span>
-    </div>`;
-  }).join('');
+// renderMembers is defined below with modal support
 }
 
 // ── HOME EVENTS ──
@@ -405,3 +387,82 @@ async function loadTribute() {
 function emptyState(icon, msg) {
   return `<div class="empty-state"><span class="empty-icon">${icon}</span><p>${msg}</p></div>`;
 }
+
+// ── MEMBER DETAIL MODAL (Public Site) ──
+// Inject modal HTML once
+function injectMemberModal() {
+  if (document.getElementById('memberModal')) return;
+  const modal = document.createElement('div');
+  modal.id = 'memberModal';
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-box">
+      <button class="modal-close" onclick="closeMemberModal()">✕</button>
+      <div class="modal-header" id="pubModalHeader"></div>
+      <div class="modal-body" id="pubModalBody"></div>
+      <div class="modal-actions" id="pubModalActions"></div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target === modal) closeMemberModal(); });
+}
+
+window.closeMemberModal = () => {
+  document.getElementById('memberModal')?.classList.remove('open');
+};
+
+function renderMembers() {
+  const grid = document.getElementById('membersGrid');
+  if (!grid) return;
+  const search = (document.getElementById('memberSearch')?.value||'').toLowerCase();
+  const filter = document.getElementById('sectorFilter')?.value||'';
+  const filtered = allMembers.filter(m =>
+    (!search||(m.fullname||'').toLowerCase().includes(search)||(m.specialty||'').toLowerCase().includes(search)) &&
+    (!filter||m.sector===filter)
+  );
+  if (!filtered.length) { grid.innerHTML = '<div class="no-results">No members found.</div>'; return; }
+
+  injectMemberModal();
+
+  grid.innerHTML = filtered.map(m => {
+    const init = (m.fullname||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const safeId = m.id;
+    return `<div class="member-card" onclick="openMemberModal('${safeId}')" title="Click to view details">
+      <div class="member-avatar">${m.photoURL?`<img src="${m.photoURL}" alt="${m.fullname}">`:init}</div>
+      <div class="member-name">${m.fullname||'—'}</div>
+      <div class="member-role">${m.specialty||''}</div>
+      <span class="member-badge ${m.membership==='Lifetime'?'lifetime':''}">${m.sector||''}</span>
+    </div>`;
+  }).join('');
+}
+
+window.openMemberModal = (id) => {
+  const m = allMembers.find(x => x.id === id);
+  if (!m) return;
+  injectMemberModal();
+  const init = (m.fullname||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  document.getElementById('pubModalHeader').innerHTML = `
+    <div class="modal-avatar">${m.photoURL ? `<img src="${m.photoURL}" alt="${m.fullname}">` : init}</div>
+    <div>
+      <div class="modal-name">${m.fullname||'—'}</div>
+      <div class="modal-role">${m.specialty||''} · ${m.sector||''}</div>
+    </div>`;
+
+  const rows = [
+    ['Sector', m.sector],
+    ['Specialization', m.specialty],
+    ['Experience', m.experience],
+    ['Membership', m.membership],
+    ['Mobile', m.mobile],
+    ['WhatsApp', m.whatsapp],
+    ['Email', m.email],
+    ['Facebook', m.facebook ? `<a href="${m.facebook}" target="_blank" style="color:var(--forest);">${m.facebook}</a>` : null],
+    ['Current Location', [m.thana_c, m.dist_c, m.div_c].filter(Boolean).join(', ')],
+    ['Organization', m.organization],
+  ];
+  document.getElementById('pubModalBody').innerHTML = rows
+    .filter(([,v]) => v)
+    .map(([l,v]) => `<div class="modal-row"><div class="modal-label">${l}</div><div class="modal-value">${v}</div></div>`)
+    .join('');
+
+  document.getElementById('memberModal').classList.add('open');
+};
