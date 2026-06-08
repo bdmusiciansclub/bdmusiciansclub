@@ -225,7 +225,6 @@ async function loadMembers() {
   } catch(e) { grid.innerHTML = '<div class="no-results">Unable to load members.</div>'; }
 }
 // renderMembers is defined below with modal support
-}
 
 // ── HOME EVENTS ──
 async function loadHomeEvents() {
