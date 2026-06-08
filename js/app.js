@@ -1,3 +1,25 @@
+// ── DROPDOWN CLICK SUPPORT (mobile + touch) ──
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.dropdown > a').forEach(toggle => {
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const dropdown = toggle.parentElement;
+      const isOpen = dropdown.classList.contains('open');
+      // Close all dropdowns
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+      // Toggle current
+      if (!isOpen) dropdown.classList.add('open');
+    });
+  });
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.dropdown')) {
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+    }
+  });
+});
+
 import { db } from './firebase-config.js';
 import { uploadToCloudinary } from './cloudinary.js';
 import {
