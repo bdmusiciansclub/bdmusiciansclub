@@ -147,25 +147,25 @@ nav::after {
   display:flex; align-items:center; justify-content:center;
   position:relative; overflow:hidden; padding-top:66px;
 }
-/* Subtle sound wave pattern */
-.hero::before {
-  content:'';
-  position:absolute; inset:0;
+
+/* Hero background layer */
+.hero-bg {
+  position:absolute; inset:0; pointer-events:none;
   background:
     radial-gradient(ellipse at 8% 60%, rgba(21,112,64,0.6) 0%, transparent 45%),
     radial-gradient(ellipse at 92% 25%, rgba(184,17,26,0.25) 0%, transparent 40%),
     radial-gradient(ellipse at 50% 100%, rgba(15,85,48,0.4) 0%, transparent 50%);
 }
 /* Music staff lines */
-.hero-staff {
+.hero-lines, .hero-staff {
   position:absolute; inset:0; overflow:hidden; pointer-events:none;
 }
-.hero-staff::before {
+.hero-lines::before, .hero-staff::before {
   content:'';
   position:absolute; left:0; right:0; top:38%;
   height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);
 }
-.hero-staff::after {
+.hero-lines::after, .hero-staff::after {
   content:'';
   position:absolute; left:0; right:0; top:62%;
   height:1px; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.06),transparent);
@@ -173,9 +173,11 @@ nav::after {
 .hero-content {
   text-align:center; position:relative; z-index:2;
   padding:2rem; animation:fadeUp 0.9s ease both; max-width:800px;
+  display:flex; flex-direction:column; align-items:center;
 }
 .hero-logo {
-  height:86px; width:auto; margin-bottom:2rem;
+  height:86px; width:auto; margin:0 auto 2rem;
+  display:block;
   filter:drop-shadow(0 4px 24px rgba(0,0,0,0.4));
 }
 .hero-badge {
