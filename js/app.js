@@ -1,25 +1,4 @@
-// ── DROPDOWN CLICK SUPPORT (mobile + touch) ──
-document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.dropdown > a').forEach(toggle => {
-    toggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const dropdown = toggle.parentElement;
-      const isOpen = dropdown.classList.contains('open');
-      // Close all dropdowns
-      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
-      // Toggle current
-      if (!isOpen) dropdown.classList.add('open');
-    });
-  });
-  // Close dropdown when clicking outside
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.dropdown')) {
-      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
-    }
-  });
-});
-
+// ── ES MODULE: imports must be at the top ──
 import { db } from './firebase-config.js';
 import { uploadToCloudinary } from './cloudinary.js';
 import {
@@ -63,36 +42,110 @@ function loadPageData(id) {
   }
 }
 
-navigate(location.hash.replace('#', '') || 'home', false);
-
-// ── GEO DROPDOWNS ──
+// ── ALL DOM-DEPENDENT CODE IN ONE DOMContentLoaded ──
 document.addEventListener('DOMContentLoaded', () => {
+
+  // Initial page navigation
+  navigate(location.hash.replace('#', '') || 'home', false);
+
+  // ── DROPDOWN CLICK SUPPORT (mobile + touch) ──
+  document.querySelectorAll('.dropdown > a').forEach(toggle => {
+    toggle.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const dropdown = toggle.parentElement;
+      const isOpen = dropdown.classList.contains('open');
+      // Close all dropdowns
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+      // Toggle current
+      if (!isOpen) dropdown.classList.add('open');
+    });
+  });
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.dropdown')) {
+      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
+    }
+  });
+
+  // ── GEO DROPDOWNS ──
   if (typeof initGeo === 'function') {
     initGeo('div_c', 'dist_c', 'thana_c');
     initGeo('div_p', 'dist_p', 'thana_p');
   }
+
   document.getElementById('sameAddress')?.addEventListener('change', (e) => {
     document.getElementById('permanentAddress').style.display = e.target.checked ? 'none' : 'block';
   });
+
   document.querySelectorAll('.sector-option').forEach(opt => {
     opt.addEventListener('click', () => {
       opt.closest('.sector-options').querySelectorAll('.sector-option').forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected'); opt.querySelector('input').checked = true;
     });
   });
+
   document.querySelectorAll('.membership-option').forEach(opt => {
     opt.addEventListener('click', () => {
       document.querySelectorAll('.membership-option').forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected'); opt.querySelector('input').checked = true;
     });
   });
+
   document.querySelectorAll('.feedback-option').forEach(opt => {
     opt.addEventListener('click', () => {
       document.querySelectorAll('.feedback-option').forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected');
     });
   });
-});
+
+  // ── MEMBER SEARCH ──
+  document.getElementById('memberSearch')?.addEventListener('input', renderMembers);
+  document.getElementById('sectorFilter')?.addEventListener('change', renderMembers);
+
+  // ── REGISTRATION ──
+  document.getElementById('regForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const sector = document.querySelector('.sector-option.selected')?.dataset.value;
+    const membership = document.querySelector('.membership-option.selected')?.dataset.value;
+    if (!sector) { alert('Please select a sector.'); return; }
+    if (!membership) { alert('Please select membership type.'); return; }
+    const btn = document.getElementById('regSubmitBtn');
+    btn.textContent = 'Submitting...'; btn.disabled = true;
+    try {
+      const data = Object.fromEntries(new FormData(e.target).entries());
+      data.sector = sector; data.membership = membership;
+      data.status = 'pending'; data.createdAt = serverTimestamp();
+      const photoFile = document.getElementById('regPhoto')?.files[0];
+      if (photoFile) { btn.textContent = 'Uploading photo...'; data.photoURL = await uploadToCloudinary(photoFile); }
+      delete data.photo;
+      await addDoc(collection(db,'members'), data);
+      e.target.style.display = 'none';
+      document.getElementById('regSuccess').classList.add('show');
+    } catch(err) {
+      alert('Submission failed. Please try again.');
+      btn.textContent = 'Submit Application'; btn.disabled = false;
+    }
+  });
+
+  // ── FEEDBACK ──
+  document.getElementById('feedbackForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const type = document.querySelector('.feedback-option.selected')?.dataset.type || 'Suggestion';
+    try {
+      await addDoc(collection(db,'feedback'), {
+        type, name: document.getElementById('fb_name').value,
+        subject: document.getElementById('fb_subject').value,
+        message: document.getElementById('fb_message').value,
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('feedbackFormWrap').style.display = 'none';
+      document.getElementById('feedbackSuccess').classList.add('show');
+    } catch(err) { alert('Failed to send. Please try again.'); }
+  });
+
+}); // end DOMContentLoaded
 
 // ── HOME ──
 async function loadHome() {
@@ -195,8 +248,6 @@ function renderMembers() {
     </div>`;
   }).join('');
 }
-document.getElementById('memberSearch')?.addEventListener('input', renderMembers);
-document.getElementById('sectorFilter')?.addEventListener('change', renderMembers);
 
 // ── HOME EVENTS ──
 async function loadHomeEvents() {
@@ -353,47 +404,6 @@ async function loadTribute() {
     }).join('');
   } catch(e) {}
 }
-
-// ── REGISTRATION ──
-document.getElementById('regForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const sector = document.querySelector('.sector-option.selected')?.dataset.value;
-  const membership = document.querySelector('.membership-option.selected')?.dataset.value;
-  if (!sector) { alert('Please select a sector.'); return; }
-  if (!membership) { alert('Please select membership type.'); return; }
-  const btn = document.getElementById('regSubmitBtn');
-  btn.textContent = 'Submitting...'; btn.disabled = true;
-  try {
-    const data = Object.fromEntries(new FormData(e.target).entries());
-    data.sector = sector; data.membership = membership;
-    data.status = 'pending'; data.createdAt = serverTimestamp();
-    const photoFile = document.getElementById('regPhoto')?.files[0];
-    if (photoFile) { btn.textContent = 'Uploading photo...'; data.photoURL = await uploadToCloudinary(photoFile); }
-    delete data.photo;
-    await addDoc(collection(db,'members'), data);
-    e.target.style.display = 'none';
-    document.getElementById('regSuccess').classList.add('show');
-  } catch(err) {
-    alert('Submission failed. Please try again.');
-    btn.textContent = 'Submit Application'; btn.disabled = false;
-  }
-});
-
-// ── FEEDBACK ──
-document.getElementById('feedbackForm')?.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const type = document.querySelector('.feedback-option.selected')?.dataset.type || 'Suggestion';
-  try {
-    await addDoc(collection(db,'feedback'), {
-      type, name: document.getElementById('fb_name').value,
-      subject: document.getElementById('fb_subject').value,
-      message: document.getElementById('fb_message').value,
-      createdAt: serverTimestamp()
-    });
-    document.getElementById('feedbackFormWrap').style.display = 'none';
-    document.getElementById('feedbackSuccess').classList.add('show');
-  } catch(err) { alert('Failed to send. Please try again.'); }
-});
 
 // ── HELPERS ──
 function emptyState(icon, msg) {
