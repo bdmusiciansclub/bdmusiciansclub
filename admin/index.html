@@ -222,14 +222,8 @@
       <a href="#" onclick="showSec('subcommittee',this)">🔖 Sub-Committees</a>
       <div class="nav-group">Content</div>
       <a href="#" onclick="showSec('news',this)">📰 News</a>
-      <a href="#" onclick="showSec('events',this)">📅 Events</a>
-      <a href="#" onclick="showSec('jobs',this)">💼 Gig Board</a>
-      <a href="#" onclick="showSec('gallery',this)">🖼️ Gallery</a>
-      <a href="#" onclick="showSec('videos',this)">🎬 Videos</a>
-      <a href="#" onclick="showSec('achievements',this)">🏆 Achievements</a>
-      <a href="#" onclick="showSec('sponsors',this)">🤝 Sponsors</a>
-      <a href="#" onclick="showSec('tribute',this)">🕯️ In Memoriam</a>
-      <div class="nav-group">Other</div>
+      <a href="#" onclick="showSec('events',this)">📅 Events</a>      <a href="#" onclick="showSec('gallery',this)">🖼️ Gallery</a>
+      <a href="#" onclick="showSec('videos',this)">🎬 Videos</a>      <div class="nav-group">Other</div>
       <a href="#" onclick="showSec('feedback',this)">💬 Feedback</a>
     </nav>
     <div class="sidebar-footer">
@@ -311,25 +305,6 @@
       <div class="panel"><div class="panel-title">All Events</div><div id="eventsList"></div></div>
     </div>
 
-    <!-- GIG BOARD -->
-    <div id="sec-jobs" class="sc">
-      <div class="top-bar"><h1>Gig Board</h1></div>
-      <div class="panel">
-        <div class="panel-title">Post Opportunity</div>
-        <div class="fi">
-          <div class="fr2"><input type="text" id="jb_title" placeholder="Job Title *"><input type="text" id="jb_organization" placeholder="Organization / Person"></div>
-          <div class="fr2">
-            <select id="jb_type"><option>Gig</option><option>Full-time</option><option>Part-time</option></select>
-            <select id="jb_sector"><option value="">All Sectors</option><option>Musicians</option><option>Sound Engineers</option><option>Logistic Supporters</option></select>
-          </div>
-          <div class="fr2"><input type="text" id="jb_location" placeholder="Location"><input type="text" id="jb_pay" placeholder="Pay / Budget (optional)"></div>
-          <textarea id="jb_desc" rows="3" placeholder="Description..."></textarea>
-          <button class="add-btn" onclick="addJob()">Post Opportunity</button>
-        </div>
-      </div>
-      <div class="panel"><div class="panel-title">All Opportunities</div><div id="jobsList"></div></div>
-    </div>
-
     <!-- GALLERY -->
     <div id="sec-gallery" class="sc">
       <div class="top-bar"><h1>Gallery</h1></div>
@@ -359,53 +334,6 @@
         </div>
       </div>
       <div class="panel"><div class="panel-title">All Videos</div><div id="videosList"></div></div>
-    </div>
-
-    <!-- ACHIEVEMENTS -->
-    <div id="sec-achievements" class="sc">
-      <div class="top-bar"><h1>Achievements</h1></div>
-      <div class="panel">
-        <div class="panel-title">Add Achievement</div>
-        <div class="fi">
-          <div class="fr2"><input type="text" id="ac_title" placeholder="Achievement Title *"><input type="text" id="ac_year" placeholder="Year"></div>
-          <div class="fr2"><input type="text" id="ac_icon" placeholder="Icon emoji (e.g. 🏆)"><input type="number" id="ac_order" placeholder="Display Order" value="1"></div>
-          <textarea id="ac_desc" rows="3" placeholder="Description..."></textarea>
-          <button class="add-btn" onclick="addAchievement()">Add Achievement</button>
-        </div>
-      </div>
-      <div class="panel"><div class="panel-title">All Achievements</div><div id="achievementsList"></div></div>
-    </div>
-
-    <!-- SPONSORS -->
-    <div id="sec-sponsors" class="sc">
-      <div class="top-bar"><h1>Sponsors & Partners</h1></div>
-      <div class="panel">
-        <div class="panel-title">Add Sponsor</div>
-        <div class="fi">
-          <div class="fr2"><input type="text" id="sp_name" placeholder="Sponsor Name *"><input type="text" id="sp_type" placeholder="Type (e.g. Gold Sponsor)"></div>
-          <input type="file" id="sp_logo" accept="image/*">
-          <input type="number" id="sp_order" placeholder="Display Order" value="1">
-          <button class="add-btn" onclick="addSponsor()">Add Sponsor</button>
-          <p id="sp_status" style="font-size:12px;color:#888;"></p>
-        </div>
-      </div>
-      <div class="panel"><div class="panel-title">All Sponsors</div><div id="sponsorsList"></div></div>
-    </div>
-
-    <!-- IN MEMORIAM -->
-    <div id="sec-tribute" class="sc">
-      <div class="top-bar"><h1>In Memoriam</h1></div>
-      <div class="panel">
-        <div class="panel-title">Add Member</div>
-        <div class="fi">
-          <div class="fr2"><input type="text" id="tr_name" placeholder="Full Name *"><input type="text" id="tr_role" placeholder="Role / Profession"></div>
-          <div class="fr2"><input type="text" id="tr_born" placeholder="Birth Year"><input type="text" id="tr_passed" placeholder="Year Passed"></div>
-          <input type="file" id="tr_photo" accept="image/*">
-          <textarea id="tr_message" rows="3" placeholder="Memorial message..."></textarea>
-          <button class="add-btn" onclick="addTribute()">Add to Memoriam</button>
-        </div>
-      </div>
-      <div class="panel"><div class="panel-title">In Memoriam List</div><div id="tributeList"></div></div>
     </div>
 
     <!-- FEEDBACK -->
