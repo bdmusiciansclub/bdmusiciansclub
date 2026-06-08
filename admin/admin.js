@@ -1,7 +1,7 @@
 import { db, auth } from '../js/firebase-config.js';
 import { uploadToCloudinary } from '../js/cloudinary.js';
 import {
-  collection, getDocs, addDoc, updateDoc, deleteDoc, doc,
+  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc,
   query, orderBy, where, serverTimestamp, limit
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -203,7 +203,6 @@ window.viewMemberDetail = async (id) => {
   // If not cached yet (called from applications), fetch from Firestore
   if (!m) {
     try {
-      const { getDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
       const snap = await getDoc(doc(db,'members',id));
       if (snap.exists()) m = {...snap.data(), id};
     } catch(e) { alert('Could not load member details.'); return; }
