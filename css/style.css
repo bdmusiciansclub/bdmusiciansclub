@@ -556,21 +556,6 @@ nav::after {
 .event-status.past { background:rgba(0,0,0,0.04); color:var(--text-muted); border-color:var(--border); }
 
 /* ═══════════════════════════════════════
-   GIG BOARD
-═══════════════════════════════════════ */
-.job-grid  { display:flex; flex-direction:column; gap:1rem; }
-.job-card  { background:var(--white); border:1px solid var(--border); display:flex; align-items:center; gap:1.2rem; padding:1.2rem 1.5rem; box-shadow:var(--shadow); }
-.job-badge { padding:4px 12px; font-family:'Cinzel',serif; font-size:8px; font-weight:700; letter-spacing:1px; text-transform:uppercase; flex-shrink:0; }
-.job-badge.gig  { background:rgba(184,17,26,0.08); color:var(--crimson); }
-.job-badge.full { background:rgba(11,61,32,0.08); color:var(--forest3); }
-.job-badge.part { background:rgba(0,0,0,0.05); color:var(--text-muted); }
-.job-info   { flex:1; }
-.job-title  { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--text); }
-.job-org    { font-size:12px; color:var(--text-muted); margin-top:2px; }
-.job-detail { font-size:12px; color:var(--text-light); margin-top:4px; }
-.job-sector { font-family:'Cinzel',serif; font-size:8px; padding:3px 10px; color:var(--forest2); background:rgba(11,61,32,0.06); border:1px solid rgba(11,61,32,0.2); letter-spacing:1px; text-transform:uppercase; flex-shrink:0; }
-
-/* ═══════════════════════════════════════
    GALLERY
 ═══════════════════════════════════════ */
 .gallery-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:4px; }
@@ -589,39 +574,6 @@ nav::after {
 .video-info  { padding:1rem 1.2rem; }
 .video-title { font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--text); }
 .video-date  { font-size:11px; color:var(--text-muted); margin-top:4px; }
-
-/* ═══════════════════════════════════════
-   ACHIEVEMENTS
-═══════════════════════════════════════ */
-.achievements-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:1.5rem; }
-.achievement-card { background:var(--white); border:1px solid var(--border); padding:2rem; box-shadow:var(--shadow); transition:all 0.3s; border-left:4px solid var(--forest3); }
-.achievement-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); border-left-color:var(--crimson); }
-.achievement-icon  { font-size:2.5rem; display:block; margin-bottom:1rem; }
-.achievement-title { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:0.5rem; }
-.achievement-desc  { font-size:13px; color:var(--text-muted); line-height:1.8; }
-.achievement-year  { display:inline-block; margin-top:0.8rem; font-family:'Cinzel',serif; font-size:9px; padding:3px 12px; background:rgba(11,61,32,0.07); color:var(--forest2); border:1px solid rgba(11,61,32,0.2); letter-spacing:2px; }
-
-/* ═══════════════════════════════════════
-   SPONSORS
-═══════════════════════════════════════ */
-.sponsors-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(175px,1fr)); gap:1rem; }
-.sponsor-card { background:var(--white); border:1px solid var(--border); padding:1.5rem; text-align:center; box-shadow:var(--shadow); transition:all 0.3s; }
-.sponsor-card:hover { transform:translateY(-3px); box-shadow:var(--shadow-lg); border-color:var(--forest3); }
-.sponsor-logo { max-height:80px; max-width:100%; object-fit:contain; margin-bottom:0.8rem; }
-.sponsor-name { font-family:'Playfair Display',serif; font-size:0.95rem; font-weight:700; color:var(--text); }
-.sponsor-type { font-size:11px; color:var(--text-muted); margin-top:4px; }
-
-/* ═══════════════════════════════════════
-   IN MEMORIAM
-═══════════════════════════════════════ */
-.tribute-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.5rem; }
-.tribute-card { background:var(--white); border:1px solid var(--border); padding:2rem; text-align:center; box-shadow:var(--shadow); border-top:3px solid var(--forest2); }
-.tribute-avatar { width:80px; height:80px; border-radius:50%; background:var(--cream2); margin:0 auto 1rem; overflow:hidden; display:flex; align-items:center; justify-content:center; font-size:2rem; border:2px solid var(--border); }
-.tribute-avatar img { width:100%; height:100%; object-fit:cover; }
-.tribute-name  { font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:4px; }
-.tribute-role  { font-size:12px; color:var(--text-muted); margin-bottom:4px; }
-.tribute-dates { font-family:'Cinzel',serif; font-size:9px; color:var(--text-light); letter-spacing:1px; margin-bottom:0.8rem; }
-.tribute-msg   { font-size:13px; color:var(--text-muted); font-style:italic; line-height:1.7; }
 
 /* ═══════════════════════════════════════
    REGISTRATION FORM
@@ -672,15 +624,6 @@ nav::after {
 }
 .form-submit:hover { background:var(--forest2); }
 .form-note { font-size:12px; color:var(--text-muted); margin-top:1rem; text-align:center; line-height:1.7; }
-
-/* ═══════════════════════════════════════
-   FEEDBACK
-═══════════════════════════════════════ */
-.feedback-type    { display:flex; gap:1rem; }
-.feedback-option  { flex:1; border:2px solid var(--border); padding:1rem; cursor:pointer; text-align:center; transition:all 0.2s; background:var(--off-white); }
-.feedback-option.selected { border-color:var(--forest3); background:rgba(21,112,64,0.04); }
-.feedback-option-icon  { font-size:1.5rem; margin-bottom:6px; }
-.feedback-option-label { font-size:12px; font-weight:600; color:var(--text); }
 
 /* ═══════════════════════════════════════
    CONTACT
