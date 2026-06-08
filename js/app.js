@@ -86,7 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-
   // ── MEMBER SEARCH ──
   document.getElementById('memberSearch')?.addEventListener('input', renderMembers);
   document.getElementById('sectorFilter')?.addEventListener('change', renderMembers);
@@ -114,147 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Submission failed. Please try again.');
       btn.textContent = 'Submit Application'; btn.disabled = false;
     }
-  });
-
-  // ── FEEDBACK ──
- ES MODULE: imports must be at the top ──
-import { db } from './firebase-config.js';
-import { uploadToCloudinary } from './cloudinary.js';
-import {
-  collection, getDocs, addDoc, query, where, orderBy, limit, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-// ── NAVIGATION ──
-const hamburger = document.getElementById('hamburger');
-const mobileMenu = document.getElementById('mobileMenu');
-if (hamburger) hamburger.addEventListener('click', () => mobileMenu.classList.toggle('open'));
-
-window.navigate = function(pageId, pushState = true) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const target = document.getElementById('page-' + pageId);
-  if (target) target.classList.add('active');
-  document.querySelectorAll('[data-page]').forEach(a => a.classList.toggle('active', a.dataset.page === pageId));
-  if (mobileMenu) mobileMenu.classList.remove('open');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (pushState) history.pushState({ page: pageId }, '', '#' + pageId);
-  loadPageData(pageId);
-}
-
-window.addEventListener('popstate', (e) => navigate(e.state?.page || 'home', false));
-
-function loadPageData(id) {
-  switch(id) {
-    case 'home': loadHome(); break;
-    case 'founders': loadCommittee('founders', 'foundersGrid'); break;
-    case 'managing': loadCommittee('managing', 'managingGrid'); break;
-    case 'committee': loadCommittee('committee', 'committeeGrid'); break;
-    case 'subcommittee': loadCommittee('subcommittee', 'subcommitteeGrid'); break;
-    case 'members': loadMembers(); break;
-    case 'news': loadNews('newsGrid', 20); break;
-    case 'events': loadEvents(); break;
-    case 'gallery': loadGallery(); break;
-    case 'videos': loadVideos('videosGrid', 20); break;
-  }
-}
-
-// ── ALL DOM-DEPENDENT CODE IN ONE DOMContentLoaded ──
-document.addEventListener('DOMContentLoaded', () => {
-
-  // Initial page navigation
-  navigate(location.hash.replace('#', '') || 'home', false);
-
-  // ── DROPDOWN CLICK SUPPORT ──
-  document.querySelectorAll('.dropdown > a').forEach(toggle => {
-    toggle.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const dropdown = toggle.parentElement;
-      const isOpen = dropdown.classList.contains('open');
-      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
-      if (!isOpen) dropdown.classList.add('open');
-    });
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('.dropdown')) {
-      document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
-    }
-  });
-
-  // ── GEO DROPDOWNS ──
-  if (typeof initGeo === 'function') {
-    initGeo('div_c', 'dist_c', 'thana_c');
-    initGeo('div_p', 'dist_p', 'thana_p');
-  }
-
-  document.getElementById('sameAddress')?.addEventListener('change', (e) => {
-    document.getElementById('permanentAddress').style.display = e.target.checked ? 'none' : 'block';
-  });
-
-  document.querySelectorAll('.sector-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      opt.closest('.sector-options').querySelectorAll('.sector-option').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected'); opt.querySelector('input').checked = true;
-    });
-  });
-
-  document.querySelectorAll('.membership-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      document.querySelectorAll('.membership-option').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected'); opt.querySelector('input').checked = true;
-    });
-  });
-
-  document.querySelectorAll('.feedback-option').forEach(opt => {
-    opt.addEventListener('click', () => {
-      document.querySelectorAll('.feedback-option').forEach(o => o.classList.remove('selected'));
-      opt.classList.add('selected');
-    });
-  });
-
-  // ── MEMBER SEARCH ──
-  document.getElementById('memberSearch')?.addEventListener('input', renderMembers);
-  document.getElementById('sectorFilter')?.addEventListener('change', renderMembers);
-
-  // ── REGISTRATION ──
-  document.getElementById('regForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const sector = document.querySelector('.sector-option.selected')?.dataset.value;
-    const membership = document.querySelector('.membership-option.selected')?.dataset.value;
-    if (!sector) { alert('Please select a sector.'); return; }
-    if (!membership) { alert('Please select membership type.'); return; }
-    const btn = document.getElementById('regSubmitBtn');
-    btn.textContent = 'Submitting...'; btn.disabled = true;
-    try {
-      const data = Object.fromEntries(new FormData(e.target).entries());
-      data.sector = sector; data.membership = membership;
-      data.status = 'pending'; data.createdAt = serverTimestamp();
-      const photoFile = document.getElementById('regPhoto')?.files[0];
-      if (photoFile) { btn.textContent = 'Uploading photo...'; data.photoURL = await uploadToCloudinary(photoFile); }
-      delete data.photo;
-      await addDoc(collection(db,'members'), data);
-      e.target.style.display = 'none';
-      document.getElementById('regSuccess').classList.add('show');
-    } catch(err) {
-      alert('Submission failed. Please try again.');
-      btn.textContent = 'Submit Application'; btn.disabled = false;
-    }
-  });
-
-  // ── FEEDBACK ──
-  document.getElementById('feedbackForm')?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const type = document.querySelector('.feedback-option.selected')?.dataset.type || 'Suggestion';
-    try {
-      await addDoc(collection(db,'feedback'), {
-        type, name: document.getElementById('fb_name').value,
-        subject: document.getElementById('fb_subject').value,
-        message: document.getElementById('fb_message').value,
-        createdAt: serverTimestamp()
-      });
-      document.getElementById('feedbackFormWrap').style.display = 'none';
-      document.getElementById('feedbackSuccess').classList.add('show');
-    } catch(err) { alert('Failed to send. Please try again.'); }
   });
 
 }); // end DOMContentLoaded
@@ -378,7 +236,46 @@ function eventCard(d, isPast) {
   </div>`;
 }
 
-// ── JOBS ──
+
+// ── GALLERY ──
+async function loadGallery() {
+  const grid = document.getElementById('galleryGrid');
+  if (!grid) return;
+  grid.innerHTML = '<div class="loading">Loading gallery</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'gallery'),orderBy('createdAt','desc')));
+    if (snap.empty) { grid.innerHTML = emptyState('🖼️','Gallery photos will be added soon.'); return; }
+    grid.innerHTML = snap.docs.map(doc => {
+      const d = doc.data();
+      return `<div class="gallery-item"><img src="${d.url}" alt="${d.caption||'Gallery'}"></div>`;
+    }).join('');
+  } catch(e) { grid.innerHTML = emptyState('🖼️','Unable to load.'); }
+}
+
+// ── VIDEOS ──
+async function loadVideos(containerId, lim) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  container.innerHTML = '<div class="loading">Loading</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'videos'),orderBy('createdAt','desc'),limit(lim)));
+    if (snap.empty) { container.innerHTML = emptyState('🎬','Videos will be added soon.'); return; }
+    container.innerHTML = '<div class="video-grid">'+snap.docs.map(doc => {
+      const d = doc.data();
+      const embedId = d.youtubeId || '';
+      return `<div class="video-card">
+        <div class="video-embed"><iframe src="https://www.youtube.com/embed/${embedId}" allowfullscreen loading="lazy"></iframe></div>
+        <div class="video-info"><div class="video-title">${d.title||'—'}</div><div class="video-date">${d.date||''}</div></div>
+      </div>`;
+    }).join('')+'</div>';
+  } catch(e) { container.innerHTML = emptyState('🎬','Unable to load.'); }
+}
+
+
+// ── HELPERS ──
+function emptyState(icon, msg) {
+  return `<div class="empty-state"><span class="empty-icon">${icon}</span><p>${msg}</p></div>`;
+}
 
 // ── MEMBER DETAIL MODAL (Public Site) ──
 // Inject modal HTML once
