@@ -48,21 +48,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initial page navigation
   navigate(location.hash.replace('#', '') || 'home', false);
 
-  // ── DROPDOWN CLICK SUPPORT (mobile + touch) ──
+  // ── DROPDOWN CLICK SUPPORT ──
   document.querySelectorAll('.dropdown > a').forEach(toggle => {
     toggle.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
       const dropdown = toggle.parentElement;
       const isOpen = dropdown.classList.contains('open');
-      // Close all dropdowns
       document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
-      // Toggle current
       if (!isOpen) dropdown.classList.add('open');
     });
   });
 
-  // Close dropdown when clicking outside
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.dropdown')) {
       document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
@@ -163,7 +160,6 @@ async function loadHome() {
     setText('statSoundEng', soundEng.size || '0');
     setText('statLogistic', logistic.size || '0');
   } catch(e) {}
-
   loadNews('homeNews', 3);
   loadHomeEvents();
   loadJobs('homeJobs', 3);
