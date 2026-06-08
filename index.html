@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+a<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -38,15 +38,8 @@
     <li class="dropdown">
       <a href="#">More ▾</a>
       <div class="dropdown-menu">
-        <a href="#" onclick="navigate('news'); return false;">News & Announcements</a>
-        <a href="#" onclick="navigate('jobs'); return false;">Gig Board</a>
-        <a href="#" onclick="navigate('gallery'); return false;">Photo Gallery</a>
-        <a href="#" onclick="navigate('videos'); return false;">Videos</a>
-        <a href="#" onclick="navigate('achievements'); return false;">Achievements</a>
-        <a href="#" onclick="navigate('sponsors'); return false;">Sponsors</a>
-        <a href="#" onclick="navigate('tribute'); return false;">In Memoriam</a>
-        <a href="#" onclick="navigate('feedback'); return false;">Feedback</a>
-        <a href="#" onclick="navigate('contact'); return false;">Contact</a>
+        <a href="#" onclick="navigate('news'); return false;">News & Announcements</a>        <a href="#" onclick="navigate('gallery'); return false;">Photo Gallery</a>
+        <a href="#" onclick="navigate('videos'); return false;">Videos</a>        <a href="#" onclick="navigate('contact'); return false;">Contact</a>
       </div>
     </li>
     <li><a href="#" data-page="register" class="nav-join" onclick="navigate('register'); return false;">Join Us</a></li>
@@ -63,15 +56,8 @@
   <a href="#" onclick="navigate('subcommittee'); return false;">♩ Sub-Committees</a>
   <a href="#" onclick="navigate('members'); return false;">♩ Members</a>
   <a href="#" onclick="navigate('news'); return false;">♩ News & Announcements</a>
-  <a href="#" onclick="navigate('events'); return false;">♩ Events</a>
-  <a href="#" onclick="navigate('jobs'); return false;">♩ Gig Board</a>
-  <a href="#" onclick="navigate('gallery'); return false;">♩ Photo Gallery</a>
-  <a href="#" onclick="navigate('videos'); return false;">♩ Videos</a>
-  <a href="#" onclick="navigate('achievements'); return false;">♩ Achievements</a>
-  <a href="#" onclick="navigate('sponsors'); return false;">♩ Sponsors</a>
-  <a href="#" onclick="navigate('tribute'); return false;">♩ In Memoriam</a>
-  <a href="#" onclick="navigate('feedback'); return false;">♩ Feedback</a>
-  <a href="#" onclick="navigate('contact'); return false;">♩ Contact</a>
+  <a href="#" onclick="navigate('events'); return false;">♩ Events</a>  <a href="#" onclick="navigate('gallery'); return false;">♩ Photo Gallery</a>
+  <a href="#" onclick="navigate('videos'); return false;">♩ Videos</a>  <a href="#" onclick="navigate('contact'); return false;">♩ Contact</a>
   <a href="#" class="mobile-join" onclick="navigate('register'); return false;">♪ Join Us</a>
 </div>
 
@@ -188,33 +174,7 @@
     </div>
   </section>
 
-  <!-- Latest Jobs (WHITE) -->
-  <section class="section sec-off">
-    <div class="container">
-      <div class="sec-header">
-        <span class="sec-tag on-light">Opportunities</span>
-        <h2 class="sec-title on-light">Gig Board</h2>
-        <div class="sec-rule on-light"><span>♪</span></div>
-        <p class="sec-desc on-light">Find your next gig or post an opportunity for fellow musicians.</p>
-      </div>
-      <div id="homeJobs"></div>
-      <div style="text-align:center;margin-top:2rem;">
-        <a href="#" class="btn-outline" onclick="navigate('jobs'); return false;">View All Opportunities</a>
-      </div>
-    </div>
-  </section>
 
-  <!-- Sponsors (LIGHT) -->
-  <section class="section sec-white">
-    <div class="container">
-      <div class="sec-header">
-        <span class="sec-tag on-light">Partners</span>
-        <h2 class="sec-title on-light">Our Sponsors</h2>
-        <div class="sec-rule on-light"><span>♪</span></div>
-      </div>
-      <div id="homeSponsors" class="sponsors-grid"></div>
-    </div>
-  </section>
 
 </div><!-- end home -->
 
@@ -318,18 +278,6 @@
 <!-- ════════════════════════════
      GIG BOARD
 ════════════════════════════ -->
-<div id="page-jobs" class="page">
-  <div class="page-hero"><h1>Gig Board</h1><p>Opportunities for music professionals</p></div>
-  <section class="section sec-white">
-    <div class="container">
-      <div style="background:var(--white);border:1px solid var(--border-light);padding:1.5rem;margin-bottom:2rem;box-shadow:var(--shadow);">
-        <p style="font-size:13px;color:var(--text-muted);line-height:1.8;">Looking for musicians, sound engineers, or logistic crew? Post your requirement here. Want to find gigs? Browse the listings below. Contact the admin to post a listing.</p>
-      </div>
-      <div id="jobsGrid"><div class="loading">Loading opportunities</div></div>
-    </div>
-  </section>
-</div>
-
 <!-- ════════════════════════════
      GALLERY
 ════════════════════════════ -->
@@ -357,44 +305,11 @@
 <!-- ════════════════════════════
      ACHIEVEMENTS
 ════════════════════════════ -->
-<div id="page-achievements" class="page">
-  <div class="page-hero"><h1>Achievements</h1><p>Our milestones and recognition</p></div>
-  <section class="section sec-white">
-    <div class="container">
-      <div class="achievements-grid" id="achievementsGrid"><div class="loading">Loading</div></div>
-    </div>
-  </section>
-</div>
-
 <!-- ════════════════════════════
      SPONSORS
 ════════════════════════════ -->
-<div id="page-sponsors" class="page">
-  <div class="page-hero"><h1>Sponsors & Partners</h1><p>Organizations that support our mission</p></div>
-  <section class="section sec-white">
-    <div class="container">
-      <div class="sponsors-grid" id="sponsorsGrid"><div class="loading">Loading</div></div>
-    </div>
-  </section>
-</div>
-
 <!-- ════════════════════════════
      IN MEMORIAM
-════════════════════════════ -->
-<div id="page-tribute" class="page">
-  <div class="page-hero"><h1>In Memoriam</h1><p>Remembering those who are no longer with us</p></div>
-  <section class="section sec-white">
-    <div class="container">
-      <div class="sec-header">
-        <p class="sec-desc on-light">Members of our club who have passed away — their contributions remain forever in our hearts.</p>
-      </div>
-      <div class="tribute-grid" id="tributeGrid"><div class="loading">Loading</div></div>
-    </div>
-  </section>
-</div>
-
-<!-- ════════════════════════════
-     REGISTRATION
 ════════════════════════════ -->
 <div id="page-register" class="page">
   <div class="page-hero"><h1>Join Us</h1><p>Apply for membership in Bangladesh Musician's Club</p></div>
@@ -488,34 +403,6 @@
 <!-- ════════════════════════════
      FEEDBACK
 ════════════════════════════ -->
-<div id="page-feedback" class="page">
-  <div class="page-hero"><h1>Feedback</h1><p>Your suggestions and complaints help us grow</p></div>
-  <section class="section sec-white">
-    <div class="container" style="max-width:600px;">
-      <div class="reg-form">
-        <div id="feedbackFormWrap">
-          <div class="form-section-title">Type of Feedback</div>
-          <div class="feedback-type" style="margin-bottom:1.5rem;">
-            <div class="feedback-option selected" data-type="Suggestion"><div class="feedback-option-icon">💡</div><div class="feedback-option-label">Suggestion</div></div>
-            <div class="feedback-option" data-type="Complaint"><div class="feedback-option-icon">📢</div><div class="feedback-option-label">Complaint</div></div>
-          </div>
-          <form id="feedbackForm">
-            <div class="form-group"><label class="form-label">Your Name (optional)</label><input type="text" class="form-input" id="fb_name" placeholder="Anonymous is fine"></div>
-            <div class="form-group"><label class="form-label">Subject <span style="color:var(--red);">*</span></label><input type="text" class="form-input" id="fb_subject" placeholder="Brief subject" required></div>
-            <div class="form-group"><label class="form-label">Message <span style="color:var(--red);">*</span></label><textarea class="form-textarea" id="fb_message" rows="5" placeholder="Write your feedback in detail..." required style="resize:vertical;"></textarea></div>
-            <button type="submit" class="form-submit">Send Feedback</button>
-          </form>
-        </div>
-        <div class="success-msg" id="feedbackSuccess">
-          <div style="font-size:3rem;margin-bottom:1rem;">✓</div>
-          <h3>Message Sent!</h3>
-          <p style="color:var(--text-muted);">Thank you. We take your feedback seriously.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-</div>
-
 <!-- ════════════════════════════
      CONTACT
 ════════════════════════════ -->
@@ -563,18 +450,11 @@
         <h4>Organization</h4>
         <a href="#" onclick="navigate('about'); return false;">About Us</a>
         <a href="#" onclick="navigate('founders'); return false;">Founders</a>
-        <a href="#" onclick="navigate('managing'); return false;">Managing Board</a>
-        <a href="#" onclick="navigate('achievements'); return false;">Achievements</a>
-        <a href="#" onclick="navigate('sponsors'); return false;">Sponsors</a>
-      </div>
+        <a href="#" onclick="navigate('managing'); return false;">Managing Board</a>      </div>
       <div class="footer-col">
         <h4>Community</h4>
-        <a href="#" onclick="navigate('members'); return false;">Members</a>
-        <a href="#" onclick="navigate('jobs'); return false;">Gig Board</a>
-        <a href="#" onclick="navigate('events'); return false;">Events</a>
-        <a href="#" onclick="navigate('news'); return false;">News</a>
-        <a href="#" onclick="navigate('feedback'); return false;">Feedback</a>
-      </div>
+        <a href="#" onclick="navigate('members'); return false;">Members</a>        <a href="#" onclick="navigate('events'); return false;">Events</a>
+        <a href="#" onclick="navigate('news'); return false;">News</a>      </div>
       <div class="footer-col">
         <h4>Contact</h4>
         <a href="tel:01967860636">📞 01967860636</a>
