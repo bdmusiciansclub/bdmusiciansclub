@@ -25,15 +25,7 @@
   <ul class="nav-links">
     <li><a href="#" onclick="showPage('home')">Home</a></li>
     <li><a href="#" onclick="showPage('about')">About</a></li>
-    <li class="dropdown">
-      <a href="#">Committee ▾</a>
-      <div class="dropdown-menu">
-        <a href="#" onclick="showPage('committee');switchTab('founders')">Founders</a>
-        <a href="#" onclick="showPage('committee');switchTab('board')">Managing Board</a>
-        <a href="#" onclick="showPage('committee');switchTab('executive')">Executive Committee</a>
-        <a href="#" onclick="showPage('committee');switchTab('subcommittees')">Sub-Committees</a>
-      </div>
-    </li>
+    <li><a href="#" onclick="showPage('committee')">Committee</a></li>
     <li><a href="#" onclick="showPage('members')">Members</a></li>
     <li class="dropdown">
       <a href="#">More ▾</a>
@@ -60,10 +52,7 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="#" onclick="showPage('home')">Home</a>
   <a href="#" onclick="showPage('about')">About</a>
-  <a class="mobile-sub" href="#" onclick="showPage('committee');switchTab('founders')">— Founders</a>
-  <a class="mobile-sub" href="#" onclick="showPage('committee');switchTab('board')">— Managing Board</a>
-  <a class="mobile-sub" href="#" onclick="showPage('committee');switchTab('executive')">— Executive Committee</a>
-  <a class="mobile-sub" href="#" onclick="showPage('committee');switchTab('subcommittees')">— Sub-Committees</a>
+  <a href="#" onclick="showPage('committee')">Committee</a>
   <a href="#" onclick="showPage('members')">Members</a>
   <a href="#" onclick="showPage('events')">Events</a>
   <a href="#" onclick="showPage('news')">News</a>
@@ -396,7 +385,7 @@
         <div class="reg-form">
 
           <!-- Membership Type -->
-          <div class="form-section-title">সদস্যপদের ধরন</div>
+          <div class="form-section-title">Membership Type</div>
           <div class="membership-options" style="margin-bottom:2rem;">
             <div class="membership-option selected" data-type="General" onclick="selectMembership('General')">
               <input type="radio" name="membership" value="General">
@@ -411,23 +400,23 @@
           </div>
 
           <!-- Personal Info -->
-          <div class="form-section-title">ব্যক্তিগত তথ্য</div>
+          <div class="form-section-title">Personal Information</div>
           <div class="form-gap">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">পূর্ণ নাম (NID অনুযায়ী) <span>*</span></label>
-                <input type="text" id="fullName" class="form-input" placeholder="আপনার পূর্ণ নাম">
+                <label class="form-label">Full Name (as per NID) <span>*</span></label>
+                <input type="text" id="fullName" class="form-input" placeholder="Your full name">
               </div>
               <div class="form-group">
-                <label class="form-label">জন্ম তারিখ (NID) <span>*</span></label>
+                <label class="form-label">Date of Birth (NID) <span>*</span></label>
                 <input type="date" id="dob" class="form-input">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">রক্তের গ্রুপ <span>*</span></label>
+                <label class="form-label">Blood Group <span>*</span></label>
                 <select id="bloodGroup" class="form-select">
-                  <option value="">নির্বাচন করুন</option>
+                  <option value="">Select</option>
                   <option>A+</option><option>A-</option>
                   <option>B+</option><option>B-</option>
                   <option>AB+</option><option>AB-</option>
@@ -435,72 +424,122 @@
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">জাতীয় পরিচয়পত্র নম্বর <span>*</span></label>
-                <input type="text" id="nid" class="form-input" placeholder="NID নম্বর">
+                <label class="form-label">National ID Number <span>*</span></label>
+                <input type="text" id="nid" class="form-input" placeholder="NID number">
               </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Profile Photo</label>
+              <input type="file" id="profilePhoto" class="form-input" accept="image/*">
             </div>
           </div>
 
-          <!-- Address -->
-          <div class="form-section-title" style="margin-top:1.5rem;">বর্তমান ঠিকানা</div>
+          <!-- Current Address -->
+          <div class="form-section-title" style="margin-top:1.5rem;">Current Address</div>
           <div class="form-gap">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">বিভাগ <span>*</span></label>
-                <select id="currentDivision" class="form-select">
-                  <option value="">বিভাগ নির্বাচন করুন</option>
-                  <option>ঢাকা</option><option>চট্টগ্রাম</option><option>রাজশাহী</option>
-                  <option>খুলনা</option><option>বরিশাল</option><option>সিলেট</option>
-                  <option>রংপুর</option><option>ময়মনসিংহ</option>
+                <label class="form-label">Division <span>*</span></label>
+                <select id="div_c" class="form-select" onchange="populateDistricts('div_c','dist_c','thana_c')">
+                  <option value="">Select Division</option>
+                  <option>Dhaka</option><option>Chittagong</option><option>Rajshahi</option>
+                  <option>Khulna</option><option>Barisal</option><option>Sylhet</option>
+                  <option>Rangpur</option><option>Mymensingh</option>
                 </select>
               </div>
               <div class="form-group">
-                <label class="form-label">জেলা <span>*</span></label>
-                <input type="text" id="currentDistrict" class="form-input" placeholder="জেলা">
+                <label class="form-label">District <span>*</span></label>
+                <select id="dist_c" class="form-select" onchange="populateThanas('dist_c','thana_c')" disabled>
+                  <option value="">Select District</option>
+                </select>
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">থানা / উপজেলা</label>
-                <input type="text" id="currentThana" class="form-input" placeholder="থানা / উপজেলা">
+                <label class="form-label">Thana / Upazila</label>
+                <select id="thana_c" class="form-select" disabled>
+                  <option value="">Select Thana</option>
+                </select>
               </div>
               <div class="form-group">
-                <label class="form-label">সম্পূর্ণ ঠিকানা</label>
-                <input type="text" id="currentAddressFull" class="form-input" placeholder="বাড়ি/রোড/এলাকা">
+                <label class="form-label">Full Address</label>
+                <input type="text" id="addr_c" class="form-input" placeholder="House / Road / Area">
               </div>
             </div>
           </div>
 
-          <!-- Contact -->
-          <div class="form-section-title" style="margin-top:1.5rem;">যোগাযোগের তথ্য</div>
+          <!-- Permanent Address -->
+          <div class="form-section-title" style="margin-top:1.5rem;">Permanent Address</div>
+          <div class="form-gap">
+            <div class="form-group" style="flex-direction:row;align-items:center;gap:8px;">
+              <input type="checkbox" id="sameAddress" onchange="copyCurrAddress()" style="width:16px;height:16px;accent-color:var(--forest3);cursor:pointer;">
+              <label for="sameAddress" style="font-size:13px;color:var(--text-muted);cursor:pointer;">Same as current address</label>
+            </div>
+            <div id="permAddressFields">
+              <div class="form-gap">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Division <span>*</span></label>
+                    <select id="div_p" class="form-select" onchange="populateDistricts('div_p','dist_p','thana_p')">
+                      <option value="">Select Division</option>
+                      <option>Dhaka</option><option>Chittagong</option><option>Rajshahi</option>
+                      <option>Khulna</option><option>Barisal</option><option>Sylhet</option>
+                      <option>Rangpur</option><option>Mymensingh</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">District <span>*</span></label>
+                    <select id="dist_p" class="form-select" onchange="populateThanas('dist_p','thana_p')" disabled>
+                      <option value="">Select District</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">Thana / Upazila</label>
+                    <select id="thana_p" class="form-select" disabled>
+                      <option value="">Select Thana</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Full Address</label>
+                    <input type="text" id="addr_p" class="form-input" placeholder="House / Road / Area">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Info -->
+          <div class="form-section-title" style="margin-top:1.5rem;">Contact Information</div>
           <div class="form-gap">
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">মোবাইল নম্বর <span>*</span></label>
+                <label class="form-label">Mobile Number <span>*</span></label>
                 <input type="tel" id="mobile" class="form-input" placeholder="01XXXXXXXXX">
               </div>
               <div class="form-group">
-                <label class="form-label">WhatsApp নম্বর</label>
+                <label class="form-label">WhatsApp Number</label>
                 <input type="tel" id="whatsapp" class="form-input" placeholder="01XXXXXXXXX">
               </div>
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">ইমেইল ঠিকানা</label>
+                <label class="form-label">Email Address</label>
                 <input type="email" id="email" class="form-input" placeholder="email@example.com">
               </div>
               <div class="form-group">
-                <label class="form-label">Facebook প্রোফাইল</label>
+                <label class="form-label">Facebook Profile</label>
                 <input type="url" id="facebook" class="form-input" placeholder="https://facebook.com/...">
               </div>
             </div>
           </div>
 
           <!-- Professional Info -->
-          <div class="form-section-title" style="margin-top:1.5rem;">পেশাদার তথ্য</div>
+          <div class="form-section-title" style="margin-top:1.5rem;">Professional Information</div>
           <div class="form-gap">
             <div class="form-group">
-              <label class="form-label">আপনার সেক্টর নির্বাচন করুন <span>*</span></label>
+              <label class="form-label">Select Your Sector <span>*</span></label>
               <div class="sector-options">
                 <div class="sector-option selected" data-sector="Musicians" onclick="selectSector('Musicians')">
                   <input type="radio" name="sector">
@@ -521,38 +560,38 @@
             </div>
             <div class="form-row">
               <div class="form-group">
-                <label class="form-label">বিশেষত্ব / পেশা <span>*</span></label>
-                <input type="text" id="specialization" class="form-input" placeholder="যেমন: গিটারিস্ট, সাউন্ড ইঞ্জিনিয়ার...">
+                <label class="form-label">Specialization / Profession <span>*</span></label>
+                <input type="text" id="specialization" class="form-input" placeholder="e.g. Guitarist, Sound Engineer...">
               </div>
               <div class="form-group">
-                <label class="form-label">অভিজ্ঞতা</label>
+                <label class="form-label">Years of Experience</label>
                 <select id="experience" class="form-select">
-                  <option value="">নির্বাচন করুন</option>
-                  <option>১ বছরের কম</option>
-                  <option>১–৩ বছর</option>
-                  <option>৩–৫ বছর</option>
-                  <option>৫–১০ বছর</option>
-                  <option>১০+ বছর</option>
+                  <option value="">Select</option>
+                  <option>Less than 1 year</option>
+                  <option>1–3 years</option>
+                  <option>3–5 years</option>
+                  <option>5–10 years</option>
+                  <option>10+ years</option>
                 </select>
               </div>
             </div>
             <div class="form-group">
-              <label class="form-label">বর্তমান প্রতিষ্ঠান</label>
-              <input type="text" id="organization" class="form-input" placeholder="ব্যান্ড / প্রতিষ্ঠানের নাম (যদি থাকে)">
+              <label class="form-label">Current Organization</label>
+              <input type="text" id="organization" class="form-input" placeholder="Band / Organization name (if any)">
             </div>
           </div>
 
-          <button class="form-submit" onclick="submitApplication()">আবেদন জমা দিন</button>
-          <p class="form-note">আবেদন জমা হলে অ্যাডমিন রিভিউ করবেন। অনুমোদনের পর আপনাকে যোগাযোগ করা হবে।</p>
+          <button class="form-submit" onclick="submitApplication()">Submit Application</button>
+          <p class="form-note">After submission, your application will be reviewed by admin. You will be contacted once approved.</p>
         </div>
       </div>
 
       <!-- Success -->
       <div id="joinSuccess" class="success-msg">
         <div style="font-size:3rem;margin-bottom:1rem;">🎵</div>
-        <h3>আবেদন সফলভাবে জমা হয়েছে!</h3>
-        <p style="color:var(--text-muted);margin:0.5rem 0 2rem;">অনুমোদনের পর আপনাকে যোগাযোগ করা হবে।</p>
-        <button class="btn-forest" onclick="resetJoinForm()">নতুন আবেদন</button>
+        <h3>Application Submitted!</h3>
+        <p style="color:var(--text-muted);margin:0.5rem 0 2rem;">Your application has been received. You will be contacted upon approval.</p>
+        <button class="btn-forest" onclick="resetJoinForm()">New Application</button>
       </div>
 
     </div>
