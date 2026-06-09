@@ -404,44 +404,130 @@ window.selectSector = function(sector) {
   document.querySelector(`.sector-option[data-sector="${sector}"]`)?.classList.add('selected');
 };
 
+/* ─── CASCADE DROPDOWN DATA ─── */
+const BD_DATA = {
+  Dhaka:       { districts: ['Dhaka','Gazipur','Narayanganj','Narsingdi','Manikganj','Munshiganj','Rajbari','Shariatpur','Faridpur','Madaripur','Gopalganj','Kishoreganj','Tangail','Mymensingh','Jamalpur','Sherpur','Netrokona'] },
+  Chittagong:  { districts: ['Chittagong','Cox\'s Bazar','Comilla','Noakhali','Feni','Lakshmipur','Chandpur','Brahmanbaria','Khagrachhari','Rangamati','Bandarban'] },
+  Rajshahi:    { districts: ['Rajshahi','Natore','Pabna','Sirajganj','Bogra','Joypurhat','Naogaon','Chapainawabganj'] },
+  Khulna:      { districts: ['Khulna','Bagerhat','Satkhira','Jessore','Narail','Magura','Jhenaidah','Kushtia','Chuadanga','Meherpur'] },
+  Barisal:     { districts: ['Barisal','Patuakhali','Bhola','Pirojpur','Jhalokati','Barguna'] },
+  Sylhet:      { districts: ['Sylhet','Moulvibazar','Habiganj','Sunamganj'] },
+  Rangpur:     { districts: ['Rangpur','Dinajpur','Gaibandha','Kurigram','Lalmonirhat','Nilphamari','Panchagarh','Thakurgaon'] },
+  Mymensingh:  { districts: ['Mymensingh','Jamalpur','Sherpur','Netrokona'] },
+};
+
+const BD_THANAS = {
+  'Dhaka':['Adabor','Badda','Banani','Bangshal','Bimanbandar','Cantonment','Chawkbazar','Dakshinkhan','Darus Salam','Demra','Dhanmondi','Gendaria','Gulshan','Hazaribag','Jatrabari','Kafrul','Kadamtali','Kalabagan','Kamrangirchar','Khilgaon','Khilkhet','Kotwali','Lalbag','Mirpur','Mohammadpur','Motijheel','Mugda','New Market','Pallabi','Paltan','Ramna','Rayer Bazar','Sabujbagh','Shah Ali','Shahjahanpur','Sher-e-Bangla Nagar','Shyampur','Sutrapur','Tejgaon','Tejgaon Industrial','Turag','Uttara','Uttarkhan','Vatara','Wari'],
+  'Gazipur':['Gazipur Sadar','Kaliakair','Kaliganj','Kapasia','Sreepur'],
+  'Narayanganj':['Araihazar','Bandar','Narayanganj Sadar','Rupganj','Sonargaon'],
+  'Chittagong':['Akbarshah','Bakalia','Bayazid','Chandgaon','Chawk Bazar','Double Mooring','EPZ','Halishahar','Khulshi','Karnaphuli','Kotwali','Pahartali','Panchlaish','Patenga','Sadarghat'],
+  'Cox\'s Bazar':['Cox\'s Bazar Sadar','Chakaria','Kutubdia','Maheshkhali','Pekua','Ramu','Teknaf','Ukhia'],
+  'Comilla':['Comilla Sadar','Barura','Brahmanpara','Burichang','Chandina','Chauddagram','Daudkandi','Debidwar','Homna','Laksam','Muradnagar','Nangalkot','Meghna','Monoharganj','Titas'],
+  'Rajshahi':['Boalia','Motihar','Rajpara','Shah Makhdum','Bagmara','Charghat','Durgapur','Godagari','Mohanpur','Paba','Puthia','Tanore'],
+  'Khulna':['Daulatpur','Khan Jahan Ali','Khalishpur','Khulna Sadar','Sonadanga','Batiaghata','Dacope','Dumuria','Koyra','Paikgachha','Phultala','Rupsa','Terokhada'],
+  'Sylhet':['Sylhet Sadar','Balaganj','Beanibazar','Biswanath','Companiganj','Dakshin Surma','Fenchuganj','Golapganj','Gowainghat','Jaintiapur','Kanaighat','Osmaninagar','South Surma','Zakiganj'],
+  'Barisal':['Agailjhara','Babuganj','Bakerganj','Banaripara','Barisal Sadar','Gaurnadi','Hizla','Mehendiganj','Muladi','Wazirpur'],
+  'Rangpur':['Badarganj','Gangachara','Kaunia','Mithapukur','Pirgachha','Pirganj','Rangpur Sadar','Taraganj'],
+};
+
+window.populateDistricts = function(divId, distId, thanaId) {
+  const div = document.getElementById(divId)?.value;
+  const distSel = document.getElementById(distId);
+  const thanaSel = document.getElementById(thanaId);
+  if (!distSel) return;
+  distSel.innerHTML = '<option value="">Select District</option>';
+  thanaSel.innerHTML = '<option value="">Select Thana</option>';
+  distSel.disabled = true;
+  thanaSel.disabled = true;
+  if (!div || !BD_DATA[div]) return;
+  BD_DATA[div].districts.forEach(d => {
+    distSel.innerHTML += `<option value="${d}">${d}</option>`;
+  });
+  distSel.disabled = false;
+};
+
+window.populateThanas = function(distId, thanaId) {
+  const dist = document.getElementById(distId)?.value;
+  const thanaSel = document.getElementById(thanaId);
+  if (!thanaSel) return;
+  thanaSel.innerHTML = '<option value="">Select Thana</option>';
+  thanaSel.disabled = true;
+  if (!dist || !BD_THANAS[dist]) return;
+  BD_THANAS[dist].forEach(t => {
+    thanaSel.innerHTML += `<option value="${t}">${t}</option>`;
+  });
+  thanaSel.disabled = false;
+};
+
+window.copyCurrAddress = function() {
+  const same = document.getElementById('sameAddress')?.checked;
+  const fields = document.getElementById('permAddressFields');
+  if (!fields) return;
+  if (same) {
+    // Copy values
+    const copy = (from, to) => {
+      const fromEl = document.getElementById(from);
+      const toEl   = document.getElementById(to);
+      if (!fromEl || !toEl) return;
+      toEl.value = fromEl.value;
+      toEl.dispatchEvent(new Event('change'));
+    };
+    copy('div_c','div_p');
+    setTimeout(() => {
+      copy('dist_c','dist_p');
+      setTimeout(() => copy('thana_c','thana_p'), 100);
+    }, 100);
+    copy('addr_c','addr_p');
+    fields.style.opacity = '0.5';
+    fields.style.pointerEvents = 'none';
+  } else {
+    fields.style.opacity = '';
+    fields.style.pointerEvents = '';
+  }
+};
+
 window.submitApplication = async function() {
   const get = id => document.getElementById(id)?.value?.trim() || '';
   const membershipEl = document.querySelector('.membership-option.selected');
   const sectorEl     = document.querySelector('.sector-option.selected');
 
   const data = {
-    name:             get('fullName'),
-    dob:              get('dob'),
-    bloodGroup:       get('bloodGroup'),
-    nid:              get('nid'),
-    currentDivision:  get('currentDivision'),
-    currentDistrict:  get('currentDistrict'),
-    currentThana:     get('currentThana'),
-    currentAddress:   get('currentAddressFull'),
-    mobile:           get('mobile'),
-    whatsapp:         get('whatsapp'),
-    email:            get('email'),
-    facebook:         get('facebook'),
-    sector:           sectorEl?.dataset.sector || '',
-    specialization:   get('specialization'),
-    experience:       get('experience'),
-    organization:     get('organization'),
-    membershipType:   membershipEl?.dataset.type || 'General',
-    status:           'pending',
-    createdAt:        serverTimestamp(),
+    fullname:     get('fullName'),
+    dob:          get('dob'),
+    blood:        get('bloodGroup'),
+    nid:          get('nid'),
+    div_c:        get('div_c'),
+    dist_c:       get('dist_c'),
+    thana_c:      get('thana_c'),
+    addr_c:       get('addr_c'),
+    div_p:        get('div_p'),
+    dist_p:       get('dist_p'),
+    thana_p:      get('thana_p'),
+    addr_p:       get('addr_p'),
+    mobile:       get('mobile'),
+    whatsapp:     get('whatsapp'),
+    email:        get('email'),
+    facebook:     get('facebook'),
+    sector:       sectorEl?.dataset.sector || '',
+    specialty:    get('specialization'),
+    experience:   get('experience'),
+    organization: get('organization'),
+    membership:   membershipEl?.dataset.type || 'General',
+    status:       'pending',
+    createdAt:    serverTimestamp(),
   };
 
-  if (!data.name || !data.mobile || !data.sector) {
-    alert('নাম, মোবাইল এবং সেক্টর অবশ্যই দিতে হবে।');
+  if (!data.fullname || !data.mobile || !data.sector) {
+    alert('Full Name, Mobile Number and Sector are required.');
     return;
   }
 
   try {
-    await addDoc(collection(db, 'applications'), data);
+    await addDoc(collection(db, 'members'), data);
     document.getElementById('joinForm').classList.add('hidden');
     document.getElementById('joinSuccess').classList.add('show');
   } catch(e) {
-    alert('সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    alert('Something went wrong. Please try again.');
   }
 };
 
@@ -449,6 +535,13 @@ window.resetJoinForm = function() {
   document.getElementById('joinForm').classList.remove('hidden');
   document.getElementById('joinSuccess').classList.remove('show');
   document.getElementById('joinForm').reset();
+  // Reset dropdowns
+  ['dist_c','thana_c','dist_p','thana_p'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.innerHTML = `<option value="">Select ${id.startsWith('dist') ? 'District' : 'Thana'}</option>`; el.disabled = true; }
+  });
+  const fields = document.getElementById('permAddressFields');
+  if (fields) { fields.style.opacity = ''; fields.style.pointerEvents = ''; }
 };
 
 /* ═══════════════════════════════════════
