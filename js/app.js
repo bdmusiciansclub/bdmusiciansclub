@@ -372,109 +372,115 @@ window.selectSector = function(sector) {
   document.querySelector(`.sector-option[data-sector="${sector}"]`)?.classList.add('selected');
 };
 
-/* ─── CASCADE DATA ─── */
+/* ─── CASCADE DATA (Division > District > Thana) ─── */
 const BD_DATA = {
-  Dhaka:      ['Dhaka','Gazipur','Narayanganj','Narsingdi','Manikganj','Munshiganj','Rajbari','Shariatpur','Faridpur','Madaripur','Gopalganj','Kishoreganj','Tangail'],
-  Chittagong: ['Chittagong',"Cox's Bazar",'Comilla','Noakhali','Feni','Lakshmipur','Chandpur','Brahmanbaria','Khagrachhari','Rangamati','Bandarban'],
-  Rajshahi:   ['Rajshahi','Natore','Pabna','Sirajganj','Bogra','Joypurhat','Naogaon','Chapainawabganj'],
-  Khulna:     ['Khulna','Bagerhat','Satkhira','Jessore','Narail','Magura','Jhenaidah','Kushtia','Chuadanga','Meherpur'],
-  Barisal:    ['Barisal','Patuakhali','Bhola','Pirojpur','Jhalokati','Barguna'],
-  Sylhet:     ['Sylhet','Moulvibazar','Habiganj','Sunamganj'],
-  Rangpur:    ['Rangpur','Dinajpur','Gaibandha','Kurigram','Lalmonirhat','Nilphamari','Panchagarh','Thakurgaon'],
-  Mymensingh: ['Mymensingh','Jamalpur','Sherpur','Netrokona'],
-};
-
-const BD_THANAS = {
-  'Dhaka':['Adabor','Badda','Banani','Bangshal','Bimanbandar','Cantonment','Chawkbazar','Dakshinkhan','Darus Salam','Demra','Dhanmondi','Gendaria','Gulshan','Hazaribag','Jatrabari','Kafrul','Kadamtali','Kalabagan','Kamrangirchar','Khilgaon','Khilkhet','Kotwali','Lalbag','Mirpur','Mohammadpur','Motijheel','Mugda','New Market','Pallabi','Paltan','Ramna','Rayer Bazar','Sabujbagh','Shah Ali','Shahjahanpur','Sher-e-Bangla Nagar','Shyampur','Sutrapur','Tejgaon','Tejgaon Industrial','Turag','Uttara','Uttarkhan','Vatara','Wari'],
-  'Gazipur':['Gazipur Sadar','Kaliakair','Kaliganj','Kapasia','Sreepur','Tongi'],
-  'Narayanganj':['Araihazar','Bandar','Narayanganj Sadar','Rupganj','Sonargaon','Fatullah','Siddhirganj'],
-  'Narsingdi':['Narsingdi Sadar','Belabo','Monohardi','Palash','Raipura','Shibpur'],
-  'Manikganj':['Manikganj Sadar','Daulatpur','Ghior','Harirampur','Saturia','Shivalaya','Singair'],
-  'Munshiganj':['Munshiganj Sadar','Gazaria','Lohajang','Sirajdikhan','Sreenagar','Tongibari'],
-  'Rajbari':['Rajbari Sadar','Baliakandi','Goalanda','Kalukhali','Pangsha'],
-  'Shariatpur':['Shariatpur Sadar','Bhedarganj','Damudya','Gosairhat','Naria','Zanjira'],
-  'Faridpur':['Faridpur Sadar','Alfadanga','Bhanga','Boalmari','Charbhadrasan','Madhukhali','Nagarkanda','Sadarpur','Saltha'],
-  'Madaripur':['Madaripur Sadar','Kalkini','Rajoir','Shibchar'],
-  'Gopalganj':['Gopalganj Sadar','Kashiani','Kotalipara','Muksudpur','Tungipara'],
-  'Kishoreganj':['Kishoreganj Sadar','Austagram','Bajitpur','Bhairab','Hossainpur','Itna','Karimganj','Katiadi','Kuliarchar','Mithamain','Nikli','Pakundia','Tarail'],
-  'Tangail':['Tangail Sadar','Basail','Bhuapur','Delduar','Dhanbari','Ghatail','Gopalpur','Kalihati','Madhupur','Mirzapur','Nagarpur','Sakhipur'],
-  'Chittagong':['Akbarshah','Bakalia','Bayazid','Boalkhali','Chandgaon','Chawk Bazar','Double Mooring','EPZ','Halishahar','Hathazari','Karnaphuli','Khulshi','Kotwali','Lohagara','Mirsharai','Pahartali','Panchlaish','Patiya','Patenga','Rangunia','Raozan','Sadarghat','Sandwip','Satkania','Sitakund'],
-  "Cox's Bazar":["Cox's Bazar Sadar",'Chakaria','Kutubdia','Maheshkhali','Pekua','Ramu','Teknaf','Ukhia'],
-  'Comilla':['Comilla Sadar','Barura','Brahmanpara','Burichang','Chandina','Chauddagram','Daudkandi','Debidwar','Homna','Laksam','Meghna','Monoharganj','Muradnagar','Nangalkot','Titas'],
-  'Noakhali':['Noakhali Sadar','Begumganj','Chatkhil','Companiganj','Hatiya','Senbagh','Sonaimuri','Subarnachar'],
-  'Feni':['Feni Sadar','Chhagalnaiya','Daganbhuiyan','Fulgazi','Parshuram','Sonagazi'],
-  'Lakshmipur':['Lakshmipur Sadar','Kamalnagar','Raipur','Ramganj','Ramgati'],
-  'Chandpur':['Chandpur Sadar','Faridganj','Haimchar','Haziganj','Kachua','Matlab Dakshin','Matlab Uttar','Shahrasti'],
-  'Brahmanbaria':['Brahmanbaria Sadar','Akhaura','Ashuganj','Bancharampur','Bijoynagar','Kasba','Nabinagar','Nasirnagar','Sarail'],
-  'Khagrachhari':['Khagrachhari Sadar','Dighinala','Lakshmichhari','Mahalchhari','Manikchhari','Matiranga','Panchhari','Ramgarh'],
-  'Rangamati':['Rangamati Sadar','Bagaichhari','Barkal','Belaichhari','Juraichhari','Kaptai','Kawkhali','Langadu','Naniarchar','Rajasthali'],
-  'Bandarban':['Bandarban Sadar','Alikadam','Lama','Naikhongchhari','Rowangchhari','Ruma','Thanchi'],
-  'Rajshahi':['Boalia','Motihar','Rajpara','Shah Makhdum','Bagmara','Charghat','Durgapur','Godagari','Mohanpur','Paba','Puthia','Tanore'],
-  'Natore':['Natore Sadar','Bagatipara','Baraigram','Gurudaspur','Lalpur','Singra'],
-  'Pabna':['Pabna Sadar','Atgharia','Bera','Bhangura','Chatmohar','Faridpur','Ishwardi','Santhia','Sujanagar'],
-  'Sirajganj':['Sirajganj Sadar','Belkuchi','Chauhali','Kamarkhanda','Kazipur','Raiganj','Shahjadpur','Tarash','Ullahpara'],
-  'Bogra':['Bogra Sadar','Adamdighi','Dhunat','Dhupchanchia','Gabtali','Kahaloo','Nandigram','Sariakandi','Shajahanpur','Sherpur','Shibganj','Sonatala'],
-  'Joypurhat':['Joypurhat Sadar','Akkelpur','Kalai','Khetlal','Panchbibi'],
-  'Naogaon':['Naogaon Sadar','Atrai','Badalgachhi','Dhamoirhat','Manda','Mahadebpur','Mohadevpur','Niamatpur','Patnitala','Porsha','Raninagar','Sapahar'],
-  'Chapainawabganj':['Chapainawabganj Sadar','Bholahat','Gomastapur','Nachol','Shibganj'],
-  'Khulna':['Daulatpur','Khan Jahan Ali','Khalishpur','Khulna Sadar','Sonadanga','Batiaghata','Dacope','Dumuria','Koyra','Paikgachha','Phultala','Rupsa','Terokhada'],
-  'Bagerhat':['Bagerhat Sadar','Chitalmari','Fakirhat','Kachua','Mollahat','Mongla','Morrelganj','Rampal','Sarankhola'],
-  'Satkhira':['Satkhira Sadar','Assasuni','Debhata','Kalaroa','Kaliganj','Shyamnagar','Tala'],
-  'Jessore':['Jessore Sadar','Abhaynagar','Bagherpara','Chaugachha','Jhikargachha','Keshabpur','Manirampur','Sharsha'],
-  'Narail':['Narail Sadar','Kalia','Lohagara'],
-  'Magura':['Magura Sadar','Mohammadpur','Shalikha','Sreepur'],
-  'Jhenaidah':['Jhenaidah Sadar','Harinakunda','Kaliganj','Kotchandpur','Maheshpur','Shailkupa'],
-  'Kushtia':['Kushtia Sadar','Bheramara','Daulatpur','Khoksa','Kumarkhali','Mirpur'],
-  'Chuadanga':['Chuadanga Sadar','Alamdanga','Damurhuda','Jibannagar'],
-  'Meherpur':['Meherpur Sadar','Gangni','Mujibnagar'],
-  'Barisal':['Agailjhara','Babuganj','Bakerganj','Banaripara','Barisal Sadar','Gaurnadi','Hizla','Mehendiganj','Muladi','Wazirpur'],
-  'Patuakhali':['Patuakhali Sadar','Bauphal','Dashmina','Dumki','Galachipa','Kalapara','Mirzaganj','Rangabali'],
-  'Bhola':['Bhola Sadar','Borhanuddin','Char Fasson','Daulatkhan','Lalmohan','Manpura','Tazumuddin'],
-  'Pirojpur':['Pirojpur Sadar','Bhandaria','Kawkhali','Mathbaria','Nazirpur','Nesarabad','Zianagar'],
-  'Jhalokati':['Jhalokati Sadar','Kanthalia','Nalchity','Rajapur'],
-  'Barguna':['Barguna Sadar','Amtali','Bamna','Betagi','Patharghata','Taltali'],
-  'Sylhet':['Sylhet Sadar','Balaganj','Beanibazar','Biswanath','Companiganj','Dakshin Surma','Fenchuganj','Golapganj','Gowainghat','Jaintiapur','Kanaighat','Osmani Nagar','South Surma','Zakiganj'],
-  'Moulvibazar':['Moulvibazar Sadar','Barlekha','Juri','Kamalganj','Kulaura','Rajnagar','Sreemangal'],
-  'Habiganj':['Habiganj Sadar','Ajmiriganj','Baniachong','Bahubal','Chunarughat','Lakhai','Madhabpur','Nabiganj'],
-  'Sunamganj':['Sunamganj Sadar','Bishwamvarpur','Chhatak','Derai','Dharampasha','Dowarabazar','Jagannathpur','Jamalganj','Sullah','Tahirpur'],
-  'Rangpur':['Badarganj','Gangachara','Kaunia','Mithapukur','Pirgachha','Pirganj','Rangpur Sadar','Taraganj'],
-  'Dinajpur':['Dinajpur Sadar','Birampur','Birganj','Biral','Bochaganj','Chirirbandar','Fulbari','Ghoraghat','Hakimpur','Kaharole','Khansama','Nawabganj','Parbatipur'],
-  'Gaibandha':['Gaibandha Sadar','Fulchhari','Gobindaganj','Palashbari','Sadullapur','Saghata','Sundarganj'],
-  'Kurigram':['Kurigram Sadar','Bhurungamari','Char Rajibpur','Chilmari','Nageshwari','Phulbari','Rajarhat','Raumari','Ulipur'],
-  'Lalmonirhat':['Lalmonirhat Sadar','Aditmari','Hatibandha','Kaliganj','Patgram'],
-  'Nilphamari':['Nilphamari Sadar','Dimla','Domar','Jaldhaka','Kishoreganj','Saidpur'],
-  'Panchagarh':['Panchagarh Sadar','Atwari','Boda','Debiganj','Tetulia'],
-  'Thakurgaon':['Thakurgaon Sadar','Baliadangi','Haripur','Pirganj','Ranisankail'],
-  'Mymensingh':['Mymensingh Sadar','Bhaluka','Dhobaura','Fulbaria','Gaffargaon','Gauripur','Haluaghat','Ishwarganj','Muktagachha','Nandail','Phulpur','Trishal'],
-  'Jamalpur':['Jamalpur Sadar','Bakshiganj','Dewanganj','Islampur','Madarganj','Melandaha','Sarishabari'],
-  'Sherpur':['Sherpur Sadar','Jhenaigati','Nakla','Nalitabari','Sreebardi'],
-  'Netrokona':['Netrokona Sadar','Atpara','Barhatta','Durgapur','Kalmakanda','Kendua','Khaliajuri','Madan','Mohanganj','Purbadhala'],
+  "Dhaka": {
+    "Dhaka": ["Adabor","Badda","Bangshal","Cantonment","Chawkbazar","Demra","Dhanmondi","Dohar","Gulshan","Hazaribagh","Jatrabari","Kadamtali","Kafrul","Kalabagan","Keraniganj","Khilgaon","Khilkhet","Kotwali","Lalbagh","Mirpur","Mohammadpur","Motijheel","Nawabganj","Newmarket","Pallabi","Paltan","Ramna","Rayer Bazar","Sabujbagh","Shahbagh","Sher-e-Bangla Nagar","Shyampur","Sutrapur","Tejgaon","Turag","Uttara","Uttarkhan","Vatara","Wari"],
+    "Gazipur": ["Gazipur Sadar","Kaliakair","Kaliganj","Kapasia","Sreepur","Tongi"],
+    "Manikganj": ["Daulatpur","Ghior","Harirampur","Manikganj Sadar","Saturia","Shivalaya","Singair"],
+    "Munshiganj": ["Gazaria","Lohajang","Munshiganj Sadar","Sirajdikhan","Sreenagar","Tongibari"],
+    "Narayanganj": ["Araihazar","Bandar","Narayanganj Sadar","Rupganj","Sonargaon"],
+    "Narsingdi": ["Belabo","Monohardi","Narsingdi Sadar","Palash","Raipura","Shibpur"],
+    "Rajbari": ["Baliakandi","Goalandaghat","Kalukhali","Pangsha","Rajbari Sadar"],
+    "Shariatpur": ["Bhedarganj","Damudya","Gosairhat","Naria","Shariatpur Sadar","Zanjira"],
+    "Tangail": ["Basail","Bhuapur","Delduar","Dhanbari","Ghatail","Gopalpur","Kalihati","Madhupur","Mirzapur","Nagarpur","Sakhipur","Tangail Sadar"]
+  },
+  "Chittagong": {
+    "Chittagong": ["Anwara","Banshkhali","Boalkhali","Chandanaish","Fatikchhari","Hathazari","Karnaphuli","Lohagara","Mirsharai","Patiya","Rangunia","Raozan","Sandwip","Satkania","Sitakunda","Chittagong City"],
+    "Cox's Bazar": ["Chakaria","Cox's Bazar Sadar","Kutubdia","Maheshkhali","Pekua","Ramu","Teknaf","Ukhia"],
+    "Bandarban": ["Ali Kadam","Bandarban Sadar","Lama","Naikhongchhari","Rowangchhari","Ruma","Thanchi"],
+    "Brahmanbaria": ["Akhaura","Ashuganj","Bancharampur","Brahmanbaria Sadar","Kasba","Nabinagar","Nasirnagar","Sarail"],
+    "Chandpur": ["Chandpur Sadar","Faridganj","Haimchar","Haziganj","Kachua","Matlab Dakshin","Matlab Uttar","Shahrasti"],
+    "Comilla": ["Barura","Brahmanpara","Burichang","Chandina","Chauddagram","Comilla Sadar","Daudkandi","Debidwar","Homna","Laksam","Meghna","Monohorgonj","Muradnagar","Nangalkot","Titas"],
+    "Feni": ["Chhagalnaiya","Daganbhuiyan","Feni Sadar","Parshuram","Sonagazi"],
+    "Khagrachhari": ["Dighinala","Khagrachhari Sadar","Lakshmichhari","Mahalchhari","Manikchhari","Matiranga","Panchhari","Ramgarh"],
+    "Lakshmipur": ["Kamalnagar","Lakshmipur Sadar","Ramganj","Ramgati","Roypur"],
+    "Noakhali": ["Begumganj","Chatkhil","Companiganj","Hatiya","Kabirhat","Noakhali Sadar","Senbagh","Sonaimuri","Subarnachar"],
+    "Rangamati": ["Baghaichhari","Barkal","Belaichhari","Juraichhari","Kaptai","Kawkhali","Langadu","Naniarchar","Rajasthali","Rangamati Sadar"]
+  },
+  "Rajshahi": {
+    "Rajshahi": ["Bagha","Bagmara","Charghat","Durgapur","Godagari","Mohanpur","Paba","Puthia","Rajshahi Sadar","Tanore"],
+    "Bogura": ["Adamdighi","Bogura Sadar","Dhunat","Dupchanchia","Gabtali","Kahaloo","Nandigram","Sariakandi","Shajahanpur","Sherpur","Shibganj","Sonatola"],
+    "Chapai Nawabganj": ["Bholahat","Chapai Nawabganj Sadar","Gomastapur","Nachole","Shibganj"],
+    "Joypurhat": ["Akkelpur","Joypurhat Sadar","Kalai","Khetlal","Panchbibi"],
+    "Naogaon": ["Atrai","Badalgachhi","Dhamoirhat","Mahadebpur","Manda","Naogaon Sadar","Niamatpur","Patnitala","Porsha","Raninagar","Sapahar"],
+    "Natore": ["Bagatipara","Baraigram","Gurudaspur","Lalpur","Natore Sadar","Singra"],
+    "Pabna": ["Atgharia","Bera","Bhangura","Chatmohar","Faridpur","Ishwardi","Pabna Sadar","Santhia","Sujanagar"],
+    "Sirajganj": ["Belkuchi","Chauhali","Kamarkhanda","Kazipur","Raiganj","Shahjadpur","Sirajganj Sadar","Tarash","Ullahpara"]
+  },
+  "Khulna": {
+    "Khulna": ["Batiaghata","Dacope","Daulatpur","Dighalia","Dumuria","Khalishpur","Khan Jahan Ali","Khulna Sadar","Koyra","Paikgachha","Phultala","Rupsa","Sonadanga","Terokhada"],
+    "Bagerhat": ["Bagerhat Sadar","Chitalmari","Fakirhat","Kachua","Mollahat","Mongla","Morrelganj","Rampal","Sharankhola"],
+    "Chuadanga": ["Alamdanga","Chuadanga Sadar","Damurhuda","Jibannagar"],
+    "Jessore": ["Abhaynagar","Bagherpara","Chaugachha","Jessore Sadar","Jhikargachha","Keshabpur","Manirampur","Sharsha"],
+    "Jhenaidah": ["Harinakunda","Jhenaidah Sadar","Kaliganj","Kotchandpur","Maheshpur","Shailkupa"],
+    "Kushtia": ["Bheramara","Daulatpur","Khoksa","Kumarkhali","Kushtia Sadar","Mirpur"],
+    "Magura": ["Magura Sadar","Mohammadpur","Shalikha","Sreepur"],
+    "Meherpur": ["Gangni","Meherpur Sadar","Mujibnagar"],
+    "Narail": ["Kalia","Lohagara","Narail Sadar"],
+    "Satkhira": ["Assasuni","Debhata","Kalaroa","Kaliganj","Satkhira Sadar","Shyamnagar","Tala"]
+  },
+  "Barishal": {
+    "Barishal": ["Agailjhara","Babuganj","Backerganj","Banaripara","Barisal Sadar","Gaurnadi","Hizla","Mehendiganj","Muladi","Wazirpur"],
+    "Bhola": ["Bhola Sadar","Borhanuddin","Charfasson","Daulatkhan","Lalmohan","Manpura","Tazumuddin"],
+    "Jhalokati": ["Jhalokati Sadar","Kanthalia","Nalchity","Rajapur"],
+    "Patuakhali": ["Bauphal","Dashmina","Dumki","Galachipa","Kalapara","Mirzaganj","Patuakhali Sadar","Rangabali"],
+    "Pirojpur": ["Bhandaria","Kawkhali","Mathbaria","Nazirpur","Nesarabad","Pirojpur Sadar","Zianagar"],
+    "Barguna": ["Amtali","Bamna","Barguna Sadar","Betagi","Patharghata","Taltali"]
+  },
+  "Sylhet": {
+    "Sylhet": ["Balaganj","Beanibazar","Bishwanath","Companigonj","Dakshin Surma","Fenchuganj","Golapganj","Gowainghat","Jaintiapur","Kanaighat","Osmani Nagar","Sylhet Sadar","Zakiganj"],
+    "Habiganj": ["Ajmiriganj","Bahubal","Baniachong","Chunarughat","Habiganj Sadar","Lakhai","Madhabpur","Nabiganj"],
+    "Moulvibazar": ["Barlekha","Juri","Kamalganj","Kulaura","Moulvibazar Sadar","Rajnagar","Sreemangal"],
+    "Sunamganj": ["Bishwamvarpur","Chhatak","Derai","Dharampasha","Dowarabazar","Jagannathpur","Jamalganj","Shalla","Sunamganj Sadar","Tahirpur"]
+  },
+  "Mymensingh": {
+    "Mymensingh": ["Bhaluka","Dhobaura","Fulbaria","Gaffargaon","Gauripur","Haluaghat","Ishwarganj","Mymensingh Sadar","Muktagachha","Nandail","Phulpur","Trishal"],
+    "Jamalpur": ["Bakshiganj","Dewanganj","Islampur","Jamalpur Sadar","Madarganj","Melandaha","Sarishabari"],
+    "Netrokona": ["Atpara","Barhatta","Durgapur","Kalmakanda","Kendua","Khaliajuri","Madan","Mohanganj","Netrokona Sadar","Purbadhala"],
+    "Sherpur": ["Jhenaigati","Nakla","Nalitabari","Sherpur Sadar","Sreebardi"]
+  },
+  "Rangpur": {
+    "Rangpur": ["Badarganj","Gangachara","Kaunia","Mithapukur","Pirgachha","Pirganj","Rangpur Sadar","Taraganj"],
+    "Dinajpur": ["Birampur","Birganj","Biral","Bochaganj","Chirirbandar","Dinajpur Sadar","Fulbari","Ghoraghat","Hakimpur","Kaharole","Khansama","Nawabganj","Parbatipur"],
+    "Gaibandha": ["Fulchhari","Gaibandha Sadar","Gobindaganj","Palashbari","Sadullapur","Saghata","Sundarganj"],
+    "Kurigram": ["Bhurungamari","Char Rajibpur","Chilmari","Kurigram Sadar","Nageshwari","Phulbari","Rajarhat","Raomari","Ulipur"],
+    "Lalmonirhat": ["Aditmari","Hatibandha","Kaliganj","Lalmonirhat Sadar","Patgram"],
+    "Nilphamari": ["Dimla","Domar","Jaldhaka","Kishoreganj","Nilphamari Sadar","Saidpur"],
+    "Panchagarh": ["Atwari","Boda","Debiganj","Panchagarh Sadar","Tetulia"],
+    "Thakurgaon": ["Baliadangi","Haripur","Pirganj","Ranisankail","Thakurgaon Sadar"]
+  }
 };
 
 window.populateDistricts = function(divId, distId, thanaId) {
-  const div = document.getElementById(divId)?.value;
+  const div      = document.getElementById(divId)?.value;
   const distSel  = document.getElementById(distId);
   const thanaSel = document.getElementById(thanaId);
   if (!distSel || !thanaSel) return;
-  distSel.innerHTML  = '<option value="">Select District</option>';
-  thanaSel.innerHTML = '<option value="">Select Thana</option>';
+  distSel.innerHTML  = '<option value="">-- Select District --</option>';
+  thanaSel.innerHTML = '<option value="">-- Select Thana --</option>';
   distSel.disabled  = true;
   thanaSel.disabled = true;
   if (!div || !BD_DATA[div]) return;
-  BD_DATA[div].forEach(d => {
+  Object.keys(BD_DATA[div]).forEach(d => {
     distSel.innerHTML += `<option value="${d}">${d}</option>`;
   });
   distSel.disabled = false;
 };
 
 window.populateThanas = function(distId, thanaId) {
-  const dist     = document.getElementById(distId)?.value;
+  const distSel  = document.getElementById(distId);
   const thanaSel = document.getElementById(thanaId);
-  if (!thanaSel) return;
-  thanaSel.innerHTML = '<option value="">Select Thana</option>';
+  if (!distSel || !thanaSel) return;
+  thanaSel.innerHTML = '<option value="">-- Select Thana --</option>';
   thanaSel.disabled  = true;
-  if (!dist || !BD_THANAS[dist]) return;
-  BD_THANAS[dist].forEach(t => {
+  // find the division from any sibling division select
+  const divId = distId.replace('dist_', 'div_');
+  const div   = document.getElementById(divId)?.value;
+  const dist  = distSel.value;
+  const thanas = BD_DATA[div]?.[dist];
+  if (!thanas) return;
+  thanas.forEach(t => {
     thanaSel.innerHTML += `<option value="${t}">${t}</option>`;
   });
   thanaSel.disabled = false;
