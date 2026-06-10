@@ -227,42 +227,60 @@
     <div class="container">
       <!-- Tab Navigation -->
       <div class="tab-nav">
-        <button class="tab-btn active" data-tab="founders"      onclick="switchTab('founders')">Founders</button>
-        <button class="tab-btn"        data-tab="board"         onclick="switchTab('board')">Managing Board</button>
-        <button class="tab-btn"        data-tab="executive"     onclick="switchTab('executive')">Executive Committee</button>
-        <button class="tab-btn"        data-tab="subcommittees" onclick="switchTab('subcommittees')">Sub-Committees</button>
+        <button class="tab-btn active" data-tab="founders"     onclick="switchTab('founders')">👑 Founders</button>
+        <button class="tab-btn"        data-tab="president"    onclick="switchTab('president')">🎖️ President</button>
+        <button class="tab-btn"        data-tab="secretary"    onclick="switchTab('secretary')">📝 Gen. Secretary</button>
+        <button class="tab-btn"        data-tab="treasurer"    onclick="switchTab('treasurer')">💰 Treasurer</button>
+        <button class="tab-btn"        data-tab="executive"    onclick="switchTab('executive')">📌 Executive</button>
+        <button class="tab-btn"        data-tab="subcommittee" onclick="switchTab('subcommittee')">🔖 Sub-Committees</button>
       </div>
 
       <div id="tab-founders" class="tab-panel active">
         <div class="sec-header" style="margin-bottom:2rem;">
           <h2 class="sec-title on-light">Founders</h2>
-          <p class="sec-desc on-light">যাঁদের দূরদর্শিতায় BMC-র পথচলা শুরু</p>
+          <p class="sec-desc on-light">The visionaries who established Bangladesh Musician's Club</p>
         </div>
-        <div id="foundersGrid"><div class="loading">লোড হচ্ছে...</div></div>
+        <div id="foundersGrid"><div class="loading">Loading...</div></div>
       </div>
 
-      <div id="tab-board" class="tab-panel">
+      <div id="tab-president" class="tab-panel">
         <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">Managing Board</h2>
-          <p class="sec-desc on-light">ক্লাবের পরিচালনায় নেতৃত্ব দানকারী পর্ষদ</p>
+          <h2 class="sec-title on-light">President</h2>
+          <p class="sec-desc on-light">Club president and leadership</p>
         </div>
-        <div id="boardGrid"><div class="loading">লোড হচ্ছে...</div></div>
+        <div id="presidentGrid"><div class="loading">Loading...</div></div>
+      </div>
+
+      <div id="tab-secretary" class="tab-panel">
+        <div class="sec-header" style="margin-bottom:2rem;">
+          <h2 class="sec-title on-light">General Secretary</h2>
+          <p class="sec-desc on-light">Club general secretary</p>
+        </div>
+        <div id="secretaryGrid"><div class="loading">Loading...</div></div>
+      </div>
+
+      <div id="tab-treasurer" class="tab-panel">
+        <div class="sec-header" style="margin-bottom:2rem;">
+          <h2 class="sec-title on-light">Treasurer</h2>
+          <p class="sec-desc on-light">Financial management</p>
+        </div>
+        <div id="treasurerGrid"><div class="loading">Loading...</div></div>
       </div>
 
       <div id="tab-executive" class="tab-panel">
         <div class="sec-header" style="margin-bottom:2rem;">
           <h2 class="sec-title on-light">Executive Committee</h2>
-          <p class="sec-desc on-light">আমাদের কার্যনির্বাহী নেতৃত্ব</p>
+          <p class="sec-desc on-light">Our executive leadership team</p>
         </div>
-        <div id="executiveGrid"><div class="loading">লোড হচ্ছে...</div></div>
+        <div id="executiveGrid"><div class="loading">Loading...</div></div>
       </div>
 
-      <div id="tab-subcommittees" class="tab-panel">
+      <div id="tab-subcommittee" class="tab-panel">
         <div class="sec-header" style="margin-bottom:2rem;">
           <h2 class="sec-title on-light">Sub-Committees</h2>
-          <p class="sec-desc on-light">বিশেষায়িত উপ-কমিটিসমূহ</p>
+          <p class="sec-desc on-light">Specialized teams and working groups</p>
         </div>
-        <div id="subcommitteeGrid"><div class="loading">লোড হচ্ছে...</div></div>
+        <div id="subcommitteeGrid"><div class="loading">Loading...</div></div>
       </div>
     </div>
   </section>
