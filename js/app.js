@@ -122,7 +122,7 @@ async function loadSlideshow() {
   const dots  = document.getElementById('slideDots');
   if (!track) return;
   try {
-    const snap = await getDocs(query(collection(db,'gallery'), orderBy('createdAt','desc')));
+    const snap = await getDocs(query(collection(db,'gallery'), where('showInSlideshow','==',true), orderBy('createdAt','desc')));
     if (snap.empty) {
       track.innerHTML = '<div class="slideshow-placeholder"><span>কোনো ছবি নেই</span></div>';
       return;
@@ -263,12 +263,9 @@ window.closeMemberModal = function() {
 ═══════════════════════════════════════ */
 async function loadCommittee() {
   await Promise.all([
-    loadCommitteeSection('founders',      'foundersGrid'),
-    loadCommitteeSection('president',     'presidentGrid'),
-    loadCommitteeSection('secretary',     'secretaryGrid'),
-    loadCommitteeSection('treasurer',     'treasurerGrid'),
-    loadCommitteeSection('executive',     'executiveGrid'),
-    loadCommitteeSection('subcommittee',  'subcommitteeGrid'),
+    loadCommitteeSection('founders',  'foundersGrid'),
+    loadCommitteeSection('advisers',  'advisersGrid'),
+    loadCommitteeSection('executive', 'executiveGrid'),
   ]);
 }
 async function loadCommitteeSection(col, elId) {
