@@ -31,15 +31,12 @@
       <a href="#">More ▾</a>
       <div class="dropdown-menu">
         <a href="#" onclick="showPage('events')">Events</a>
-        <a href="#" onclick="showPage('news')">News</a>
+        <a href="#" onclick="showPage('notice')">Notice</a>
         <a href="#" onclick="showPage('gallery')">Photo Gallery</a>
         <a href="#" onclick="showPage('videos')">Videos</a>
         <a href="#" onclick="showPage('contact')">Contact</a>
       </div>
     </li>
-    <li id="memberPortalLink" style="display:none"><a href="#" onclick="showPage('dashboard')">My Portal</a></li>
-    <li id="loginBtn"><a href="#" onclick="openModal('loginModal')">Login</a></li>
-    <li id="logoutBtn" style="display:none"><a href="#" onclick="handleLogout()">Logout</a></li>
     <li><a class="nav-join" href="#" onclick="showPage('join')">Join Us</a></li>
   </ul>
 
@@ -55,11 +52,10 @@
   <a href="#" onclick="showPage('committee')">Committee</a>
   <a href="#" onclick="showPage('members')">Members</a>
   <a href="#" onclick="showPage('events')">Events</a>
-  <a href="#" onclick="showPage('news')">News</a>
+  <a href="#" onclick="showPage('notice')">Notice</a>
   <a href="#" onclick="showPage('gallery')">Photo Gallery</a>
   <a href="#" onclick="showPage('videos')">Videos</a>
   <a href="#" onclick="showPage('contact')">Contact</a>
-  <a href="#" onclick="openModal('loginModal')" id="mobileLoginBtn">Login</a>
   <a href="#" onclick="showPage('join')" class="mobile-join">Join Us</a>
 </div>
 
@@ -72,30 +68,12 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-bg"></div>
-    <div class="hero-content">
-      <img src="images/logo.png" alt="BMC Logo" class="hero-logo">
+    <div class="hero-content" style="text-align:center;align-items:center;">
+      <img src="images/logo.png" alt="BMC Logo" class="hero-logo" style="margin:0 auto;">
       <div class="hero-badge">Est. 2022 · Dhaka, Bangladesh</div>
       <h1 class="hero-title">Bangladesh<br><span class="accent">Musician's</span> Club</h1>
       <p class="hero-slogan">"We Are The Soul Of Music"</p>
       <p class="hero-tagline">Where Music Becomes Brotherhood</p>
-      <div class="hero-stats">
-        <div>
-          <span class="hero-stat-num" id="heroStatMembers">—</span>
-          <span class="hero-stat-label">Members</span>
-        </div>
-        <div>
-          <span class="hero-stat-num">3</span>
-          <span class="hero-stat-label">Sectors</span>
-        </div>
-        <div>
-          <span class="hero-stat-num">64</span>
-          <span class="hero-stat-label">Districts</span>
-        </div>
-        <div>
-          <span class="hero-stat-num">2022</span>
-          <span class="hero-stat-label">Founded</span>
-        </div>
-      </div>
       <div class="hero-btns">
         <a href="#" class="btn-primary" onclick="showPage('join')">সদস্য হন</a>
         <a href="#" class="btn-outline-light" onclick="showPage('about')">আরো জানুন</a>
@@ -103,33 +81,48 @@
     </div>
   </section>
 
-  <!-- Sectors -->
+  <!-- Photo Slideshow Strip -->
+  <section class="slideshow-section">
+    <div class="slideshow-track" id="slideshowTrack">
+      <div class="slideshow-placeholder">
+        <span>ছবি লোড হচ্ছে...</span>
+      </div>
+    </div>
+    <button class="slide-btn slide-prev" onclick="slidePrev()">&#8249;</button>
+    <button class="slide-btn slide-next" onclick="slideNext()">&#8250;</button>
+    <div class="slide-dots" id="slideDots"></div>
+  </section>
+
+  <!-- Club Introduction -->
   <section class="section sec-white">
     <div class="container">
-      <div class="sec-header">
-        <span class="sec-tag on-light">Our Sectors</span>
-        <h2 class="sec-title on-light">United in Music</h2>
-        <div class="sec-divider"></div>
-        <p class="sec-desc on-light">শিল্পী থেকে মঞ্চের পেছনের দল — প্রতিটি সেক্টরই সমান গুরুত্বপূর্ণ।</p>
-      </div>
-      <div class="sectors-grid">
-        <div class="sector-card s1">
-          <span class="sector-icon">🎵</span>
-          <div class="sector-name">Musicians</div>
-          <p class="sector-desc">সকল কণ্ঠশিল্পী, যন্ত্রশিল্পী — গিটার, কীবোর্ড, ড্রামস, বাঁশি, বেহালা, তবলা, হারমোনিয়াম এবং আরো সব যন্ত্রের শিল্পীরা।</p>
-          <span class="sector-tag">শিল্পী ও যন্ত্রী</span>
+      <div class="club-intro-grid">
+        <div class="club-intro-text">
+          <span class="sec-tag on-light">আমাদের পরিচয়</span>
+          <h2 class="sec-title on-light" style="margin-top:0.75rem;">Bangladesh Musician's Club</h2>
+          <div class="sec-divider" style="margin:1rem 0;"></div>
+          <p style="color:var(--text-muted);line-height:1.9;font-size:15px;">
+            Bangladesh Musician's Club (BMC) ২০২২ সালে প্রতিষ্ঠিত হয়েছে বাংলাদেশের সঙ্গীত শিল্পের সকল পেশাদারদের একটি ঐক্যবদ্ধ প্ল্যাটফর্মে আনার লক্ষ্যে। মঞ্চের শিল্পী থেকে সাউন্ড ইঞ্জিনিয়ার, লাইটিং ডিজাইনার থেকে প্রোডাকশন ম্যানেজার — BMC প্রতিটি পেশাদারকে সমান মর্যাদায় স্বীকৃতি দেয়।
+          </p>
+          <a href="#" class="btn-outline" onclick="showPage('about')" style="margin-top:1.5rem;display:inline-block;">আরো জানুন</a>
         </div>
-        <div class="sector-card s2">
-          <span class="sector-icon">🔊</span>
-          <div class="sector-name">Sound Engineers</div>
-          <p class="sector-desc">সাউন্ড ইঞ্জিনিয়ার, অডিও টেকনিশিয়ান, PA সিস্টেম অপারেটর, মিক্সিং ও লাইটিং বিশেষজ্ঞরা।</p>
-          <span class="sector-tag">সাউন্ড ইঞ্জিনিয়ার</span>
-        </div>
-        <div class="sector-card s3">
-          <span class="sector-icon">🎬</span>
-          <div class="sector-name">Logistic Supporters</div>
-          <p class="sector-desc">LED অপারেটর, স্টেজ ম্যানেজার, সেট ডিজাইনার, প্রোডাকশন ম্যানেজার — মঞ্চের অদৃশ্য মেরুদণ্ড।</p>
-          <span class="sector-tag">লজিস্টিক সাপোর্টার</span>
+        <div class="club-intro-stats">
+          <div class="intro-stat-card">
+            <span class="intro-stat-num" id="heroStatMembers">—</span>
+            <span class="intro-stat-label">সদস্য</span>
+          </div>
+          <div class="intro-stat-card">
+            <span class="intro-stat-num" id="heroStatEvents">—</span>
+            <span class="intro-stat-label">ইভেন্ট</span>
+          </div>
+          <div class="intro-stat-card">
+            <span class="intro-stat-num">২০২২</span>
+            <span class="intro-stat-label">প্রতিষ্ঠিত</span>
+          </div>
+          <div class="intro-stat-card">
+            <span class="intro-stat-num">৩</span>
+            <span class="intro-stat-label">সেক্টর</span>
+          </div>
         </div>
       </div>
     </div>
@@ -165,14 +158,40 @@
     </div>
   </section>
 
-  <!-- CTA -->
+  <!-- Benefits + CTA -->
   <section class="section sec-forest">
-    <div class="container-sm" style="text-align:center;">
-      <span class="sec-tag on-dark">Join Us</span>
-      <h2 class="sec-title on-dark" style="margin-top:0.5rem;">BMC-তে যোগ দিন</h2>
-      <div class="sec-divider"></div>
-      <p class="sec-desc on-dark" style="margin-bottom:2rem;">বাংলাদেশের সঙ্গীত শিল্পের সকল পেশাদারদের একটি ঐক্যবদ্ধ পরিবার।</p>
-      <a href="#" class="btn-primary" onclick="showPage('join')">আবেদন করুন</a>
+    <div class="container">
+      <div style="text-align:center;margin-bottom:2.5rem;">
+        <span class="sec-tag on-dark">Join Us</span>
+        <h2 class="sec-title on-dark" style="margin-top:0.5rem;">BMC-তে যোগ দিন</h2>
+        <div class="sec-divider"></div>
+        <p class="sec-desc on-dark">সদস্য হলে যা পাবেন</p>
+      </div>
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <span class="benefit-icon">🤝</span>
+          <h4>পেশাদার নেটওয়ার্ক</h4>
+          <p>সারা বাংলাদেশের সঙ্গীত পেশাদারদের সাথে সংযুক্ত হোন</p>
+        </div>
+        <div class="benefit-card">
+          <span class="benefit-icon">🎯</span>
+          <h4>সুযোগ ও স্বীকৃতি</h4>
+          <p>ক্যারিয়ারের নতুন দরজা খুলবে, পাবেন যোগ্য স্বীকৃতি</p>
+        </div>
+        <div class="benefit-card">
+          <span class="benefit-icon">🎪</span>
+          <h4>ইভেন্ট ও প্রোগ্রাম</h4>
+          <p>ক্লাবের সকল অনুষ্ঠান ও কার্যক্রমে অংশগ্রহণের সুযোগ</p>
+        </div>
+        <div class="benefit-card">
+          <span class="benefit-icon">🛡️</span>
+          <h4>সদস্যপদ কার্ড</h4>
+          <p>অফিসিয়াল BMC সদস্যপদ পরিচয়পত্র ও BMC-ID</p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:2.5rem;">
+        <a href="#" class="btn-primary" onclick="showPage('join')">আবেদন করুন</a>
+      </div>
     </div>
   </section>
 
@@ -679,6 +698,21 @@
 
 
 <!-- ═══════════════════════════════════
+     PAGE: NOTICE
+════════════════════════════════════ -->
+<div id="page-notice" class="page">
+  <div class="page-hero">
+    <h1>নোটিশ ও ঘোষণা</h1>
+    <p>Bangladesh Musician's Club-এর সর্বশেষ ঘোষণা</p>
+  </div>
+  <section class="section sec-off">
+    <div class="container">
+      <div id="noticeList"><div class="loading">লোড হচ্ছে...</div></div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════
      PAGE: MEMBER DASHBOARD
 ════════════════════════════════════ -->
 <div id="page-dashboard" class="page">
@@ -766,7 +800,7 @@
       <div class="footer-col">
         <h4>Community</h4>
         <a href="#" onclick="showPage('events')">Events</a>
-        <a href="#" onclick="showPage('news')">News</a>
+        <a href="#" onclick="showPage('notice')">Notice</a>
         <a href="#" onclick="showPage('gallery')">Gallery</a>
         <a href="#" onclick="showPage('videos')">Videos</a>
       </div>
