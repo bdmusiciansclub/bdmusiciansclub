@@ -70,6 +70,7 @@ function loadPageData(pageId) {
     case 'news':      loadNews();      break;
     case 'gallery':   loadGallery();   break;
     case 'videos':    loadVideos();    break;
+    case 'notice':    loadNotice();    break;
     case 'dashboard': loadDashboard(); break;
   }
 }
@@ -96,16 +97,72 @@ document.addEventListener('click', () => {
    HOME
 ═══════════════════════════════════════ */
 async function loadHomeData() {
-  await Promise.all([loadHomeStats(), loadHomeNews(), loadHomeEvents()]);
+  await Promise.all([loadHomeStats(), loadHomeNews(), loadHomeEvents(), loadSlideshow()]);
 }
 async function loadHomeStats() {
   try {
-    const snap = await getDocs(collection(db, 'members'));
-    const el1 = document.getElementById('statMembers');
-    const el2 = document.getElementById('heroStatMembers');
-    if (el1) el1.textContent = snap.size || '—';
-    if (el2) el2.textContent = snap.size || '—';
+    const [mSnap, eSnap] = await Promise.all([
+      getDocs(query(collection(db,'members'), where('status','==','approved'))),
+      getDocs(collection(db,'events'))
+    ]);
+    const memberEls = ['statMembers','heroStatMembers'];
+    memberEls.forEach(id => { const el=document.getElementById(id); if(el) el.textContent=mSnap.size||'—'; });
+    const evEl = document.getElementById('heroStatEvents');
+    if (evEl) evEl.textContent = eSnap.size || '—';
   } catch(e) {}
+}
+
+// ── SLIDESHOW ──
+let slideIndex = 0;
+let slideTotal = 0;
+let slideTimer = null;
+
+async function loadSlideshow() {
+  const track = document.getElementById('slideshowTrack');
+  const dots  = document.getElementById('slideDots');
+  if (!track) return;
+  try {
+    const snap = await getDocs(query(collection(db,'gallery'), orderBy('createdAt','desc')));
+    if (snap.empty) {
+      track.innerHTML = '<div class="slideshow-placeholder"><span>কোনো ছবি নেই</span></div>';
+      return;
+    }
+    const imgs = snap.docs.map(d => d.data());
+    slideTotal = imgs.length;
+    track.innerHTML = imgs.map(g =>
+      `<img class="slide-item" src="${g.url}" alt="${g.caption||'BMC'}" loading="lazy">`
+    ).join('');
+    if (dots) {
+      dots.innerHTML = imgs.map((_,i) =>
+        `<button class="slide-dot ${i===0?'active':''}" onclick="goSlide(${i})"></button>`
+      ).join('');
+    }
+    slideIndex = 0;
+    clearInterval(slideTimer);
+    slideTimer = setInterval(slideNext, 4000);
+  } catch(e) { console.error('Slideshow error:', e); }
+}
+
+window.slideNext = function() {
+  slideIndex = (slideIndex + 1) % slideTotal;
+  updateSlide();
+};
+window.slidePrev = function() {
+  slideIndex = (slideIndex - 1 + slideTotal) % slideTotal;
+  updateSlide();
+};
+window.goSlide = function(i) {
+  slideIndex = i;
+  updateSlide();
+  clearInterval(slideTimer);
+  slideTimer = setInterval(slideNext, 4000);
+};
+function updateSlide() {
+  const track = document.getElementById('slideshowTrack');
+  if (track) track.style.transform = `translateX(-${slideIndex * 100}%)`;
+  document.querySelectorAll('.slide-dot').forEach((d,i) => {
+    d.classList.toggle('active', i === slideIndex);
+  });
 }
 async function loadHomeNews() {
   const el = document.getElementById('homeNewsList');
@@ -571,3 +628,30 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('.tab-btn')?.classList.add('active');
   document.querySelector('.tab-panel')?.classList.add('active');
 });
+
+/* ═══════════════════════════════════════
+   NOTICE PAGE
+═══════════════════════════════════════ */
+async function loadNotice() {
+  const el = document.getElementById('noticeList');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">লোড হচ্ছে...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'notices'), orderBy('createdAt','desc')));
+    if (snap.empty) {
+      el.innerHTML = '<div class="empty-state"><span class="empty-icon">📋</span><p>কোনো নোটিশ নেই।</p></div>';
+      return;
+    }
+    el.innerHTML = snap.docs.map(d => {
+      const n = d.data();
+      const date = n.createdAt?.toDate
+        ? n.createdAt.toDate().toLocaleDateString('bn-BD', {day:'2-digit',month:'long',year:'numeric'})
+        : '';
+      return `<div class="notice-card">
+        <div class="notice-date">${date}</div>
+        <div class="notice-title">${n.title||'—'}</div>
+        <div class="notice-body">${n.body||''}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="loading">লোড করতে সমস্যা হয়েছে।</div>'; }
+}
