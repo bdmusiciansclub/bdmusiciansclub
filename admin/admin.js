@@ -179,9 +179,52 @@ async function loadApplications() {
 }
 
 window.upStatus = async (id, status) => {
-  await updateDoc(doc(db,'members',id), { status });
-  loadApplications(); loadDashboard();
-  alert(status === 'approved' ? '✓ Member approved successfully!' : '✗ Application rejected.');
+  if (status === 'approved') {
+    showCategoryModal(id);
+  } else {
+    await updateDoc(doc(db,'members',id), {status:'rejected'});
+    loadApplications(); loadDashboard();
+    alert('✗ Application rejected.');
+  }
+};
+
+window.showCategoryModal = (memberId) => {
+  const existing = document.getElementById('categoryModalOverlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'categoryModalOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `
+    <div style="background:#fff;padding:2rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#111;margin:0 0 0.5rem;">Approve Member</h3>
+      <p style="font-size:12px;color:#888;margin:0 0 1.2rem;">Select membership category before approving.</p>
+      <select id="catSelect" style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:'Inter',sans-serif;background:#fafafa;margin-bottom:1rem;outline:none;">
+        <option value="">— Select Category —</option>
+        <option value="General Member">General Member</option>
+        <option value="Founding Member">Founding Member</option>
+        <option value="Honorary Member">Honorary Member</option>
+      </select>
+      <div style="display:flex;gap:0.75rem;">
+        <button onclick="confirmApprove('${memberId}')" style="flex:1;padding:11px;background:#157040;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;">✓ Approve</button>
+        <button onclick="document.getElementById('categoryModalOverlay').remove()" style="padding:11px 16px;background:#555;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+};
+
+window.confirmApprove = async (id) => {
+  const cat = document.getElementById('catSelect')?.value;
+  if (!cat) { alert('Please select a category.'); return; }
+  try {
+    await updateDoc(doc(db,'members',id), {
+      status: 'approved',
+      category: cat,
+      approvedAt: serverTimestamp()
+    });
+    document.getElementById('categoryModalOverlay')?.remove();
+    loadApplications(); loadDashboard();
+    alert('✓ Member approved as ' + cat + '!');
+  } catch(e) { alert('Error: ' + e.message); }
 };
 
 /* ═══════════════════════════════════════
@@ -199,22 +242,27 @@ async function loadMembers() {
       return;
     }
     snap.docs.forEach(d => { allMembersData[d.id] = { ...d.data(), id: d.id }; });
+    const catColor = {
+      'Founding Member': 'background:rgba(184,17,26,0.1);color:#B8111A;border:1px solid rgba(184,17,26,0.25);',
+      'Honorary Member': 'background:rgba(201,168,76,0.15);color:#7A6020;border:1px solid rgba(201,168,76,0.4);',
+      'General Member':  'background:rgba(11,61,32,0.07);color:#0F5530;border:1px solid rgba(11,61,32,0.2);'
+    };
     con.innerHTML = tbl(
-      ['Photo','Name','Sector','Membership','Mobile','District','Action'],
+      ['Photo','Name','Sector','Category','Mobile','District','Action'],
       snap.docs.map(d => {
         const m = d.data();
-        const badge = m.membership === 'Lifetime'
-          ? `<span class="status-badge status-approved">Lifetime</span>`
-          : `<span class="status-badge" style="background:rgba(11,61,32,0.07);color:#0F5530;border:1px solid rgba(11,61,32,0.2);">General</span>`;
+        const cat = m.category || 'General Member';
+        const badge = `<span class="status-badge" style="${catColor[cat]||catColor['General Member']}">${cat}</span>`;
         return `<tr style="cursor:pointer;" onclick="viewMemberDetail('${d.id}')">
           <td>${avatarDiv(m.photoURL, m.fullname, 44)}</td>
-          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.specialty||''}</small></td>
+          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.specialty||m.sector||''}</small></td>
           <td>${m.sector||''}</td>
           <td>${badge}</td>
           <td>${m.mobile||''}</td>
           <td>${m.dist_c||''}</td>
           <td>
-            <button class="abtn btn-view"   onclick="event.stopPropagation();viewMemberDetail('${d.id}')">👁 Details</button>
+            <button class="abtn btn-view" onclick="event.stopPropagation();viewMemberDetail('${d.id}')">👁 Details</button>
+            <button class="abtn" style="background:#C9A84C;color:#fff;" onclick="event.stopPropagation();editCategory('${d.id}','${cat}')">✎ Category</button>
             ${delBtn('delMember', d.id)}
           </td>
         </tr>`;
@@ -228,6 +276,52 @@ window.delMember = async id => {
   await deleteDoc(doc(db,'members',id));
   delete allMembersData[id];
   loadMembers();
+};
+
+// ── Edit Category ──
+window.editCategory = (id, currentCat) => {
+  const existing = document.getElementById("categoryModalOverlay");
+  if (existing) existing.remove();
+  const overlay = document.createElement("div");
+  overlay.id = "categoryModalOverlay";
+  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;display:flex;align-items:center;justify-content:center;";
+  overlay.innerHTML = `<div style="background:#fff;padding:2rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);"><h3 style="font-family:Playfair Display,serif;font-size:1.2rem;color:#111;margin:0 0 0.5rem;">Change Category</h3><p style="font-size:12px;color:#888;margin:0 0 1.2rem;">Current: <strong>${currentCat}</strong></p><select id="catSelect" style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:Inter,sans-serif;background:#fafafa;margin-bottom:1rem;outline:none;"><option value="">— Select Category —</option><option value="General Member">General Member</option><option value="Founding Member">Founding Member</option><option value="Honorary Member">Honorary Member</option></select><div style="display:flex;gap:0.75rem;"><button onclick="confirmCategoryChange('${id}')" style="flex:1;padding:11px;background:#157040;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:Inter,sans-serif;">Save</button><button onclick="document.getElementById('categoryModalOverlay').remove()" style="padding:11px 16px;background:#555;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:Inter,sans-serif;">Cancel</button></div></div>`;
+  document.body.appendChild(overlay);
+};
+window.confirmCategoryChange = async (id) => {
+  const cat = document.getElementById("catSelect")?.value;
+  if (!cat) { alert("Please select a category."); return; }
+  try {
+    await updateDoc(doc(db,"members",id), { category: cat });
+    document.getElementById("categoryModalOverlay")?.remove();
+    loadMembers();
+    alert("✓ Category updated to " + cat);
+  } catch(e) { alert("Error: " + e.message); }
+};
+window.addMemberByAdmin = async () => {
+  const name=document.getElementById("adm_name")?.value?.trim();
+  const mobile=document.getElementById("adm_mobile")?.value?.trim();
+  const sector=document.getElementById("adm_sector")?.value?.trim();
+  const category=document.getElementById("adm_category")?.value;
+  const email=document.getElementById("adm_email")?.value?.trim();
+  const exp=document.getElementById("adm_experience")?.value?.trim();
+  const dist=document.getElementById("adm_district")?.value?.trim();
+  const st=document.getElementById("adm_status");
+  if (!name){alert("Name is required.");return;}
+  if (!category){alert("Please select a category.");return;}
+  st.textContent="Saving...";st.style.color="#888";
+  try{
+    const photoInput=document.getElementById("adm_photo");
+    let photoURL=null;
+    if(photoInput?.files[0])photoURL=await uploadToCloudinary(photoInput.files[0]);
+    await addDoc(collection(db,"members"),{fullname:name,mobile:mobile||"",sector:sector||"",category,email:email||"",experience:exp||"",dist_c:dist||"",status:"approved",addedByAdmin:true,createdAt:serverTimestamp(),approvedAt:serverTimestamp(),...(photoURL&&{photoURL})});
+    st.textContent="✓ Member added!";st.style.color="#157040";
+    ["adm_name","adm_mobile","adm_sector","adm_email","adm_experience","adm_district"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+    document.getElementById("adm_category").value="";
+    if(photoInput)photoInput.value="";
+    loadMembers();
+    setTimeout(()=>{st.textContent="";},3000);
+  }catch(e){st.textContent="Error: "+e.message;st.style.color="#B8111A";}
 };
 
 /* ═══════════════════════════════════════
