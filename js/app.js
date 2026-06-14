@@ -122,12 +122,13 @@ async function loadSlideshow() {
   const dots  = document.getElementById('slideDots');
   if (!track) return;
   try {
-    const snap = await getDocs(query(collection(db,'gallery'), where('showInSlideshow','==',true), orderBy('createdAt','desc')));
+    const snap = await getDocs(query(collection(db,'gallery'), where('showInSlideshow','==',true)));
+    const sortedDocs = snap.docs.sort((a,b) => (b.data().createdAt?.seconds||0) - (a.data().createdAt?.seconds||0));
     if (snap.empty) {
       track.innerHTML = '<div class="slideshow-placeholder"><span>কোনো ছবি নেই</span></div>';
       return;
     }
-    const imgs = snap.docs.map(d => d.data());
+    const imgs = sortedDocs.map(d => d.data());
     slideTotal = imgs.length;
     track.innerHTML = imgs.map(g =>
       `<img class="slide-item" src="${g.url}" alt="${g.caption||'BMC'}" loading="lazy">`
@@ -202,17 +203,20 @@ function renderMembers(list) {
   const grid = document.getElementById('membersGrid');
   if (!grid) return;
   if (!list.length) { grid.innerHTML = emptyState('🎵', 'No members found'); return; }
-  grid.innerHTML = list.map(m => `
+  grid.innerHTML = list.map(m => {
+    const name = m.fullname||m.name||'—';
+    const avatarHTML = m.photoURL
+      ? `<img src="${m.photoURL}" alt="${name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+      : initials(name);
+    const cat = m.category || 'General Member';
+    return `
     <div class="member-card" onclick="openMemberModal('${m.id}')">
-      <div class="member-avatar">
-        ${m.photoURL ? `<img src="${m.photoURL}" alt="${m.fullname||m.name}" loading="lazy">` : initials(m.fullname||m.name)}
-      </div>
-      <div class="member-name">${m.fullname||m.name||'—'}</div>
-      <div class="member-role">${m.specialty||m.specialization||m.sector||'—'}</div>
-      <span class="member-badge ${m.membership==='Lifetime'||m.membershipType==='Lifetime' ? 'lifetime' : ''}">
-        ${m.membership==='Lifetime'||m.membershipType==='Lifetime' ? 'Lifetime' : 'General'}
-      </span>
-    </div>`).join('');
+      <div class="member-avatar">${avatarHTML}</div>
+      <div class="member-name">${name}</div>
+      <div class="member-role">${m.sector||m.specialty||m.specialization||'—'}</div>
+      <span class="member-badge">${cat}</span>
+    </div>`;
+  }).join('');
 }
 window.filterMembers = function() {
   const search = document.getElementById('memberSearch').value.toLowerCase();
@@ -605,13 +609,14 @@ function eventItemHTML(e, isPast = false) {
   </div>`;
 }
 function personCardHTML(p) {
+  const name = p.name || '—';
+  const avatarHTML = p.photoURL
+    ? `<img src="${p.photoURL}" alt="${name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
+    : initials(name);
   return `<div class="person-card">
-    <div class="person-avatar">
-      ${p.photoURL ? `<img src="${p.photoURL}" alt="${p.name}" loading="lazy">` : initials(p.name)}
-    </div>
-    <div class="person-name">${p.name||'—'}</div>
-    <div class="person-role">${p.role||'—'}</div>
-    <div class="person-sector">${sectorLabel(p.sector)}</div>
+    <div class="person-avatar">${avatarHTML}</div>
+    <div class="person-name">${name}</div>
+    <div class="person-role">${p.role||'Founding Member'}</div>
   </div>`;
 }
 
