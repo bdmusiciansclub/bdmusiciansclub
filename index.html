@@ -68,8 +68,8 @@
   <!-- Hero -->
   <section class="hero">
     <div class="hero-bg"></div>
-    <div class="hero-content" style="text-align:center;align-items:center;">
-      <img src="images/logo.png" alt="BMC Logo" class="hero-logo" style="margin:0 auto;">
+    <div class="hero-content">
+      <img src="images/logo.png" alt="BMC Logo" class="hero-logo">
       <div class="hero-badge">Est. 2022 · Dhaka, Bangladesh</div>
       <h1 class="hero-title">Bangladesh<br><span class="accent">Musician's</span> Club</h1>
       <p class="hero-slogan">"We Are The Soul Of Music"</p>
@@ -244,62 +244,34 @@
   </div>
   <section class="section sec-white">
     <div class="container">
-      <!-- Tab Navigation -->
       <div class="tab-nav">
-        <button class="tab-btn active" data-tab="founders"     onclick="switchTab('founders')">👑 Founders</button>
-        <button class="tab-btn"        data-tab="president"    onclick="switchTab('president')">🎖️ President</button>
-        <button class="tab-btn"        data-tab="secretary"    onclick="switchTab('secretary')">📝 Gen. Secretary</button>
-        <button class="tab-btn"        data-tab="treasurer"    onclick="switchTab('treasurer')">💰 Treasurer</button>
-        <button class="tab-btn"        data-tab="executive"    onclick="switchTab('executive')">📌 Executive</button>
-        <button class="tab-btn"        data-tab="subcommittee" onclick="switchTab('subcommittee')">🔖 Sub-Committees</button>
+        <button class="tab-btn active" data-tab="founders"  onclick="switchTab('founders')">👑 Founding Members</button>
+        <button class="tab-btn"        data-tab="advisers"  onclick="switchTab('advisers')">🎓 Advisers</button>
+        <button class="tab-btn"        data-tab="executive" onclick="switchTab('executive')">📌 Executive Committee</button>
       </div>
 
       <div id="tab-founders" class="tab-panel active">
         <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">Founders</h2>
+          <h2 class="sec-title on-light">Founding Members</h2>
           <p class="sec-desc on-light">The visionaries who established Bangladesh Musician's Club</p>
         </div>
         <div id="foundersGrid"><div class="loading">Loading...</div></div>
       </div>
 
-      <div id="tab-president" class="tab-panel">
+      <div id="tab-advisers" class="tab-panel">
         <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">President</h2>
-          <p class="sec-desc on-light">Club president and leadership</p>
+          <h2 class="sec-title on-light">Advisers</h2>
+          <p class="sec-desc on-light">উপদেষ্টা পরিষদ — BMC-র দিকনির্দেশনায় যাঁরা আলো দেন</p>
         </div>
-        <div id="presidentGrid"><div class="loading">Loading...</div></div>
-      </div>
-
-      <div id="tab-secretary" class="tab-panel">
-        <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">General Secretary</h2>
-          <p class="sec-desc on-light">Club general secretary</p>
-        </div>
-        <div id="secretaryGrid"><div class="loading">Loading...</div></div>
-      </div>
-
-      <div id="tab-treasurer" class="tab-panel">
-        <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">Treasurer</h2>
-          <p class="sec-desc on-light">Financial management</p>
-        </div>
-        <div id="treasurerGrid"><div class="loading">Loading...</div></div>
+        <div id="advisersGrid"><div class="loading">Loading...</div></div>
       </div>
 
       <div id="tab-executive" class="tab-panel">
         <div class="sec-header" style="margin-bottom:2rem;">
           <h2 class="sec-title on-light">Executive Committee</h2>
-          <p class="sec-desc on-light">Our executive leadership team</p>
+          <p class="sec-desc on-light">পরিচালনা কমিটি — ক্লাবের দৈনন্দিন পরিচালনায় নিয়োজিত</p>
         </div>
         <div id="executiveGrid"><div class="loading">Loading...</div></div>
-      </div>
-
-      <div id="tab-subcommittee" class="tab-panel">
-        <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">Sub-Committees</h2>
-          <p class="sec-desc on-light">Specialized teams and working groups</p>
-        </div>
-        <div id="subcommitteeGrid"><div class="loading">Loading...</div></div>
       </div>
     </div>
   </section>
@@ -420,21 +392,6 @@
 
       <div id="joinForm">
         <div class="reg-form">
-
-          <!-- Membership Type -->
-          <div class="form-section-title">Membership Type</div>
-          <div class="membership-options" style="margin-bottom:2rem;">
-            <div class="membership-option selected" data-type="General" onclick="selectMembership('General')">
-              <input type="radio" name="membership" value="General">
-              <div class="membership-type">General Member</div>
-              <div class="membership-fee">Annual · Renewable</div>
-            </div>
-            <div class="membership-option" data-type="Lifetime" onclick="selectMembership('Lifetime')">
-              <input type="radio" name="membership" value="Lifetime">
-              <div class="membership-type">Lifetime Member</div>
-              <div class="membership-fee">One-time · Forever</div>
-            </div>
-          </div>
 
           <!-- Personal Info -->
           <div class="form-section-title">Personal Information</div>
