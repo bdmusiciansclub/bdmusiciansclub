@@ -384,7 +384,35 @@
       <button class="back-btn" onclick="showSec('dashboard')">← Back to Dashboard</button>
       <div class="page-title">Members</div>
       <div class="panel">
-        <div class="panel-title">Approved Members <span style="font-size:11px;color:#888;font-family:Inter;letter-spacing:0;text-transform:none;font-weight:400;">Click a row to view, print or download PDF</span></div>
+        <div class="panel-title">Add Member (Admin Entry — Auto Approved)</div>
+        <div class="fi">
+          <div class="fr2">
+            <input type="text" id="adm_name" placeholder="Full Name *">
+            <select id="adm_category">
+              <option value="">— Select Category * —</option>
+              <option value="General Member">General Member</option>
+              <option value="Founding Member">Founding Member</option>
+              <option value="Honorary Member">Honorary Member</option>
+            </select>
+          </div>
+          <div class="fr2">
+            <input type="text" id="adm_mobile" placeholder="Mobile Number">
+            <input type="text" id="adm_sector" placeholder="Instrument / Vocal Type (Sector)">
+          </div>
+          <div class="fr2">
+            <input type="email" id="adm_email" placeholder="Email Address">
+            <input type="text" id="adm_district" placeholder="District">
+          </div>
+          <div class="fr2">
+            <input type="text" id="adm_experience" placeholder="Years of Experience">
+            <input type="file" id="adm_photo" accept="image/*">
+          </div>
+          <button class="add-btn" onclick="addMemberByAdmin()">+ Add Member</button>
+          <p id="adm_status" style="font-size:12px;margin-top:4px;"></p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Approved Members <span style="font-size:11px;color:#888;font-family:Inter;letter-spacing:0;text-transform:none;font-weight:400;">Click a row to view full details</span></div>
         <div id="membersList"></div>
       </div>
     </div>
