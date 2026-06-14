@@ -594,30 +594,56 @@ async function loadGallery() {
     if (snap.empty) { con.innerHTML = '<p style="color:#888;padding:1rem;">No photos yet.</p>'; return; }
     con.innerHTML = snap.docs.map(d => {
       const g = d.data();
-      return `<div style="position:relative;">
+      const inSlide = g.showInSlideshow ? 'border:3px solid #C9A84C;' : '';
+      const slideBtnLabel = g.showInSlideshow ? '★ In Slideshow' : '☆ Add to Slideshow';
+      const slideBtnStyle = g.showInSlideshow ? 'background:#C9A84C;color:#0B3D20;' : 'background:rgba(0,0,0,0.55);color:#fff;';
+      return `<div style="position:relative;${inSlide}">
         <img src="${g.url}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;">
-        <div style="padding:6px;font-size:11px;color:#888;">${g.caption||''}</div>
+        <div style="padding:6px 8px;font-size:11px;color:#888;">${g.caption||''}</div>
+        <button onclick="toggleSlideshow('${d.id}',${!g.showInSlideshow})" style="position:absolute;top:6px;left:6px;${slideBtnStyle}border:none;cursor:pointer;padding:4px 8px;font-size:10px;font-weight:700;">${slideBtnLabel}</button>
         <button onclick="delGallery('${d.id}')" style="position:absolute;top:6px;right:6px;background:#B8111A;color:#fff;border:none;cursor:pointer;padding:4px 10px;font-size:11px;font-weight:700;">✕</button>
       </div>`;
     }).join('');
   } catch(e) { console.error(e); }
 }
 
+window.toggleSlideshow = async (id, show) => {
+  try {
+    await updateDoc(doc(db,'gallery',id), { showInSlideshow: show });
+    loadGallery();
+  } catch(e) { alert('Error: ' + e.message); }
+};
+
 window.uploadGallery = async () => {
   const st = $('galleryStatus');
-  st.textContent = 'Uploading...';
-  try {
-    const url = await upload('galleryPhoto');
-    if (!url) { st.textContent = 'Please select a photo.'; return; }
-    await addDoc(collection(db,'gallery'), { url, caption: val('galleryCaption'), createdAt: serverTimestamp() });
-    st.textContent = '✓ Uploaded!';
-    $('galleryPhoto').value = '';
-    $('galleryCaption').value = '';
-    loadGallery();
-  } catch(e) { st.textContent = 'Error: ' + e.message; }
+  const fileInput = $('galleryPhoto');
+  const files = fileInput?.files;
+  if (!files || files.length === 0) { st.textContent = 'Please select photos.'; return; }
+  st.textContent = `Uploading 0 / ${files.length}...`;
+  let uploaded = 0;
+  for (const file of Array.from(files)) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', 'bmc_unsigned');
+      const res = await fetch('https://api.cloudinary.com/v1_1/democloud/image/upload', { method:'POST', body:formData });
+      const data = await res.json();
+      if (data.secure_url) {
+        await addDoc(collection(db,'gallery'), { url: data.secure_url, caption: val('galleryCaption'), showInSlideshow: false, createdAt: serverTimestamp() });
+        uploaded++;
+        st.textContent = `Uploading ${uploaded} / ${files.length}...`;
+      }
+    } catch(e) { console.error('Upload error:', file.name, e); }
+  }
+  st.textContent = `✓ ${uploaded} photo(s) uploaded!`;
+  fileInput.value = '';
+  $('galleryCaption').value = '';
+  setTimeout(() => { st.textContent = ''; }, 4000);
+  loadGallery();
 };
+
 window.delGallery = async id => {
-  if (!confirm('Delete?')) return;
+  if (!confirm('Delete this photo?')) return;
   await deleteDoc(doc(db,'gallery',id));
   loadGallery();
 };
