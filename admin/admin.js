@@ -149,24 +149,33 @@ async function loadApplications() {
   const con = $('applicationsList');
   con.innerHTML = '<div style="color:#888;font-size:13px;padding:1rem;">Loading...</div>';
   try {
-    const snap = await getDocs(query(collection(db,'members'), where('status','==','pending'), orderBy('createdAt','desc')));
-    $('pendingBadge').textContent = snap.size + ' pending';
+    // orderBy বাদ — index ছাড়া কাজ করে, client-side sort
+    const snap = await getDocs(query(collection(db,'members'), where('status','==','pending')));
+    const docs = snap.docs.sort((a,b) => {
+      const ta = a.data().createdAt?.seconds || 0;
+      const tb = b.data().createdAt?.seconds || 0;
+      return tb - ta;
+    });
+    const badge = $('pendingBadge');
+    if (badge) badge.textContent = snap.size + ' pending';
     if (snap.empty) {
       con.innerHTML = '<p style="color:#888;font-size:13px;padding:1rem;">No pending applications.</p>';
       return;
     }
     con.innerHTML = tbl(
-      ['Photo','Name','NID','Sector','Type','Mobile','District','Action'],
-      snap.docs.map(d => {
+      ['Photo','Name','Mobile','Sector','District','Submitted','Action'],
+      docs.map(d => {
         const m = d.data();
+        const date = m.createdAt?.toDate
+          ? m.createdAt.toDate().toLocaleDateString('en-GB')
+          : '—';
         return `<tr>
           <td>${avatarDiv(m.photoURL, m.fullname, 40)}</td>
-          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.specialty||''}</small></td>
-          <td style="font-size:12px;">${m.nid||'—'}</td>
-          <td>${m.sector||''}</td>
-          <td>${m.membership||''}</td>
-          <td>${m.mobile||''}</td>
-          <td>${m.dist_c||''}</td>
+          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.email||''}</small></td>
+          <td>${m.mobile||'—'}</td>
+          <td>${m.sector||'—'}</td>
+          <td>${m.dist_c||'—'}</td>
+          <td style="font-size:12px;color:#888;">${date}</td>
           <td>
             <button class="abtn btn-approve" onclick="upStatus('${d.id}','approved')">✓ Approve</button>
             <button class="abtn btn-reject"  onclick="upStatus('${d.id}','rejected')">✗ Reject</button>
@@ -175,7 +184,10 @@ async function loadApplications() {
         </tr>`;
       }).join('')
     );
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    console.error('loadApplications error:', e);
+    con.innerHTML = '<p style="color:#B8111A;font-size:13px;padding:1rem;">Error loading applications: ' + e.message + '</p>';
+  }
 }
 
 window.upStatus = async (id, status) => {
