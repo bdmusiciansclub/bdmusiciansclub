@@ -193,7 +193,7 @@ async function loadMembers() {
   if (!grid) return;
   grid.innerHTML = loadingHTML();
   try {
-    const snap = await getDocs(collection(db, 'members'));
+    const snap = await getDocs(query(collection(db, 'members'), where('status','==','approved')));
     allMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderMembers(allMembers);
   } catch(e) { grid.innerHTML = emptyState('⚠️', 'Failed to load'); }
