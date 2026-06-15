@@ -393,33 +393,12 @@
     <div id="sec-members" class="sc">
       <button class="back-btn" onclick="showSec('dashboard')">← Back to Dashboard</button>
       <div class="page-title">Members</div>
-      <div class="panel">
-        <div class="panel-title">Add Member (Admin Entry — Auto Approved)</div>
-        <div class="fi">
-          <div class="fr2">
-            <input type="text" id="adm_name" placeholder="Full Name *">
-            <select id="adm_category">
-              <option value="">— Select Category * —</option>
-              <option value="General Member">General Member</option>
-              <option value="Founding Member">Founding Member</option>
-              <option value="Honorary Member">Honorary Member</option>
-            </select>
-          </div>
-          <div class="fr2">
-            <input type="text" id="adm_mobile" placeholder="Mobile Number">
-            <input type="text" id="adm_sector" placeholder="Instrument / Vocal Type (Sector)">
-          </div>
-          <div class="fr2">
-            <input type="email" id="adm_email" placeholder="Email Address">
-            <input type="text" id="adm_district" placeholder="District">
-          </div>
-          <div class="fr2">
-            <input type="text" id="adm_experience" placeholder="Years of Experience">
-            <input type="file" id="adm_photo" accept="image/*">
-          </div>
-          <button class="add-btn" onclick="addMemberByAdmin()">+ Add Member</button>
-          <p id="adm_status" style="font-size:12px;margin-top:4px;"></p>
+      <div class="panel" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:1px;color:#0B3D20;">Admin Entry</div>
+          <div style="font-size:13px;color:#888;margin-top:4px;">Offline registration — auto approved</div>
         </div>
+        <button class="add-btn" onclick="openAddMemberModal()" style="margin:0;">+ Add Member</button>
       </div>
       <div class="panel">
         <div class="panel-title">Approved Members <span style="font-size:11px;color:#888;font-family:Inter;letter-spacing:0;text-transform:none;font-weight:400;">Click a row to view full details</span></div>
@@ -439,10 +418,28 @@
       <div class="panel">
         <div class="panel-title">Add Event</div>
         <div class="fi">
-          <div class="fr2"><input type="text" id="ev_title" placeholder="Event Title *"><input type="text" id="ev_location" placeholder="Location"></div>
-          <div class="fr2"><input type="date" id="ev_date"><input type="text" id="ev_tag" placeholder="Tag (e.g. Concert)"></div>
-          <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#666;cursor:pointer;"><input type="checkbox" id="ev_upcoming" style="accent-color:#157040;width:16px;height:16px;"> Mark as Upcoming</label>
+          <div class="fr2">
+            <input type="text" id="ev_title" placeholder="Event Title *">
+            <input type="text" id="ev_location" placeholder="Location">
+          </div>
+          <div class="fr2">
+            <input type="date" id="ev_date">
+            <input type="text" id="ev_tag" placeholder="Tag (e.g. Concert, Workshop)">
+          </div>
+          <textarea id="ev_description" placeholder="Event description (optional)" rows="3"
+            style="width:100%;padding:10px;border:1px solid #e5e7eb;font-family:Inter,sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;"></textarea>
+          <div class="fr2" style="align-items:center;">
+            <div>
+              <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Event Image (optional)</label>
+              <input type="file" id="ev_image" accept="image/*">
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:#666;cursor:pointer;">
+              <input type="checkbox" id="ev_upcoming" style="accent-color:#157040;width:16px;height:16px;">
+              Mark as Upcoming
+            </label>
+          </div>
           <button class="add-btn" onclick="addEvent()">Add Event</button>
+          <p id="evStatus" style="font-size:12px;color:#888;margin-top:4px;"></p>
         </div>
       </div>
       <div class="panel"><div class="panel-title">All Events</div><div id="eventsList"></div></div>
@@ -572,6 +569,96 @@
 </div>
 
 <div id="printArea" style="display:none;"></div>
+
+<!-- ADD MEMBER MODAL -->
+<div id="addMemberModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:4000;overflow-y:auto;padding:2rem 1rem;">
+  <div style="background:#fff;max-width:700px;margin:0 auto;padding:2rem;position:relative;">
+    <button onclick="closeAddMemberModal()" style="position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#888;">✕</button>
+    <h2 style="font-family:'Playfair Display',serif;font-size:1.3rem;color:#0B3D20;margin:0 0 1.5rem;padding-bottom:1rem;border-bottom:2px solid #f0f0f0;">
+      Add Member (Admin — Auto Approved)
+    </h2>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Full Name *</label>
+        <input type="text" id="adm_name" placeholder="Full Name" style="width:100%;padding:10px;border:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Mobile *</label>
+        <input type="text" id="adm_mobile" placeholder="Mobile Number" style="width:100%;padding:10px;border:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Main Instrument / Vocal *</label>
+        <select id="adm_sector" style="width:100%;padding:10px;border:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;">
+          <option value="">— Select —</option>
+          <optgroup label="🎤 Vocal"><option>Singer (Classical)</option><option>Singer (Folk / Baul)</option><option>Singer (Modern / Pop)</option><option>Singer (Rabindra Sangeet)</option><option>Singer (Nazrul Sangeet)</option><option>Singer (Band / Rock)</option><option>Singer (Devotional)</option><option>Singer (Other)</option></optgroup>
+          <optgroup label="🎸 String"><option>Guitar (Acoustic)</option><option>Guitar (Electric)</option><option>Guitar (Bass)</option><option>Sitar</option><option>Violin / Fiddle</option><option>Dotara</option><option>Esraj</option><option>Sarod</option><option>Ektara</option><option>Banjo</option><option>Ukulele</option></optgroup>
+          <optgroup label="🥁 Percussion"><option>Tabla</option><option>Dhol</option><option>Dhak</option><option>Drum Kit</option><option>Cajon</option><option>Khol</option><option>Mridanga</option></optgroup>
+          <optgroup label="🎹 Keys"><option>Harmonium</option><option>Piano</option><option>Keyboard / Synthesizer</option><option>Accordion</option></optgroup>
+          <optgroup label="🎺 Wind"><option>Bansuri / Flute</option><option>Shehnai</option><option>Saxophone</option><option>Trumpet</option><option>Clarinet</option><option>Harmonica</option></optgroup>
+          <optgroup label="🔊 Technical"><option>Sound Engineer</option><option>Mixing Engineer</option><option>Audio Technician</option><option>Live Sound Operator</option><option>Recording Engineer</option></optgroup>
+          <optgroup label="🎬 Production"><option>Stage Manager</option><option>Lighting Operator</option><option>LED / Visual Operator</option><option>Production Manager</option></optgroup>
+          <optgroup label="🎵 Other"><option>Music Composer</option><option>Lyricist</option><option>Music Director</option><option>Music Teacher</option><option>Other</option></optgroup>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Sub Instrument (optional)</label>
+        <select id="adm_specialty" style="width:100%;padding:10px;border:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;">
+          <option value="">— None —</option>
+          <optgroup label="🎤 Vocal"><option>Singer (Classical)</option><option>Singer (Folk / Baul)</option><option>Singer (Modern / Pop)</option><option>Singer (Rabindra Sangeet)</option><option>Singer (Nazrul Sangeet)</option><option>Singer (Band / Rock)</option><option>Singer (Other)</option></optgroup>
+          <optgroup label="🎸 String"><option>Guitar (Acoustic)</option><option>Guitar (Electric)</option><option>Guitar (Bass)</option><option>Sitar</option><option>Violin / Fiddle</option><option>Dotara</option></optgroup>
+          <optgroup label="🥁 Percussion"><option>Tabla</option><option>Dhol</option><option>Drum Kit</option><option>Cajon</option></optgroup>
+          <optgroup label="🎹 Keys"><option>Harmonium</option><option>Piano</option><option>Keyboard / Synthesizer</option></optgroup>
+          <optgroup label="🎺 Wind"><option>Bansuri / Flute</option><option>Saxophone</option><option>Clarinet</option></optgroup>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Email</label>
+        <input type="email" id="adm_email" placeholder="Email Address" style="width:100%;padding:10px;border:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;">
+      </div>
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">District</label>
+        <input type="text" id="adm_district" placeholder="District" style="width:100%;padding:10px;border:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;">
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Years of Experience</label>
+        <select id="adm_experience" style="width:100%;padding:10px;border:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;">
+          <option value="">Select</option>
+          <option>Less than 1 year</option><option>1–3 years</option><option>3–5 years</option><option>5–10 years</option><option>10+ years</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Membership Type *</label>
+        <select id="adm_category" style="width:100%;padding:10px;border:1px solid #e5e7eb;font-size:13px;box-sizing:border-box;">
+          <option value="">— Select —</option>
+          <option value="General Member">General Member (Paid)</option>
+          <option value="Honorary Member">Honorary Member (Free)</option>
+          <option value="Founding Member">Founding Member</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="margin-bottom:1.5rem;">
+      <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Profile Photo</label>
+      <input type="file" id="adm_photo" accept="image/*">
+    </div>
+
+    <button onclick="addMemberByAdmin()" style="width:100%;padding:14px;background:#0B3D20;color:#fff;border:none;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;">
+      + Add Member (Auto Approved)
+    </button>
+    <p id="adm_status" style="font-size:12px;margin-top:8px;text-align:center;"></p>
+  </div>
+</div>
+
 <script type="module" src="admin.js"></script>
 </body>
 </html>
