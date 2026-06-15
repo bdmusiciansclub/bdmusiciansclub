@@ -345,10 +345,30 @@
           <span class="nav-card-label">Videos</span>
           <div class="nav-card-count">YouTube videos</div>
         </div>
+        <div class="nav-card" style="background:linear-gradient(135deg,#0B3D20,#1a6b3a);" onclick="showSec('notice')">
+          <span class="nav-card-icon">📋</span>
+          <span class="nav-card-label">Notice</span>
+          <div class="nav-card-count">ঘোষণা ও নোটিশ</div>
+        </div>
         <div class="nav-card c-blue" onclick="showSec('feedback')">
           <span class="nav-card-icon">💬</span>
           <span class="nav-card-label">Feedback</span>
           <div class="nav-card-count">User feedback</div>
+        </div>
+        <div class="nav-card" style="background:linear-gradient(135deg,#4a1a6b,#7b2fa8);" onclick="showSec('about')">
+          <span class="nav-card-icon">ℹ️</span>
+          <span class="nav-card-label">About Page</span>
+          <div class="nav-card-count">Edit about content</div>
+        </div>
+      </div>
+
+      <!-- Site Settings -->
+      <div class="section-title">Settings</div>
+      <div class="nav-cards" style="margin-bottom:2rem;">
+        <div class="nav-card" style="background:linear-gradient(135deg,#1a3a6b,#2a5fa8);" onclick="showSec('executive-assign')">
+          <span class="nav-card-icon">🏅</span>
+          <span class="nav-card-label">Executive Roles</span>
+          <div class="nav-card-count">Assign roles to members</div>
         </div>
       </div>
 
@@ -465,8 +485,77 @@
     <!-- FEEDBACK -->
     <div id="sec-feedback" class="sc">
       <button class="back-btn" onclick="showSec('dashboard')">← Back</button>
-      <div class="page-title">Feedback</div>
+      <div class="page-title">Feedback / Complaints</div>
       <div class="panel"><div class="panel-title">All Feedback</div><div id="feedbackList"></div></div>
+    </div>
+
+    <!-- NOTICE -->
+    <div id="sec-notice" class="sc">
+      <button class="back-btn" onclick="showSec('dashboard')">← Back to Dashboard</button>
+      <div class="page-title">📋 Notice & Announcements</div>
+      <div class="panel">
+        <div class="panel-title">Publish New Notice</div>
+        <div class="fi">
+          <input type="text" id="noticeTitle" placeholder="Notice Title *" style="width:100%;margin-bottom:8px;">
+          <textarea id="noticeBody" placeholder="Notice details..." rows="4"
+            style="width:100%;padding:10px;border:1px solid #e5e7eb;font-family:Inter,sans-serif;font-size:13px;resize:vertical;margin-bottom:8px;box-sizing:border-box;"></textarea>
+          <button class="add-btn" id="noticeAddBtn" onclick="addNotice()">+ Publish Notice</button>
+          <p id="noticeStatus" style="font-size:12px;margin-top:4px;"></p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">All Notices</div>
+        <div id="noticeList"></div>
+      </div>
+    </div>
+
+    <!-- ABOUT EDIT -->
+    <div id="sec-about" class="sc">
+      <button class="back-btn" onclick="showSec('dashboard')">← Back to Dashboard</button>
+      <div class="page-title">ℹ️ About Page Content</div>
+      <div class="panel">
+        <div class="panel-title">Club Introduction (পরিচয়)</div>
+        <div class="fi">
+          <p style="font-size:12px;color:#888;margin-bottom:8px;">প্রতিটি paragraph আলাদা line এ লিখুন। দুটো blank line = নতুন paragraph।</p>
+          <textarea id="aboutIntro" rows="8"
+            style="width:100%;padding:10px;border:1px solid #e5e7eb;font-family:Inter,sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;"
+            placeholder="Club পরিচিতি লিখুন..."></textarea>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Goals / লক্ষ্য</div>
+        <div class="fi">
+          <p style="font-size:12px;color:#888;margin-bottom:8px;">প্রতিটি লক্ষ্য আলাদা line এ লিখুন।</p>
+          <textarea id="aboutGoals" rows="8"
+            style="width:100%;padding:10px;border:1px solid #e5e7eb;font-family:Inter,sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;"
+            placeholder="প্রতি line এ একটি করে লক্ষ্য..."></textarea>
+        </div>
+      </div>
+      <button class="add-btn" onclick="saveAbout()" style="width:100%;padding:14px;">💾 Save About Page</button>
+      <p id="aboutStatus" style="font-size:12px;margin-top:8px;text-align:center;"></p>
+    </div>
+
+    <!-- EXECUTIVE ROLES -->
+    <div id="sec-executive-assign" class="sc">
+      <button class="back-btn" onclick="showSec('dashboard')">← Back to Dashboard</button>
+      <div class="page-title">🏅 Executive Committee Roles</div>
+      <div class="panel">
+        <div class="panel-title">Assign Role to Member</div>
+        <div class="fi">
+          <div class="fr2">
+            <select id="execMemberId" style="padding:10px;border:1px solid #e5e7eb;font-size:13px;font-family:Inter,sans-serif;background:#fafafa;">
+              <option value="">— Select Approved Member —</option>
+            </select>
+            <input type="text" id="execRole" placeholder="Role (e.g. President, Secretary, Treasurer...)">
+          </div>
+          <button class="add-btn" onclick="assignExecutiveRole()">+ Assign Role</button>
+          <p id="execStatus" style="font-size:12px;margin-top:4px;"></p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Current Executive Committee</div>
+        <div id="execList"></div>
+      </div>
     </div>
 
   </div><!-- /admin-main -->
