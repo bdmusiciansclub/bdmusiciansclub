@@ -1,16 +1,12 @@
 import { db, auth } from '../js/firebase-config.js';
 import { uploadToCloudinary } from '../js/cloudinary.js';
 import {
-  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, setDoc, doc,
+  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc,
   query, orderBy, where, serverTimestamp, limit
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import {
-  signInWithEmailAndPassword, signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
-/* ═══════════════════════════════════════
-   AUTH
-═══════════════════════════════════════ */
+// ── AUTH ──
 onAuthStateChanged(auth, user => {
   if (user) {
     document.getElementById('loginWrap').classList.add('hidden');
@@ -36,62 +32,38 @@ window.adminLogin = async () => {
 };
 window.adminLogout = () => signOut(auth);
 
-/* ═══════════════════════════════════════
-   NAVIGATION
-═══════════════════════════════════════ */
+// ── NAV ──
 window.showSec = (id, el) => {
   document.querySelectorAll('.sc').forEach(s => s.classList.remove('active'));
-  const sec = document.getElementById('sec-' + id);
-  if (sec) sec.classList.add('active');
+  document.getElementById('sec-'+id).classList.add('active');
   document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
   if (el) el.classList.add('active');
   loadSec(id);
 };
-
-// Committee collection mapping
-const COMM_MAP = {
-  founders:  { col: 'founders',  title: 'Founding Members',   wrap: 'mgr-founders'  },
-  advisers:  { col: 'advisers',  title: 'Advisers',           wrap: 'mgr-advisers'  },
-  executive: { col: 'executive', title: 'Executive Committee',wrap: 'mgr-executive' },
-};
-
 function loadSec(id) {
-  if (COMM_MAP[id]) {
-    const m = COMM_MAP[id];
-    loadCommMgr(m.col, m.wrap);
-    return;
-  }
   const map = {
-    dashboard:          loadDashboard,
-    applications:       loadApplications,
-    members:            loadMembers,
-    founders:           () => loadCommitteeAdmin('founders'),
-    advisers:           () => loadCommitteeAdmin('advisers'),
-    executive:          () => loadCommitteeAdmin('executive'),
-    events:             loadEvents,
-    gallery:            loadGallery,
-    videos:             loadVideos,
-    notice:             loadNotice,
-    feedback:           loadFeedback,
-    about:              loadAboutAdmin,
-    'executive-assign': loadExecutiveAssign,
+    dashboard: loadDashboard,
+    applications: loadApplications,
+    members: loadMembers,
+    founders: () => loadCategoryMgr('Founding Member', 'mgr-founders'),
+    advisers: () => loadCategoryMgr('Honorary Member', 'mgr-advisers'),
+    committee: () => loadCommMgr('committee','mgr-committee'),
+    subcommittee: () => loadCommMgr('subcommittee','mgr-subcommittee'),
+    news: loadNews, events: loadEvents,
+    gallery: loadGallery, videos: loadVideos,
+    feedback: loadFeedback
   };
   if (map[id]) map[id]();
 }
 
-/* ═══════════════════════════════════════
-   HELPERS
-═══════════════════════════════════════ */
-const $   = id  => document.getElementById(id);
-const val = id  => $(id)?.value?.trim() || '';
-
+// ── HELPERS ──
+const $ = id => document.getElementById(id);
+const val = id => $(id)?.value?.trim() || '';
 function tbl(headers, rows) {
-  return `<div style="overflow-x:auto;">
-    <table class="table">
-      <tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
-      ${rows}
-    </table>
-  </div>`;
+  return `<div style="overflow-x:auto;"><table class="table">
+    <tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>
+    ${rows}
+  </table></div>`;
 }
 function delBtn(fn, id) {
   return `<button class="abtn btn-delete" onclick="${fn}('${id}')">Delete</button>`;
@@ -100,1081 +72,556 @@ async function upload(fileInputId) {
   const f = $(fileInputId)?.files[0];
   return f ? await uploadToCloudinary(f) : null;
 }
-function avatarDiv(photoURL, name, size=44) {
-  const init = (name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  if (photoURL) return `<img src="${photoURL}" style="width:${size}px;height:${size}px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;">`;
-  return `<div style="width:${size}px;height:${size}px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-weight:700;font-size:${Math.floor(size*0.32)}px;">${init}</div>`;
-}
 
-/* ═══════════════════════════════════════
-   DASHBOARD
-═══════════════════════════════════════ */
+// ── DASHBOARD ──
 async function loadDashboard() {
   try {
-    const [pending, members, events, gallery, videos] = await Promise.all([
-      getDocs(query(collection(db,'members'), where('status','==','pending'))),
-      getDocs(query(collection(db,'members'), where('status','==','approved'))),
+    const [p,m,e] = await Promise.all([
+      getDocs(query(collection(db,'members'),where('status','==','pending'))),
+      getDocs(query(collection(db,'members'),where('status','==','approved'))),
       getDocs(collection(db,'events')),
-      getDocs(collection(db,'gallery')),
-      getDocs(collection(db,'videos')),
     ]);
-    [['sPending',pending],['sMembers',members],['sEvents',events],['sGallery',gallery],['sVideos',videos]]
-      .forEach(([id, snap]) => { const el=$(id); if(el) el.textContent = snap.size; });
-
+    const el1=$('sPending'); if(el1) el1.textContent=p.size;
+    const el2=$('sMembers'); if(el2) el2.textContent=m.size;
+    const el3=$('sEvents');  if(el3) el3.textContent=e.size;
     const con = $('dashApps');
-    if (pending.empty) {
-      con.innerHTML = '<p style="color:#888;font-size:13px;padding:1rem;">No pending applications.</p>';
+    if (!con) return;
+    if (p.empty) {
+      con.innerHTML='<p style="color:#888;font-size:13px;padding:1rem;">No pending applications.</p>';
       return;
     }
-    con.innerHTML = tbl(
-      ['Photo','Name','Sector','Mobile','Action'],
-      pending.docs.slice(0,5).map(d => {
-        const m = d.data();
+    con.innerHTML = tbl(['Photo','Name','Sector','Mobile','Action'],
+      p.docs.slice(0,5).map(d=>{
+        const m=d.data();
+        const photo = m.photoURL
+          ? `<img src="${m.photoURL}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">`
+          : `<div style="width:36px;height:36px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-size:11px;font-weight:700;">${(m.fullname||'?').charAt(0)}</div>`;
         return `<tr>
-          <td>${avatarDiv(m.photoURL, m.fullname, 36)}</td>
-          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.specialty||''}</small></td>
+          <td>${photo}</td>
+          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.sector||''}</small></td>
           <td>${m.sector||''}</td>
           <td>${m.mobile||''}</td>
           <td>
             <button class="abtn btn-approve" onclick="upStatus('${d.id}','approved')">✓ Approve</button>
-            <button class="abtn btn-reject"  onclick="upStatus('${d.id}','rejected')">✗ Reject</button>
+            <button class="abtn btn-reject" onclick="upStatus('${d.id}','rejected')">✗ Reject</button>
           </td>
         </tr>`;
-      }).join('')
-    );
+      }).join(''));
   } catch(e) { console.error('Dashboard error:', e); }
 }
 
-/* ═══════════════════════════════════════
-   APPLICATIONS
-═══════════════════════════════════════ */
+// ── APPLICATIONS ──
 async function loadApplications() {
   const con = $('applicationsList');
+  if (!con) return;
   con.innerHTML = '<div style="color:#888;font-size:13px;padding:1rem;">Loading...</div>';
   try {
-    // orderBy বাদ — index ছাড়া কাজ করে, client-side sort
-    const snap = await getDocs(query(collection(db,'members'), where('status','==','pending')));
-    const docs = snap.docs.sort((a,b) => {
-      const ta = a.data().createdAt?.seconds || 0;
-      const tb = b.data().createdAt?.seconds || 0;
-      return tb - ta;
-    });
+    const snap = await getDocs(query(collection(db,'members'),where('status','==','pending'),orderBy('createdAt','desc')));
     const badge = $('pendingBadge');
     if (badge) badge.textContent = snap.size + ' pending';
     if (snap.empty) {
-      con.innerHTML = '<p style="color:#888;font-size:13px;padding:1rem;">No pending applications.</p>';
+      con.innerHTML='<p style="color:#888;font-size:13px;padding:1rem;">No pending applications.</p>';
       return;
     }
-    con.innerHTML = tbl(
-      ['Photo','Name','Mobile','Sector','District','Submitted','Action'],
-      docs.map(d => {
-        const m = d.data();
-        const date = m.createdAt?.toDate
-          ? m.createdAt.toDate().toLocaleDateString('en-GB')
-          : '—';
+    con.innerHTML = tbl(['Photo','Name','NID','Sector','Mobile','District','Action'],
+      snap.docs.map(d=>{
+        const m=d.data();
+        const photo = m.photoURL
+          ? `<img src="${m.photoURL}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;">`
+          : `<div style="width:40px;height:40px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-weight:700;">${(m.fullname||'?').charAt(0)}</div>`;
         return `<tr>
-          <td>${avatarDiv(m.photoURL, m.fullname, 40)}</td>
-          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.email||''}</small></td>
-          <td>${m.mobile||'—'}</td>
-          <td>${m.sector||'—'}</td>
-          <td>${m.dist_c||'—'}</td>
-          <td style="font-size:12px;color:#888;">${date}</td>
+          <td>${photo}</td>
+          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.sector||''}</small></td>
+          <td style="font-size:12px;">${m.nid||'—'}</td>
+          <td>${m.sector||''}</td>
+          <td>${m.mobile||''}</td>
+          <td>${m.dist_c||''}</td>
           <td>
             <button class="abtn btn-approve" onclick="upStatus('${d.id}','approved')">✓ Approve</button>
-            <button class="abtn btn-reject"  onclick="upStatus('${d.id}','rejected')">✗ Reject</button>
-            <button class="abtn btn-view"    onclick="viewMemberDetail('${d.id}')">👁 View</button>
+            <button class="abtn btn-reject" onclick="upStatus('${d.id}','rejected')">✗ Reject</button>
+            <button class="abtn btn-view" onclick="viewMemberDetail('${d.id}')">👁 View</button>
           </td>
         </tr>`;
-      }).join('')
-    );
-  } catch(e) {
-    console.error('loadApplications error:', e);
-    con.innerHTML = '<p style="color:#B8111A;font-size:13px;padding:1rem;">Error loading applications: ' + e.message + '</p>';
-  }
+      }).join(''));
+  } catch(e) { console.error(e); }
 }
-
 window.upStatus = async (id, status) => {
-  if (status === 'approved') {
-    showCategoryModal(id);
-  } else {
-    await updateDoc(doc(db,'members',id), {status:'rejected'});
-    loadApplications(); loadDashboard();
-    alert('✗ Application rejected.');
-  }
+  await updateDoc(doc(db,'members',id), {status});
+  loadApplications(); loadDashboard();
+  alert(status==='approved' ? '✓ Member approved!' : '✗ Application rejected.');
 };
 
-window.showCategoryModal = (memberId) => {
-  const existing = document.getElementById('categoryModalOverlay');
-  if (existing) existing.remove();
-  const overlay = document.createElement('div');
-  overlay.id = 'categoryModalOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;display:flex;align-items:center;justify-content:center;';
-  overlay.innerHTML = `
-    <div style="background:#fff;padding:2rem;width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
-      <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0B3D20;margin:0 0 1.5rem;padding-bottom:0.75rem;border-bottom:2px solid #f0f0f0;">
-        ✓ Approve Member
-      </h3>
-
-      <!-- Step 1: Membership Type -->
-      <div style="margin-bottom:1.2rem;">
-        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#555;margin-bottom:8px;">
-          Step 1 — Membership Type *
-        </label>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          <label style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #e5e7eb;cursor:pointer;transition:all 0.2s;" id="lbl_paid">
-            <input type="radio" name="memType" value="General Member" onchange="highlightType()" style="accent-color:#0B3D20;">
-            <div>
-              <div style="font-weight:700;font-size:13px;color:#0B3D20;">General Member</div>
-              <div style="font-size:11px;color:#888;">Paid (Monthly/Annual)</div>
-            </div>
-          </label>
-          <label style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #e5e7eb;cursor:pointer;transition:all 0.2s;" id="lbl_unpaid">
-            <input type="radio" name="memType" value="Honorary Member" onchange="highlightType()" style="accent-color:#C9A84C;">
-            <div>
-              <div style="font-weight:700;font-size:13px;color:#C9A84C;">Honorary Member</div>
-              <div style="font-size:11px;color:#888;">Unpaid / Free Membership</div>
-            </div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Step 2: Committee Assign (Optional) -->
-      <div style="margin-bottom:1.2rem;">
-        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#555;margin-bottom:8px;">
-          Step 2 — Committee Assignment (optional)
-        </label>
-        <select id="committeeSelect" style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:'Inter',sans-serif;background:#fafafa;margin-bottom:8px;outline:none;">
-          <option value="">— None (General/Honorary Member only) —</option>
-          <option value="founder">👑 Founding Member</option>
-          <option value="executive">📌 Executive Committee</option>
-        </select>
-        <div id="execRoleWrap" style="display:none;">
-          <input type="text" id="execRoleInput" placeholder="Executive Role (e.g. President, Secretary...)"
-            style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:'Inter',sans-serif;background:#fafafa;outline:none;box-sizing:border-box;">
-        </div>
-      </div>
-
-      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
-        <button onclick="confirmApprove('${memberId}')" style="flex:1;padding:12px;background:#0B3D20;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;">✓ Approve</button>
-        <button onclick="document.getElementById('categoryModalOverlay').remove()" style="padding:12px 16px;background:#888;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;">Cancel</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-
-  // committee select toggle
-  document.getElementById('committeeSelect').addEventListener('change', function() {
-    document.getElementById('execRoleWrap').style.display = this.value === 'executive' ? 'block' : 'none';
-  });
-};
-
-window.highlightType = () => {
-  const paid   = document.querySelector('input[value="General Member"]')?.checked;
-  const unpaid = document.querySelector('input[value="Honorary Member"]')?.checked;
-  if (document.getElementById('lbl_paid'))
-    document.getElementById('lbl_paid').style.borderColor = paid ? '#0B3D20' : '#e5e7eb';
-  if (document.getElementById('lbl_unpaid'))
-    document.getElementById('lbl_unpaid').style.borderColor = unpaid ? '#C9A84C' : '#e5e7eb';
-};
-
-window.confirmApprove = async (id) => {
-  // Step 1: Paid/Unpaid
-  const memTypeEl = document.querySelector('input[name="memType"]:checked');
-  if (!memTypeEl) { alert('Please select membership type (Paid or Honorary).'); return; }
-  const memType = memTypeEl.value; // 'General Member' or 'Honorary Member'
-
-  // Step 2: Committee
-  const committee   = document.getElementById('committeeSelect')?.value || '';
-  const execRole    = document.getElementById('execRoleInput')?.value?.trim() || '';
-
-  if (committee === 'executive' && !execRole) {
-    alert('Please enter the Executive Role (e.g. President, Secretary).');
-    return;
-  }
-
-  try {
-    const memberRef  = doc(db,'members',id);
-    const memberSnap = await getDoc(memberRef);
-    const m          = memberSnap.data();
-    const nextId     = await getNextBmcId();
-
-    // Final category — founder overrides memType
-    const finalCat = committee === 'founder' ? 'Founding Member' : memType;
-
-    const updateData = {
-      status:     'approved',
-      category:   finalCat,
-      bmcId:      nextId,
-      approvedAt: serverTimestamp()
-    };
-
-    // Executive role assign
-    if (committee === 'executive' && execRole) {
-      updateData.executiveRole  = execRole;
-      updateData.executiveOrder = 99;
-    }
-
-    await updateDoc(memberRef, updateData);
-
-    document.getElementById('categoryModalOverlay')?.remove();
-    loadApplications(); loadDashboard();
-
-    let msg = `✓ Approved as ${finalCat}`;
-    if (committee === 'executive') msg += ` + Executive: ${execRole}`;
-    alert(msg);
-  } catch(e) { alert('Error: ' + e.message); }
-};
-
-/* ═══════════════════════════════════════
-   MEMBERS
-═══════════════════════════════════════ */
+// ── MEMBERS ──
 let allMembersData = {};
 
 async function loadMembers() {
   const con = $('membersList');
-  con.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
+  if (!con) return;
+  con.innerHTML='<div style="color:#888;padding:1rem;">Loading...</div>';
   try {
-    // সব members load করে client-side filter — index সমস্যা এড়াতে
-    const snap = await getDocs(collection(db,'members'));
-    const approved = snap.docs.filter(d => d.data().status === 'approved');
-    if (!approved.length) {
-      con.innerHTML = '<p style="color:#888;padding:1rem;">No approved members yet.</p>';
-      return;
-    }
-    approved.forEach(d => { allMembersData[d.id] = { ...d.data(), id: d.id }; });
-    const catColor = {
-      'Founding Member': 'background:rgba(184,17,26,0.1);color:#B8111A;border:1px solid rgba(184,17,26,0.25);',
-      'Honorary Member': 'background:rgba(201,168,76,0.15);color:#7A6020;border:1px solid rgba(201,168,76,0.4);',
-      'General Member':  'background:rgba(11,61,32,0.07);color:#0F5530;border:1px solid rgba(11,61,32,0.2);'
-    };
-    con.innerHTML = tbl(
-      ['Photo','Name','Sector','Category','Mobile','District','Action'],
-      approved.map(d => {
-        const m = d.data();
+    const snap = await getDocs(query(collection(db,'members'),where('status','==','approved')));
+    if (snap.empty) { con.innerHTML='<p style="color:#888;padding:1rem;">No approved members yet.</p>'; return; }
+    snap.docs.forEach(d => { allMembersData[d.id] = {...d.data(), id:d.id}; });
+    con.innerHTML = tbl(['Photo','Name','Sector','Category','Mobile','District','Action'],
+      snap.docs.map(d=>{
+        const m=d.data();
+        const photo = m.photoURL
+          ? `<img src="${m.photoURL}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;">`
+          : `<div style="width:44px;height:44px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-weight:700;font-size:14px;">${(m.fullname||'?').charAt(0)}</div>`;
         const cat = m.category || 'General Member';
-        const badge = `<span class="status-badge" style="${catColor[cat]||catColor['General Member']}">${cat}</span>`;
-        const bmcId = m.bmcId ? `<br><small style="color:#C9A84C;font-weight:600;">${m.bmcId}</small>` : '';
+        const catColor = cat==='Founding Member'?'#B8111A':cat==='Honorary Member'?'#C9A84C':'#157040';
         return `<tr style="cursor:pointer;" onclick="viewMemberDetail('${d.id}')">
-          <td>${avatarDiv(m.photoURL, m.fullname, 44)}</td>
-          <td><strong>${m.fullname||'—'}</strong>${bmcId}</td>
-          <td>${m.sector||'—'}</td>
-          <td>${badge}</td>
-          <td>${m.mobile||'—'}</td>
-          <td>${m.dist_c||'—'}</td>
+          <td>${photo}</td>
+          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.sector||''}</small></td>
+          <td>${m.sector||''}</td>
+          <td><span style="font-size:10px;font-weight:700;color:${catColor};">${cat}</span></td>
+          <td>${m.mobile||''}</td>
+          <td>${m.dist_c||''}</td>
           <td>
             <button class="abtn btn-view" onclick="event.stopPropagation();viewMemberDetail('${d.id}')">👁 Details</button>
-            <button class="abtn" style="background:#C9A84C;color:#fff;" onclick="event.stopPropagation();editCategory('${d.id}','${cat}')">✎ Category</button>
-            <button class="abtn" style="background:#0B3D20;color:#fff;" onclick="event.stopPropagation();editBmcId('${d.id}','${m.bmcId||''}')">🪪 ID</button>
-            ${delBtn('delMember', d.id)}
+            ${delBtn('delMember',d.id)}
           </td>
         </tr>`;
-      }).join('')
-    );
-  } catch(e) {
-    con.innerHTML = `<p style="color:#B8111A;padding:1rem;">Error loading members: ${e.message}</p>`;
-    console.error('loadMembers error:', e);
-  }
+      }).join(''));
+  } catch(e) { console.error(e); }
 }
-
 window.delMember = async id => {
-  if (!confirm('Delete this member? This cannot be undone.')) return;
+  if(!confirm('Delete this member? This cannot be undone.')) return;
   await deleteDoc(doc(db,'members',id));
   delete allMembersData[id];
   loadMembers();
 };
-/* ═══════════════════════════════════════
-   BMC-ID SYSTEM
-═══════════════════════════════════════ */
-window.editBmcId = (id, currentId) => {
-  const existing = document.getElementById('bmcIdOverlay');
-  if (existing) existing.remove();
-  const overlay = document.createElement('div');
-  overlay.id = 'bmcIdOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;display:flex;align-items:center;justify-content:center;';
-  overlay.innerHTML = `
-    <div style="background:#fff;padding:2rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#111;margin:0 0 0.5rem;">Assign BMC-ID</h3>
-      <p style="font-size:12px;color:#888;margin:0 0 1rem;">Format: BMC-YYYY-NNN (e.g. BMC-2022-001)</p>
-      <input id="bmcIdInput" type="text" value="${currentId}"
-        placeholder="BMC-2022-001"
-        style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:14px;font-family:'Cinzel',serif;font-weight:700;letter-spacing:2px;color:#0B3D20;margin-bottom:1rem;box-sizing:border-box;outline:none;">
-      <div style="display:flex;gap:0.75rem;">
-        <button onclick="saveBmcId('${id}')" style="flex:1;padding:11px;background:#0B3D20;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;">Save ID</button>
-        <button onclick="document.getElementById('bmcIdOverlay').remove()" style="padding:11px 16px;background:#555;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;">Cancel</button>
-      </div>
-    </div>`;
-  document.body.appendChild(overlay);
-  setTimeout(() => document.getElementById('bmcIdInput')?.focus(), 100);
-};
 
-window.saveBmcId = async (id) => {
-  const val = document.getElementById('bmcIdInput')?.value?.trim();
-  if (!val) { alert('Please enter a BMC-ID.'); return; }
-  // format check
-  if (!/^BMC-\d{4}-\d{3,}$/.test(val)) {
-    alert('Format must be: BMC-YYYY-NNN\nExample: BMC-2022-001');
-    return;
-  }
-  try {
-    await updateDoc(doc(db,'members',id), { bmcId: val });
-    document.getElementById('bmcIdOverlay')?.remove();
-    if (allMembersData[id]) allMembersData[id].bmcId = val;
-    loadMembers();
-    alert('✓ BMC-ID assigned: ' + val);
-  } catch(e) { alert('Error: ' + e.message); }
-};
-
-// Auto-generate next BMC-ID
-window.getNextBmcId = async () => {
-  const snap = await getDocs(collection(db,'members'));
-  const ids = snap.docs
-    .map(d => d.data().bmcId)
-    .filter(id => id && /^BMC-\d{4}-\d+$/.test(id))
-    .map(id => parseInt(id.split('-')[2]))
-    .filter(n => !isNaN(n));
-  const next = ids.length ? Math.max(...ids) + 1 : 1;
-  return `BMC-2022-${String(next).padStart(3,'0')}`;
-};
-
-
-// ── Edit Category ──
-window.editCategory = (id, currentCat) => {
-  const existing = document.getElementById("categoryModalOverlay");
-  if (existing) existing.remove();
-  const overlay = document.createElement("div");
-  overlay.id = "categoryModalOverlay";
-  overlay.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;display:flex;align-items:center;justify-content:center;";
-  overlay.innerHTML = `<div style="background:#fff;padding:2rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);"><h3 style="font-family:Playfair Display,serif;font-size:1.2rem;color:#111;margin:0 0 0.5rem;">Change Category</h3><p style="font-size:12px;color:#888;margin:0 0 1.2rem;">Current: <strong>${currentCat}</strong></p><select id="catSelect" style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:Inter,sans-serif;background:#fafafa;margin-bottom:1rem;outline:none;"><option value="">— Select Category —</option><option value="General Member">General Member</option><option value="Founding Member">Founding Member</option><option value="Honorary Member">Honorary Member</option></select><div style="display:flex;gap:0.75rem;"><button onclick="confirmCategoryChange('${id}')" style="flex:1;padding:11px;background:#157040;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:Inter,sans-serif;">Save</button><button onclick="document.getElementById('categoryModalOverlay').remove()" style="padding:11px 16px;background:#555;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:Inter,sans-serif;">Cancel</button></div></div>`;
-  document.body.appendChild(overlay);
-};
-window.confirmCategoryChange = async (id) => {
-  const cat = document.getElementById("catSelect")?.value;
-  if (!cat) { alert("Please select a category."); return; }
-  try {
-    const memberSnap = await getDoc(doc(db,"members",id));
-    const m = memberSnap.data();
-    await updateDoc(doc(db,"members",id), { category: cat });
-
-    // Founding Member এ change করলে founders collection এ add
-    if (cat === 'Founding Member') {
-      // check already exists
-      const existing = await getDocs(query(collection(db,'founders'), where('memberId','==',id)));
-      if (existing.empty) {
-        await addDoc(collection(db,'founders'), {
-          name: m.fullname || m.name || '',
-          role: 'Founding Member',
-          sector: m.sector || '',
-          photoURL: m.photoURL || '',
-          memberId: id,
-          order: 99,
-          createdAt: serverTimestamp()
-        });
-      }
-    }
-
-    document.getElementById("categoryModalOverlay")?.remove();
-    loadMembers();
-    alert("✓ Category updated to " + cat);
-  } catch(e) { alert("Error: " + e.message); }
-};
-window.addMemberByAdmin = async () => {
-  const name=document.getElementById("adm_name")?.value?.trim();
-  const mobile=document.getElementById("adm_mobile")?.value?.trim();
-  const sector=document.getElementById("adm_sector")?.value?.trim();
-  const category=document.getElementById("adm_category")?.value;
-  const email=document.getElementById("adm_email")?.value?.trim();
-  const exp=document.getElementById("adm_experience")?.value?.trim();
-  const dist=document.getElementById("adm_district")?.value?.trim();
-  const st=document.getElementById("adm_status");
-  if (!name){alert("Name is required.");return;}
-  if (!category){alert("Please select a category.");return;}
-  st.textContent="Saving...";st.style.color="#888";
-  try{
-    const photoInput=document.getElementById("adm_photo");
-    let photoURL=null;
-    if(photoInput?.files[0])photoURL=await uploadToCloudinary(photoInput.files[0]);
-    const newBmcId = await getNextBmcId();
-    const specialty = document.getElementById('adm_specialty')?.value || '';
-    await addDoc(collection(db,"members"),{fullname:name,mobile:mobile||"",sector:sector||"",specialty,category,email:email||"",experience:exp||"",dist_c:dist||"",status:"approved",bmcId:newBmcId,addedByAdmin:true,createdAt:serverTimestamp(),approvedAt:serverTimestamp(),...(photoURL&&{photoURL})});
-    st.textContent="✓ Member added!";st.style.color="#157040";
-    ["adm_name","adm_mobile","adm_sector","adm_specialty","adm_email","adm_experience","adm_district"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
-    document.getElementById("adm_category").value="";
-    if(photoInput)photoInput.value="";
-    closeAddMemberModal();
-    loadMembers();
-    setTimeout(()=>{st.textContent="";},3000);
-  }catch(e){st.textContent="Error: "+e.message;st.style.color="#B8111A";}
-};
-
-/* ═══════════════════════════════════════
-   MEMBER DETAIL MODAL
-═══════════════════════════════════════ */
+// ── MEMBER DETAIL MODAL ──
 window.viewMemberDetail = async (id) => {
   let m = allMembersData[id];
   if (!m) {
     try {
       const snap = await getDoc(doc(db,'members',id));
-      if (snap.exists()) m = { ...snap.data(), id };
+      if (snap.exists()) m = {...snap.data(), id};
     } catch(e) { alert('Could not load member details.'); return; }
   }
   if (!m) { alert('Member not found.'); return; }
 
   const init = (m.fullname||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const avatarHtml = m.photoURL ? `<img src="${m.photoURL}" alt="${m.fullname}">` : init;
+
   $('modalHeader').innerHTML = `
-    <div class="a-modal-avatar">${m.photoURL ? `<img src="${m.photoURL}" alt="${m.fullname}">` : init}</div>
+    <div class="a-modal-avatar">${avatarHtml}</div>
     <div>
       <div class="a-modal-name">${m.fullname||'—'}</div>
-      <div class="a-modal-role">${m.specialty||''} · ${m.sector||''}</div>
+      <div class="a-modal-role">${m.sector||''}</div>
       <div style="margin-top:6px;">
-        <span class="status-badge ${m.status==='approved'?'status-approved':m.status==='pending'?'status-pending':'status-rejected'}">${m.status||'pending'}</span>
-        ${m.membership==='Lifetime'?'<span class="status-badge" style="background:rgba(184,17,26,0.1);color:#B8111A;border:1px solid rgba(184,17,26,0.25);margin-left:6px;">Lifetime Member</span>':''}
+        <span class="status-badge status-approved">${m.status||'approved'}</span>
+        ${m.category?`<span class="status-badge" style="background:rgba(184,17,26,0.1);color:#B8111A;border:1px solid rgba(184,17,26,0.25);margin-left:6px;">${m.category}</span>`:''}
       </div>
     </div>`;
 
   const rows = [
-    ['Full Name',        m.fullname],
-    ['Sector',           m.sector],
-    ['Specialization',   m.specialty],
-    ['Experience',       m.experience],
-    ['Membership',       m.membership],
-    ['Mobile',           m.mobile],
-    ['WhatsApp',         m.whatsapp],
-    ['Email',            m.email],
-    ['Facebook',         m.facebook ? `<a href="${m.facebook}" target="_blank" style="color:#0B3D20;">${m.facebook}</a>` : ''],
-    ['NID Number',       m.nid],
-    ['Date of Birth',    m.dob],
-    ['Blood Group',      m.blood],
-    ['Current Address',  [m.thana_c, m.dist_c, m.div_c, m.addr_c].filter(Boolean).join(', ')],
-    ['Permanent Address',[m.thana_p, m.dist_p, m.div_p, m.addr_p].filter(Boolean).join(', ')],
-    ['Organization',     m.organization],
-    ['Joined',           m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}) : ''],
+    ['Full Name', m.fullname],
+    ['Sector', m.sector],
+    ['Category', m.category||'General Member'],
+    ['Experience', m.experience],
+    ['Mobile', m.mobile],
+    ['WhatsApp', m.whatsapp],
+    ['Email', m.email],
+    ['Facebook', m.facebook ? `<a href="${m.facebook}" target="_blank" style="color:#0B3D20;">${m.facebook}</a>` : '—'],
+    ['NID Number', m.nid],
+    ['Date of Birth', m.dob],
+    ['Blood Group', m.blood],
+    ['Current Address', [m.thana_c, m.dist_c, m.div_c, m.addr_c].filter(Boolean).join(', ')],
+    ['Organization', m.organization],
+    ['Joined', m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}) : '—'],
   ];
-
-  $('modalBody').innerHTML = rows
-    .filter(([,v]) => v)
-    .map(([label, value]) =>
-      `<div class="a-modal-row">
-        <div class="a-modal-label">${label}</div>
-        <div class="a-modal-value">${value||'—'}</div>
-      </div>`
-    ).join('');
+  $('modalBody').innerHTML = rows.map(([label, value]) =>
+    value ? `<div class="a-modal-row"><div class="a-modal-label">${label}</div><div class="a-modal-value">${value||'—'}</div></div>` : ''
+  ).join('');
 
   $('modalActions').innerHTML = `
-    <div style="margin-bottom:1rem;padding:1rem;background:#f9f9f9;border:1px solid #e5e7eb;">
-      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:8px;">Update Photo</div>
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-        <input type="file" id="memberPhotoInput_${id}" accept="image/*"
-          style="font-size:12px;font-family:Inter,sans-serif;flex:1;min-width:0;">
-        <button class="add-btn" style="white-space:nowrap;padding:8px 14px;font-size:11px;" onclick="uploadMemberPhoto('${id}')">📷 Upload Photo</button>
-      </div>
-      <p id="photoUploadStatus_${id}" style="font-size:11px;margin-top:6px;color:#888;"></p>
-    </div>
     <button class="add-btn" onclick="printMember('${id}')">🖨 Print</button>
-    <button class="add-btn" style="background:#B8111A;" onclick="downloadMemberPDF('${id}')">⬇ Download PDF</button>
-    <button class="abtn btn-delete" onclick="delMember('${id}');closeMemberModal()">Delete Member</button>
+    <button class="abtn btn-delete" onclick="event.stopPropagation();delMember('${id}');closeMemberModal()">Delete Member</button>
   `;
   $('memberModal').classList.add('open');
 };
-
 window.closeMemberModal = () => $('memberModal').classList.remove('open');
-$('memberModal')?.addEventListener('click', e => { if (e.target === $('memberModal')) closeMemberModal(); });
+$('memberModal')?.addEventListener('click', e => { if(e.target===$('memberModal')) closeMemberModal(); });
 
-/* ═══════════════════════════════════════
-   PRINT MEMBER
-═══════════════════════════════════════ */
+// ── PRINT ──
 window.printMember = (id) => {
   const m = allMembersData[id];
   if (!m) return;
-  const printWin = window.open('', '_blank', 'width=800,height=900');
+  const printWin = window.open('','_blank','width=800,height=900');
   const avatar = m.photoURL
     ? `<img src="${m.photoURL}" style="width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #0B3D20;">`
     : `<div style="width:100px;height:100px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-size:2rem;font-weight:700;">${(m.fullname||'?').charAt(0)}</div>`;
-
-  printWin.document.write(`<!DOCTYPE html><html><head>
-  <title>BMC Member — ${m.fullname}</title>
+  function prow(label, value) {
+    if (!value) return '';
+    return `<div style="display:flex;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f0f0f0;font-size:13px;"><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;min-width:140px;flex-shrink:0;">${label}</div><div style="color:#222;flex:1;">${value}</div></div>`;
+  }
+  printWin.document.write(`<!DOCTYPE html><html><head><title>BMC — ${m.fullname}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:wght@400;700&family=Inter:wght@400;600&display=swap');
     body{font-family:'Inter',sans-serif;margin:0;padding:0;background:#fff;color:#111;}
     .header{background:#0B3D20;padding:2rem;display:flex;align-items:center;gap:1.5rem;color:#fff;}
     .name{font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:700;}
     .role{font-size:13px;color:rgba(255,255,255,0.65);margin-top:4px;}
-    .badge{display:inline-block;padding:3px 12px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;background:rgba(201,168,76,0.2);color:#C9A84C;border:1px solid rgba(201,168,76,0.4);margin-top:6px;}
     .body{padding:2rem;}
-    .sec-title{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#B8111A;margin:1.5rem 0 0.8rem;padding-bottom:6px;border-bottom:1px solid rgba(184,17,26,0.2);}
-    .row{display:flex;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid #f0f0f0;font-size:13px;}
-    .row:last-child{border:none;}
-    .label{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;min-width:140px;flex-shrink:0;padding-top:1px;}
-    .value{color:#222;flex:1;}
-    .footer{margin-top:2rem;padding:1rem 2rem;background:#f9f9f9;border-top:2px solid #0B3D20;text-align:center;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:#888;text-transform:uppercase;}
+    .sec{font-family:'Cinzel',serif;font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#B8111A;margin:1.5rem 0 0.8rem;padding-bottom:6px;border-bottom:1px solid rgba(184,17,26,0.2);}
+    .footer{margin-top:2rem;padding:1rem 2rem;background:#f9f9f9;border-top:2px solid #0B3D20;text-align:center;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:#888;}
     @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
   </style></head><body>
-  <div class="header">
-    ${avatar}
-    <div>
-      <div class="name">${m.fullname||'—'}</div>
-      <div class="role">${m.specialty||''} · ${m.sector||''}</div>
-      <div class="badge">${m.membership||'General'} Member</div>
-    </div>
-    <div style="margin-left:auto;text-align:right;">
-      <div style="font-family:Cinzel,serif;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);text-transform:uppercase;">Bangladesh Musician's Club</div>
-      <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;">Est. 2022 · Dhaka, Bangladesh</div>
-    </div>
+  <div class="header">${avatar}
+    <div><div class="name">${m.fullname||'—'}</div><div class="role">${m.sector||''}</div></div>
+    <div style="margin-left:auto;text-align:right;font-family:Cinzel,serif;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,0.4);text-transform:uppercase;">Bangladesh Musician's Club</div>
   </div>
   <div class="body">
-    <div class="sec-title">Personal Information</div>
+    <div class="sec">Personal Information</div>
     ${prow('Full Name',m.fullname)}${prow('Date of Birth',m.dob)}${prow('Blood Group',m.blood)}${prow('NID Number',m.nid)}
-    <div class="sec-title">Contact Information</div>
-    ${prow('Mobile',m.mobile)}${prow('WhatsApp',m.whatsapp)}${prow('Email',m.email)}${prow('Facebook',m.facebook)}
-    <div class="sec-title">Current Address</div>
-    ${prow('Division',m.div_c)}${prow('District',m.dist_c)}${prow('Thana / Upazila',m.thana_c)}${prow('Full Address',m.addr_c)}
-    <div class="sec-title">Permanent Address</div>
-    ${prow('Division',m.div_p)}${prow('District',m.dist_p)}${prow('Thana / Upazila',m.thana_p)}${prow('Full Address',m.addr_p)}
-    <div class="sec-title">Professional Information</div>
-    ${prow('Sector',m.sector)}${prow('Specialization',m.specialty)}${prow('Experience',m.experience)}${prow('Organization',m.organization)}
-    ${prow('Membership Type',m.membership)}
-    ${prow('Member Since', m.createdAt?.toDate ? m.createdAt.toDate().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'}) : '—')}
+    <div class="sec">Contact Information</div>
+    ${prow('Mobile',m.mobile)}${prow('WhatsApp',m.whatsapp)}${prow('Email',m.email)}
+    <div class="sec">Professional Information</div>
+    ${prow('Sector',m.sector)}${prow('Experience',m.experience)}${prow('Organization',m.organization)}${prow('Category',m.category||'General Member')}
   </div>
-  <div class="footer">Bangladesh Musician's Club · Est. 2022 · Dhaka, Bangladesh · bangladeshmusiciansclub2022@gmail.com</div>
-  <script>window.onload=()=>{ window.print(); }<\/script>
-  </body></html>`);
+  <div class="footer">Bangladesh Musician's Club · Est. 2022 · Dhaka, Bangladesh</div>
+  <script>window.onload=()=>window.print()<\/script></body></html>`);
   printWin.document.close();
 };
 
-function prow(label, value) {
-  if (!value) return '';
-  return `<div class="row"><div class="label">${label}</div><div class="value">${value}</div></div>`;
-}
-
-window.downloadMemberPDF = async (id) => {
-  alert('PDF ডাউনলোডের জন্য:\n1. Print উইন্ডো খুলবে\n2. Destination এ "Save as PDF" সিলেক্ট করুন\n3. Save করুন');
-  printMember(id);
-};
-
-/* ═══════════════════════════════════════
-   COMMITTEE MANAGER (generic)
-═══════════════════════════════════════ */
-async function loadCommMgr(col, wrapperId) {
+// ═══════════════════════════════════════════════════════
+// ── CATEGORY MANAGER (Founders / Advisers) ──
+// Approved members list থেকে select করে category assign
+// ═══════════════════════════════════════════════════════
+async function loadCategoryMgr(categoryName, wrapperId) {
   const w = $(wrapperId);
   if (!w) return;
-  const snap = await getDocs(query(collection(db, col), orderBy('order','asc'))).catch(() => null);
+  w.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
 
-  w.innerHTML = `
-    <div class="panel">
-      <div class="panel-title">Add Person</div>
-      <div class="fi">
-        <div class="fr2">
-          <input type="text"   id="${col}_name"   placeholder="Full Name *">
-          <input type="text"   id="${col}_role"   placeholder="Role / Position *">
+  try {
+    const snap = await getDocs(query(collection(db,'members'), where('status','==','approved')));
+    const allApproved = snap.docs.map(d => ({id:d.id, ...d.data()}));
+
+    // এই category তে assigned members
+    const assigned = allApproved.filter(m => m.category === categoryName);
+    // Unassigned (General Member বা category নেই)
+    const unassigned = allApproved.filter(m => !m.category || m.category === 'General Member');
+
+    const catLabel = categoryName === 'Founding Member' ? 'Founding Member' : 'Honorary Member (Adviser)';
+    const catColor = categoryName === 'Founding Member' ? '#B8111A' : '#C9A84C';
+    const catBg    = categoryName === 'Founding Member' ? 'rgba(184,17,26,0.07)' : 'rgba(201,168,76,0.1)';
+
+    w.innerHTML = `
+      <!-- Assign from Members -->
+      <div class="panel">
+        <div class="panel-title" style="color:${catColor};">
+          👥 Assign Member as ${catLabel}
         </div>
-        <div class="fr2">
-          <input type="text"   id="${col}_sector" placeholder="Sector (e.g. Musicians)">
-          <input type="number" id="${col}_order"  placeholder="Display Order" value="1">
+        <div style="margin-bottom:1rem;">
+          <input type="text" id="${wrapperId}_search" placeholder="নাম দিয়ে খুঁজুন..."
+            oninput="filterAssignList('${wrapperId}','${categoryName}')"
+            style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:'Inter',sans-serif;outline:none;">
         </div>
-        <input type="file" id="${col}_photo" accept="image/*">
-        <p style="font-size:12px;color:#888;">Clear profile photo recommended — square, min 200×200px.</p>
-        <button class="add-btn" onclick="addComm('${col}')">Add Person</button>
-        <p id="${col}_st" style="font-size:12px;color:#888;"></p>
+        <div id="${wrapperId}_list" style="max-height:320px;overflow-y:auto;border:1px solid #e5e7eb;">
+          ${unassigned.length === 0
+            ? '<p style="color:#888;padding:1rem;font-size:13px;">সব approved member ইতিমধ্যে assign করা আছে।</p>'
+            : unassigned.map(m => memberAssignRow(m, categoryName, wrapperId)).join('')
+          }
+        </div>
+        <p style="font-size:11px;color:#aaa;margin-top:8px;">* General Member হিসেবে আছেন এমন approved members দেখাচ্ছে।</p>
       </div>
-    </div>
-    <div class="panel">
-      <div class="panel-title">Current Members</div>
-      ${snap && !snap.empty
-        ? tbl(
-            ['Photo','Name','Role','Sector','Order','Action'],
-            snap.docs.map(d => {
-              const p = d.data();
-              return `<tr>
-                <td>${avatarDiv(p.photoURL, p.name, 44)}</td>
-                <td><strong>${p.name||'—'}</strong></td>
-                <td>${p.role||''}</td>
-                <td>${p.sector||''}</td>
-                <td>${p.order||''}</td>
-                <td>${delBtn(`delComm_${col}`, d.id)}</td>
-              </tr>`;
-            }).join('')
-          )
-        : '<p style="color:#888;font-size:13px;padding:1rem;">No members added yet.</p>'}
-    </div>`;
 
-  window[`delComm_${col}`] = async id => {
-    if (!confirm('Delete this person?')) return;
-    await deleteDoc(doc(db, col, id));
-    loadCommMgr(col, wrapperId);
-  };
+      <!-- Currently Assigned -->
+      <div class="panel">
+        <div class="panel-title">
+          ✅ Current ${catLabel}s
+          <span style="background:${catColor};color:#fff;padding:3px 12px;font-size:10px;letter-spacing:1px;">${assigned.length} জন</span>
+        </div>
+        ${assigned.length === 0
+          ? '<p style="color:#888;font-size:13px;padding:1rem;">কেউ এখনো assign করা হয়নি।</p>'
+          : `<div style="overflow-x:auto;"><table class="table">
+              <tr><th>Photo</th><th>Name</th><th>Sector</th><th>Mobile</th><th>Action</th></tr>
+              ${assigned.map(m => {
+                const photo = m.photoURL
+                  ? `<img src="${m.photoURL}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;">`
+                  : `<div style="width:44px;height:44px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-weight:700;">${(m.fullname||'?').charAt(0)}</div>`;
+                return `<tr>
+                  <td>${photo}</td>
+                  <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.bmcId||''}</small></td>
+                  <td>${m.sector||''}</td>
+                  <td>${m.mobile||''}</td>
+                  <td><button class="abtn btn-delete" onclick="removeCategory('${m.id}','${wrapperId}','${categoryName}')">Remove</button></td>
+                </tr>`;
+              }).join('')}
+            </table></div>`
+        }
+      </div>`;
+
+    // Store unassigned list for search filtering
+    window[`_assignData_${wrapperId}`] = { unassigned, categoryName };
+
+  } catch(e) {
+    w.innerHTML = `<p style="color:#B8111A;padding:1rem;">Error: ${e.message}</p>`;
+  }
 }
 
-window.addComm = async col => {
-  const name = val(`${col}_name`), role = val(`${col}_role`);
-  if (!name || !role) { alert('Name and role are required.'); return; }
-  const st = $(`${col}_st`);
-  st.textContent = 'Saving...';
-  try {
-    const data = {
-      name, role,
-      sector: val(`${col}_sector`),
-      order:  parseInt(val(`${col}_order`)) || 1,
-      createdAt: serverTimestamp()
-    };
-    const url = await upload(`${col}_photo`);
-    if (url) data.photoURL = url;
-    await addDoc(collection(db, col), data);
-    st.textContent = '✓ Added successfully!';
-    const info = COMM_MAP[col];
-    if (info) setTimeout(() => loadCommMgr(info.col, info.wrap), 800);
-  } catch(e) { st.textContent = 'Error: ' + e.message; }
+function memberAssignRow(m, categoryName, wrapperId) {
+  const photo = m.photoURL
+    ? `<img src="${m.photoURL}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;">`
+    : `<div style="width:40px;height:40px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-weight:700;">${(m.fullname||'?').charAt(0)}</div>`;
+  return `<div class="assign-row" data-name="${(m.fullname||'').toLowerCase()}" data-id="${m.id}"
+    style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f0f0f0;transition:background 0.15s;"
+    onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background=''">
+    ${photo}
+    <div style="flex:1;">
+      <div style="font-weight:600;font-size:13px;color:#111;">${m.fullname||'—'}</div>
+      <div style="font-size:11px;color:#888;">${m.sector||''} ${m.bmcId?'· '+m.bmcId:''}</div>
+    </div>
+    <button class="abtn btn-approve" onclick="assignCategory('${m.id}','${categoryName}','${wrapperId}')">
+      + Assign
+    </button>
+  </div>`;
+}
+
+window.filterAssignList = function(wrapperId, categoryName) {
+  const q = $(`${wrapperId}_search`)?.value?.toLowerCase() || '';
+  const data = window[`_assignData_${wrapperId}`];
+  if (!data) return;
+  const listEl = $(`${wrapperId}_list`);
+  if (!listEl) return;
+  const filtered = data.unassigned.filter(m =>
+    !q || (m.fullname||'').toLowerCase().includes(q) || (m.bmcId||'').toLowerCase().includes(q)
+  );
+  listEl.innerHTML = filtered.length
+    ? filtered.map(m => memberAssignRow(m, categoryName, wrapperId)).join('')
+    : '<p style="color:#888;padding:1rem;font-size:13px;">কোনো member পাওয়া যায়নি।</p>';
 };
 
-/* ═══════════════════════════════════════
-   EVENTS
-═══════════════════════════════════════ */
-async function loadEvents() {
-  const con = $('eventsList');
-  if (!con) return;
-  con.innerHTML = 'Loading...';
+window.assignCategory = async (memberId, categoryName, wrapperId) => {
   try {
-    const snap = await getDocs(query(collection(db,'events'), orderBy('date','desc')));
-    if (snap.empty) { con.innerHTML = '<p style="color:#888;padding:1rem;">No events yet.</p>'; return; }
-    con.innerHTML = tbl(
-      ['Title','Date','Location','Tag','Status','Action'],
-      snap.docs.map(d => {
-        const e = d.data();
-        const statusStyle = e.upcoming
-          ? 'background:rgba(21,112,64,0.1);color:#157040;border:1px solid rgba(21,112,64,0.2);'
-          : 'background:rgba(0,0,0,0.05);color:#888;border:1px solid #ddd;';
+    await updateDoc(doc(db,'members',memberId), { category: categoryName });
+    alert(`✓ ${categoryName} হিসেবে assign করা হয়েছে!`);
+    loadCategoryMgr(categoryName, wrapperId);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+};
+
+window.removeCategory = async (memberId, wrapperId, categoryName) => {
+  if (!confirm('এই member কে category থেকে remove করবেন? তিনি General Member হয়ে যাবেন।')) return;
+  try {
+    await updateDoc(doc(db,'members',memberId), { category: 'General Member' });
+    alert('✓ Remove করা হয়েছে।');
+    loadCategoryMgr(categoryName, wrapperId);
+  } catch(e) {
+    alert('Error: ' + e.message);
+  }
+};
+
+// ── OLD COMMITTEE MANAGER (committee, subcommittee এর জন্য) ──
+async function loadCommMgr(col, wrapperId) {
+  const w = $(wrapperId); if (!w) return;
+  const snap = await getDocs(query(collection(db,col),orderBy('order','asc'))).catch(()=>null);
+  w.innerHTML = `
+    <div class="panel"><div class="panel-title">Add Person</div>
+    <div class="fi">
+      <div class="fr2">
+        <input type="text" id="${col}_name" placeholder="Full Name *">
+        <input type="text" id="${col}_role" placeholder="Role / Position *">
+      </div>
+      <div class="fr2">
+        <input type="text" id="${col}_sector" placeholder="Sector">
+        <input type="number" id="${col}_order" placeholder="Display Order" value="1">
+      </div>
+      <input type="file" id="${col}_photo" accept="image/*">
+      <button class="add-btn" onclick="addComm('${col}')">Add Person</button>
+      <p id="${col}_st" style="font-size:12px;color:#888;"></p>
+    </div></div>
+    <div class="panel"><div class="panel-title">Current Members</div>
+    ${snap&&!snap.empty
+      ? tbl(['Photo','Name','Role','Sector','Order','Action'],
+          snap.docs.map(d=>{
+            const m=d.data();
+            const photo = m.photoURL
+              ? `<img src="${m.photoURL}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;">`
+              : `<div style="width:44px;height:44px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-weight:700;">${(m.name||'?').charAt(0)}</div>`;
+            return `<tr>
+              <td>${photo}</td>
+              <td><strong>${m.name||'—'}</strong></td>
+              <td>${m.role||''}</td>
+              <td>${m.sector||''}</td>
+              <td>${m.order||''}</td>
+              <td>${delBtn(`delComm_${col}`,d.id)}</td>
+            </tr>`;
+          }).join(''))
+      : '<p style="color:#888;font-size:13px;padding:1rem;">No members added yet.</p>'}
+    </div>`;
+
+  const wrapMap = {committee:'mgr-committee',subcommittee:'mgr-subcommittee'};
+  window[`delComm_${col}`] = async id => {
+    if(!confirm('Delete this person?')) return;
+    await deleteDoc(doc(db,col,id));
+    loadCommMgr(col, wrapMap[col]);
+  };
+}
+window.addComm = async col => {
+  const name = val(`${col}_name`), role = val(`${col}_role`);
+  if (!name||!role) { alert('Name and role are required.'); return; }
+  const st = $(`${col}_st`); st.textContent='Saving...';
+  try {
+    const data = { name, role, sector:val(`${col}_sector`), order:parseInt(val(`${col}_order`))||1, createdAt:serverTimestamp() };
+    const url = await upload(`${col}_photo`);
+    if (url) data.photoURL = url;
+    await addDoc(collection(db,col), data);
+    st.textContent='✓ Added!';
+    const wrapMap = {committee:'mgr-committee',subcommittee:'mgr-subcommittee'};
+    setTimeout(()=>loadCommMgr(col,wrapMap[col]),800);
+  } catch(e) { st.textContent='Error: '+e.message; }
+};
+
+// ── NEWS ──
+async function loadNews() {
+  const con = $('newsList'); if(!con) return; con.innerHTML='Loading...';
+  try {
+    const snap = await getDocs(query(collection(db,'news'),orderBy('createdAt','desc')));
+    if(snap.empty){con.innerHTML='<p style="color:#888;padding:1rem;">No news yet.</p>';return;}
+    con.innerHTML = tbl(['Image','Title','Tag','Action'],
+      snap.docs.map(d=>{
+        const n=d.data();
+        return `<tr>
+          <td>${n.imageURL?`<img src="${n.imageURL}" style="width:70px;height:48px;object-fit:cover;">`:'—'}</td>
+          <td><strong>${n.title||'—'}</strong><br><small style="color:#888;">${(n.excerpt||'').slice(0,60)}</small></td>
+          <td>${n.tag||''}</td>
+          <td>${delBtn('delNews',d.id)}</td>
+        </tr>`;
+      }).join(''));
+  } catch(e){ console.error(e); }
+}
+window.addNews = async () => {
+  const title=val('nw_title'); if(!title){alert('Title is required.');return;}
+  const st=$('nw_status'); st.textContent='Publishing...';
+  try {
+    const data={title,tag:val('nw_tag'),excerpt:val('nw_excerpt'),createdAt:serverTimestamp()};
+    const url=await upload('nw_image'); if(url)data.imageURL=url;
+    await addDoc(collection(db,'news'),data);
+    st.textContent='✓ Published!';
+    ['nw_title','nw_tag','nw_excerpt'].forEach(id=>{const el=$(id);if(el)el.value='';});
+    loadNews();
+  } catch(e){st.textContent='Error: '+e.message;}
+};
+window.delNews = async id=>{if(!confirm('Delete?'))return;await deleteDoc(doc(db,'news',id));loadNews();};
+
+// ── EVENTS ──
+async function loadEvents() {
+  const con=$('eventsList'); if(!con)return; con.innerHTML='Loading...';
+  try {
+    const snap=await getDocs(query(collection(db,'events'),orderBy('date','desc')));
+    if(snap.empty){con.innerHTML='<p style="color:#888;padding:1rem;">No events.</p>';return;}
+    con.innerHTML=tbl(['Title','Date','Location','Tag','Status','Action'],
+      snap.docs.map(d=>{
+        const e=d.data();
         return `<tr>
           <td><strong>${e.title||'—'}</strong></td>
           <td>${e.date||''}</td>
           <td>${e.location||''}</td>
           <td>${e.tag||''}</td>
-          <td><span style="font-size:10px;padding:3px 10px;font-weight:700;${statusStyle}">${e.upcoming?'Upcoming':'Past'}</span></td>
-          <td>${delBtn('delEvent', d.id)}</td>
+          <td><span style="font-size:10px;padding:3px 10px;background:${e.upcoming?'rgba(21,112,64,0.1)':'rgba(0,0,0,0.05)'};color:${e.upcoming?'#157040':'#888'};font-weight:700;border:1px solid ${e.upcoming?'rgba(21,112,64,0.2)':'#ddd'};">${e.upcoming?'Upcoming':'Past'}</span></td>
+          <td>${delBtn('delEvent',d.id)}</td>
         </tr>`;
-      }).join('')
-    );
-  } catch(e) { console.error(e); }
+      }).join(''));
+  } catch(e){console.error(e);}
 }
-
-window.addEvent = async () => {
-  const title = val('ev_title');
-  if (!title) { alert('Event title is required.'); return; }
-  const st = $('evStatus');
-  if (st) { st.textContent = 'Saving...'; st.style.color = '#888'; }
-  try {
-    let imageURL = null;
-    const imgInput = $('ev_image');
-    if (imgInput?.files[0]) {
-      if (st) st.textContent = 'Uploading image...';
-      try { imageURL = await uploadToCloudinary(imgInput.files[0]); } catch(ue) { console.warn('Image upload failed:', ue); }
-    }
-    await addDoc(collection(db,'events'), {
-      title,
-      location:    val('ev_location'),
-      date:        val('ev_date'),
-      tag:         val('ev_tag'),
-      description: val('ev_description') || '',
-      upcoming:    $('ev_upcoming')?.checked || false,
-      ...(imageURL && { imageURL }),
-      createdAt:   serverTimestamp()
+window.addEvent = async()=>{
+  const title=val('ev_title'); if(!title){alert('Title is required.');return;}
+  try{
+    await addDoc(collection(db,'events'),{
+      title,location:val('ev_location'),date:val('ev_date'),
+      tag:val('ev_tag'),upcoming:$('ev_upcoming').checked,createdAt:serverTimestamp()
     });
-    ['ev_title','ev_location','ev_date','ev_tag','ev_description'].forEach(id => { const el=$(id); if(el) el.value=''; });
-    if ($('ev_upcoming')) $('ev_upcoming').checked = false;
-    if (imgInput) imgInput.value = '';
-    if (st) { st.textContent = '✓ Event added!'; st.style.color = '#157040'; setTimeout(()=>{st.textContent='';},3000); }
+    alert('✓ Event added!');
+    ['ev_title','ev_location','ev_date','ev_tag'].forEach(id=>{const el=$(id);if(el)el.value='';});
     loadEvents();
-  } catch(e) {
-    if (st) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
-    else alert('Error: ' + e.message);
-  }
+  }catch(e){alert('Error: '+e.message);}
 };
-window.delEvent = async id => {
-  if (!confirm('Delete?')) return;
-  await deleteDoc(doc(db,'events',id));
-  loadEvents();
-};
+window.delEvent=async id=>{if(!confirm('Delete?'))return;await deleteDoc(doc(db,'events',id));loadEvents();};
 
-/* ═══════════════════════════════════════
-   GALLERY
-═══════════════════════════════════════ */
-async function loadGallery() {
-  const con = $('galleryList');
-  if (!con) return;
-  try {
-    const snap = await getDocs(query(collection(db,'gallery'), orderBy('createdAt','desc')));
-    if (snap.empty) { con.innerHTML = '<p style="color:#888;padding:1rem;">No photos yet.</p>'; return; }
-    con.innerHTML = snap.docs.map(d => {
-      const g = d.data();
-      const inSlide = g.showInSlideshow ? 'border:3px solid #C9A84C;' : '';
-      const slideBtnLabel = g.showInSlideshow ? '★ In Slideshow' : '☆ Add to Slideshow';
-      const slideBtnStyle = g.showInSlideshow ? 'background:#C9A84C;color:#0B3D20;' : 'background:rgba(0,0,0,0.55);color:#fff;';
-      return `<div style="position:relative;${inSlide}">
+// ── GALLERY ──
+async function loadGallery(){
+  const con=$('galleryList'); if(!con)return;
+  try{
+    const snap=await getDocs(query(collection(db,'gallery'),orderBy('createdAt','desc')));
+    if(snap.empty){con.innerHTML='<p style="color:#888;padding:1rem;">No photos.</p>';return;}
+    con.innerHTML=snap.docs.map(d=>{
+      const g=d.data();
+      return `<div style="position:relative;">
         <img src="${g.url}" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block;">
-        <div style="padding:6px 8px;font-size:11px;color:#888;">${g.caption||''}</div>
-        <button onclick="toggleSlideshow('${d.id}',${!g.showInSlideshow})" style="position:absolute;top:6px;left:6px;${slideBtnStyle}border:none;cursor:pointer;padding:4px 8px;font-size:10px;font-weight:700;">${slideBtnLabel}</button>
+        <div style="padding:6px;font-size:11px;color:#888;">${g.caption||''}</div>
         <button onclick="delGallery('${d.id}')" style="position:absolute;top:6px;right:6px;background:#B8111A;color:#fff;border:none;cursor:pointer;padding:4px 10px;font-size:11px;font-weight:700;">✕</button>
       </div>`;
     }).join('');
-  } catch(e) { console.error(e); }
+  }catch(e){console.error(e);}
 }
-
-window.toggleSlideshow = async (id, show) => {
-  try {
-    await updateDoc(doc(db,'gallery',id), { showInSlideshow: show });
+window.uploadGallery=async()=>{
+  const st=$('galleryStatus'); st.textContent='Uploading...';
+  try{
+    const url=await upload('galleryPhoto');
+    if(!url){st.textContent='Please select a photo.';return;}
+    await addDoc(collection(db,'gallery'),{url,caption:val('galleryCaption'),createdAt:serverTimestamp()});
+    st.textContent='✓ Uploaded!';
+    $('galleryPhoto').value=''; $('galleryCaption').value='';
     loadGallery();
-  } catch(e) { alert('Error: ' + e.message); }
+  }catch(e){st.textContent='Error: '+e.message;}
 };
+window.delGallery=async id=>{if(!confirm('Delete?'))return;await deleteDoc(doc(db,'gallery',id));loadGallery();};
 
-window.uploadGallery = async () => {
-  const st = $('galleryStatus');
-  const fileInput = $('galleryPhoto');
-  const files = fileInput?.files;
-  if (!files || files.length === 0) { st.textContent = 'Please select photos.'; return; }
-  st.textContent = `Uploading 0 / ${files.length}...`;
-  let uploaded = 0;
-  for (const file of Array.from(files)) {
-    try {
-      const url = await uploadToCloudinary(file);
-      if (url) {
-        await addDoc(collection(db,'gallery'), { url, caption: val('galleryCaption'), showInSlideshow: false, createdAt: serverTimestamp() });
-        uploaded++;
-        st.textContent = `Uploading ${uploaded} / ${files.length}...`;
-      }
-    } catch(e) { console.error('Upload error:', file.name, e); }
-  }
-  st.textContent = `✓ ${uploaded} photo(s) uploaded!`;
-  fileInput.value = '';
-  $('galleryCaption').value = '';
-  setTimeout(() => { st.textContent = ''; }, 4000);
-  loadGallery();
-};
-
-window.delGallery = async id => {
-  if (!confirm('Delete this photo?')) return;
-  await deleteDoc(doc(db,'gallery',id));
-  loadGallery();
-};
-
-/* ═══════════════════════════════════════
-   VIDEOS
-═══════════════════════════════════════ */
-async function loadVideos() {
-  const con = $('videosList');
-  if (!con) return;
-  con.innerHTML = 'Loading...';
-  try {
-    const snap = await getDocs(query(collection(db,'videos'), orderBy('createdAt','desc')));
-    if (snap.empty) { con.innerHTML = '<p style="color:#888;padding:1rem;">No videos yet.</p>'; return; }
-    con.innerHTML = tbl(
-      ['Preview','Title','YouTube ID','Date','Action'],
-      snap.docs.map(d => {
-        const v = d.data();
+// ── VIDEOS ──
+async function loadVideos(){
+  const con=$('videosList'); if(!con)return; con.innerHTML='Loading...';
+  try{
+    const snap=await getDocs(query(collection(db,'videos'),orderBy('createdAt','desc')));
+    if(snap.empty){con.innerHTML='<p style="color:#888;padding:1rem;">No videos.</p>';return;}
+    con.innerHTML=tbl(['Preview','Title','YouTube ID','Date','Action'],
+      snap.docs.map(d=>{
+        const v=d.data();
         return `<tr>
           <td><img src="https://img.youtube.com/vi/${v.youtubeId}/mqdefault.jpg" style="width:80px;height:50px;object-fit:cover;"></td>
           <td><strong>${v.title||'—'}</strong></td>
           <td style="font-size:12px;color:#888;">${v.youtubeId||''}</td>
           <td>${v.date||''}</td>
-          <td>${delBtn('delVideo', d.id)}</td>
+          <td>${delBtn('delVideo',d.id)}</td>
         </tr>`;
-      }).join('')
-    );
-  } catch(e) { console.error(e); }
+      }).join(''));
+  }catch(e){console.error(e);}
 }
-
-window.addVideo = async () => {
-  const title = val('vd_title'), ytId = val('vd_youtubeId');
-  if (!title || !ytId) { alert('Title and YouTube ID are required.'); return; }
-  try {
-    await addDoc(collection(db,'videos'), { title, youtubeId: ytId, date: val('vd_date'), createdAt: serverTimestamp() });
+window.addVideo=async()=>{
+  const title=val('vd_title'),ytId=val('vd_youtubeId');
+  if(!title||!ytId){alert('Title and YouTube ID are required.');return;}
+  try{
+    await addDoc(collection(db,'videos'),{title,youtubeId:ytId,date:val('vd_date'),createdAt:serverTimestamp()});
     alert('✓ Video added!');
-    ['vd_title','vd_youtubeId','vd_date'].forEach(id => { const el=$(id); if(el) el.value=''; });
+    ['vd_title','vd_youtubeId','vd_date'].forEach(id=>{const el=$(id);if(el)el.value='';});
     loadVideos();
-  } catch(e) { alert('Error: ' + e.message); }
+  }catch(e){alert('Error: '+e.message);}
 };
-window.delVideo = async id => {
-  if (!confirm('Delete?')) return;
-  await deleteDoc(doc(db,'videos',id));
-  loadVideos();
-};
+window.delVideo=async id=>{if(!confirm('Delete?'))return;await deleteDoc(doc(db,'videos',id));loadVideos();};
 
-/* ═══════════════════════════════════════
-   FEEDBACK
-═══════════════════════════════════════ */
-async function loadFeedback() {
-  const con = $('feedbackList');
-  if (!con) return;
-  con.innerHTML = 'Loading...';
-  try {
-    const snap = await getDocs(query(collection(db,'feedback'), orderBy('createdAt','desc')));
-    if (snap.empty) { con.innerHTML = '<p style="color:#888;padding:1rem;">No feedback yet.</p>'; return; }
-    con.innerHTML = tbl(
-      ['Type','Name','Subject','Message','Date','Action'],
-      snap.docs.map(d => {
-        const f = d.data();
+// ── FEEDBACK ──
+async function loadFeedback(){
+  const con=$('feedbackList'); if(!con)return; con.innerHTML='Loading...';
+  try{
+    const snap=await getDocs(query(collection(db,'feedback'),orderBy('createdAt','desc')));
+    if(snap.empty){con.innerHTML='<p style="color:#888;padding:1rem;">No feedback.</p>';return;}
+    con.innerHTML=tbl(['Type','Name','Subject','Message','Date','Action'],
+      snap.docs.map(d=>{
+        const f=d.data();
         const date = f.createdAt?.toDate ? f.createdAt.toDate().toLocaleDateString('en-GB') : '';
-        const typeStyle = f.type === 'Complaint'
-          ? 'background:rgba(184,17,26,0.1);color:#B8111A;border:1px solid rgba(184,17,26,0.25);'
-          : 'background:rgba(21,112,64,0.1);color:#157040;border:1px solid rgba(21,112,64,0.25);';
         return `<tr>
-          <td><span style="font-size:10px;padding:3px 10px;font-weight:700;${typeStyle}">${f.type||'Suggestion'}</span></td>
+          <td><span style="font-size:10px;padding:3px 10px;background:${f.type==='Complaint'?'rgba(184,17,26,0.1)':'rgba(21,112,64,0.1)'};color:${f.type==='Complaint'?'#B8111A':'#157040'};font-weight:700;border:1px solid ${f.type==='Complaint'?'rgba(184,17,26,0.25)':'rgba(21,112,64,0.25)'};">${f.type||'Suggestion'}</span></td>
           <td>${f.name||'Anonymous'}</td>
           <td><strong>${f.subject||'—'}</strong></td>
           <td style="font-size:12px;max-width:250px;">${f.message||''}</td>
           <td style="font-size:12px;color:#888;">${date}</td>
-          <td>${delBtn('delFeedback', d.id)}</td>
+          <td>${delBtn('delFeedback',d.id)}</td>
         </tr>`;
-      }).join('')
-    );
-  } catch(e) { console.error(e); }
+      }).join(''));
+  }catch(e){console.error(e);}
 }
-window.delFeedback = async id => {
-  if (!confirm('Delete?')) return;
-  await deleteDoc(doc(db,'feedback',id));
-  loadFeedback();
-};
-
-/* ═══════════════════════════════════════
-   MEMBER PHOTO UPLOAD (from modal)
-═══════════════════════════════════════ */
-window.uploadMemberPhoto = async (id) => {
-  const fileInput = document.getElementById(`memberPhotoInput_${id}`);
-  const st = document.getElementById(`photoUploadStatus_${id}`);
-  if (!fileInput?.files[0]) { st.textContent = 'Please select a photo.'; return; }
-  st.textContent = 'Uploading...'; st.style.color = '#888';
-  try {
-    const url = await uploadToCloudinary(fileInput.files[0]);
-    await updateDoc(doc(db,'members',id), { photoURL: url });
-    st.textContent = '✓ Photo updated!'; st.style.color = '#157040';
-    // modal header refresh
-    const init = (allMembersData[id]?.fullname||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    const avatarEl = document.querySelector('.a-modal-avatar');
-    if (avatarEl) avatarEl.innerHTML = `<img src="${url}" alt="photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
-    // update local cache
-    if (allMembersData[id]) allMembersData[id].photoURL = url;
-    loadMembers();
-    setTimeout(() => { st.textContent = ''; }, 3000);
-  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
-};
-
-/* ═══════════════════════════════════════
-   NOTICE MANAGEMENT
-═══════════════════════════════════════ */
-async function loadNotice() {
-  const con = $('noticeList');
-  if (!con) return;
-  con.innerHTML = '<div style="color:#888;font-size:13px;padding:1rem;">Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db,'notices'));
-    const docs = snap.docs.sort((a,b) => (b.data().createdAt?.seconds||0) - (a.data().createdAt?.seconds||0));
-    if (!docs.length) {
-      con.innerHTML = '<p style="color:#888;font-size:13px;padding:1rem;">No notices yet.</p>';
-      return;
-    }
-    con.innerHTML = tbl(
-      ['Title','Body','Date','Action'],
-      docs.map(d => {
-        const n = d.data();
-        const date = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleDateString('en-GB') : '—';
-        const safeTitle = (n.title||'').replace(/'/g,"\\'");
-        const safeBody  = (n.body||'').replace(/'/g,"\\'");
-        return `<tr>
-          <td><strong>${n.title||'—'}</strong></td>
-          <td style="font-size:12px;max-width:260px;white-space:pre-wrap;">${n.body||''}</td>
-          <td style="font-size:12px;color:#888;white-space:nowrap;">${date}</td>
-          <td style="white-space:nowrap;">
-            <button class="abtn btn-view" onclick="editNotice('${d.id}','${safeTitle}','${safeBody}')">✎ Edit</button>
-            ${delBtn('delNotice', d.id)}
-          </td>
-        </tr>`;
-      }).join('')
-    );
-  } catch(e) {
-    console.error('loadNotice error:', e);
-    con.innerHTML = `<p style="color:#B8111A;padding:1rem;">Error: ${e.message}</p>`;
-  }
-}
-
-window.addNotice = async () => {
-  const title = val('noticeTitle');
-  const body  = val('noticeBody');
-  const st    = $('noticeStatus');
-  if (!title) { alert('Notice title is required.'); return; }
-  st.textContent = 'Saving...'; st.style.color = '#888';
-  try {
-    await addDoc(collection(db,'notices'), { title, body, createdAt: serverTimestamp() });
-    st.textContent = '✓ Notice published!'; st.style.color = '#157040';
-    $('noticeTitle').value = ''; $('noticeBody').value = '';
-    const btn = $('noticeAddBtn');
-    if (btn) { btn.textContent = '+ Publish Notice'; btn.onclick = addNotice; }
-    setTimeout(() => { st.textContent = ''; }, 3000);
-    loadNotice();
-  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
-};
-
-window.editNotice = (id, title, body) => {
-  if ($('noticeTitle')) $('noticeTitle').value = title;
-  if ($('noticeBody'))  $('noticeBody').value  = body;
-  const btn = $('noticeAddBtn');
-  if (btn) {
-    btn.textContent = '💾 Update Notice';
-    btn.onclick = async () => {
-      const newTitle = val('noticeTitle');
-      const newBody  = val('noticeBody');
-      if (!newTitle) { alert('Title required.'); return; }
-      try {
-        await updateDoc(doc(db,'notices',id), { title: newTitle, body: newBody });
-        $('noticeTitle').value = ''; $('noticeBody').value = '';
-        btn.textContent = '+ Publish Notice'; btn.onclick = addNotice;
-        loadNotice();
-      } catch(e) { alert('Error: ' + e.message); }
-    };
-  }
-};
-
-window.delNotice = async id => {
-  if (!confirm('Delete this notice?')) return;
-  await deleteDoc(doc(db,'notices',id));
-  loadNotice();
-};
-
-/* ═══════════════════════════════════════
-   COMMITTEE ADMIN VIEW (read-only info)
-   Members collection থেকে category দিয়ে
-═══════════════════════════════════════ */
-async function loadCommitteeAdmin(col) {
-  const catMap = { founders: 'Founding Member', advisers: 'Honorary Member', executive: '__executive__' };
-  const gridId = col === 'founders' ? 'mgr-founders' : col === 'advisers' ? 'mgr-advisers' : 'mgr-executive';
-  const con = $(gridId);
-  if (!con) return;
-  con.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
-  try {
-    const snap = await getDocs(collection(db,'members'));
-    let docs;
-    if (col === 'executive') {
-      docs = snap.docs.filter(d => d.data().status === 'approved' && d.data().executiveRole);
-    } else {
-      docs = snap.docs.filter(d => d.data().status === 'approved' && d.data().category === catMap[col]);
-    }
-    if (!docs.length) { con.innerHTML = '<p style="color:#888;padding:1rem;">No members in this category yet.</p>'; return; }
-    con.innerHTML = tbl(
-      ['Photo','Name','BMC-ID','Sector', col==='executive'?'Role':'Category','Action'],
-      docs.map(d => {
-        const m = d.data();
-        const roleLabel = col === 'executive' ? (m.executiveRole||'—') : (m.category||'—');
-        return `<tr>
-          <td>${avatarDiv(m.photoURL, m.fullname, 44)}</td>
-          <td><strong>${m.fullname||'—'}</strong></td>
-          <td style="font-family:'Cinzel',serif;font-size:11px;color:#C9A84C;">${m.bmcId||'—'}</td>
-          <td>${m.sector||'—'}</td>
-          <td><span class="status-badge status-approved">${roleLabel}</span></td>
-          <td>
-            <button class="abtn btn-view" onclick="viewMemberDetail('${d.id}')">👁 Details</button>
-            <button class="abtn" style="background:#C9A84C;color:#fff;" onclick="editCategory('${d.id}','${m.category||'General Member'}')">✎ Category</button>
-          </td>
-        </tr>`;
-      }).join('')
-    );
-  } catch(e) { con.innerHTML = `<p style="color:#B8111A;padding:1rem;">Error: ${e.message}</p>`; }
-}
-
-/* ═══════════════════════════════════════
-   ABOUT PAGE — Admin Edit
-═══════════════════════════════════════ */
-async function loadAboutAdmin() {
-  const st = $('aboutStatus');
-  try {
-    const snap = await getDocs(collection(db,'settings'));
-    let about = null;
-    snap.docs.forEach(d => { if (d.id === 'about') about = d.data(); });
-    if (about) {
-      if ($('aboutIntro')) $('aboutIntro').value = about.intro || '';
-      if ($('aboutGoals')) $('aboutGoals').value = about.goals || '';
-    }
-  } catch(e) { console.error(e); }
-}
-
-window.saveAbout = async () => {
-  const intro  = $('aboutIntro')?.value?.trim() || '';
-  const goals  = $('aboutGoals')?.value?.trim() || '';
-  const st     = $('aboutStatus');
-  st.textContent = 'Saving...'; st.style.color = '#888';
-  try {
-    await setDoc(doc(db,'settings','about'), { intro, goals, updatedAt: serverTimestamp() });
-    st.textContent = '✓ About page saved!'; st.style.color = '#157040';
-    setTimeout(() => { st.textContent = ''; }, 3000);
-  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
-};
-
-/* ═══════════════════════════════════════
-   EXECUTIVE ROLE ASSIGN
-═══════════════════════════════════════ */
-async function loadExecutiveAssign() {
-  // Member dropdown populate
-  const sel = $('execMemberId');
-  const listEl = $('execList');
-  if (!sel || !listEl) return;
-  try {
-    const snap = await getDocs(collection(db,'members'));
-    const approved = snap.docs.filter(d => d.data().status === 'approved');
-    sel.innerHTML = '<option value="">— Select Approved Member —</option>' +
-      approved.map(d => {
-        const m = d.data();
-        return `<option value="${d.id}">${m.fullname||'—'} ${m.bmcId?'('+m.bmcId+')':''}${m.executiveRole?' ✓ '+m.executiveRole:''}</option>`;
-      }).join('');
-
-    // Current executive list
-    const execs = approved.filter(d => d.data().executiveRole);
-    if (!execs.length) { listEl.innerHTML = '<p style="color:#888;padding:1rem;">No executive roles assigned yet.</p>'; return; }
-    listEl.innerHTML = tbl(
-      ['Name','BMC-ID','Role','Action'],
-      execs.map(d => {
-        const m = d.data();
-        return `<tr>
-          <td><strong>${m.fullname||'—'}</strong></td>
-          <td style="font-family:'Cinzel',serif;font-size:11px;color:#C9A84C;">${m.bmcId||'—'}</td>
-          <td><span class="status-badge status-approved">${m.executiveRole}</span></td>
-          <td>
-            <button class="abtn btn-delete" onclick="removeExecutiveRole('${d.id}')">✕ Remove Role</button>
-          </td>
-        </tr>`;
-      }).join('')
-    );
-  } catch(e) { console.error(e); }
-}
-
-window.assignExecutiveRole = async () => {
-  const memberId = $('execMemberId')?.value;
-  const role     = $('execRole')?.value?.trim();
-  const st       = $('execStatus');
-  if (!memberId) { alert('Please select a member.'); return; }
-  if (!role)     { alert('Please enter a role (e.g. President).'); return; }
-  st.textContent = 'Saving...'; st.style.color = '#888';
-  try {
-    await updateDoc(doc(db,'members',memberId), { executiveRole: role, executiveOrder: 99 });
-    st.textContent = '✓ Role assigned!'; st.style.color = '#157040';
-    $('execRole').value = '';
-    setTimeout(() => { st.textContent = ''; }, 2000);
-    loadExecutiveAssign();
-  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
-};
-
-window.removeExecutiveRole = async (id) => {
-  if (!confirm('Remove this member from Executive Committee?')) return;
-  try {
-    await updateDoc(doc(db,'members',id), { executiveRole: null, executiveOrder: null });
-    loadExecutiveAssign();
-  } catch(e) { alert('Error: ' + e.message); }
-};
-
-/* ═══════════════════════════════════════
-   ADD MEMBER MODAL CONTROLS
-═══════════════════════════════════════ */
-window.openAddMemberModal = () => {
-  const modal = document.getElementById('addMemberModal');
-  if (modal) { modal.style.display = 'block'; document.body.style.overflow = 'hidden'; }
-};
-window.closeAddMemberModal = () => {
-  const modal = document.getElementById('addMemberModal');
-  if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
-};
-
-/* ═══════════════════════════════════════
-   EVENT IMAGE UPLOAD FIX
-═══════════════════════════════════════ */
+window.delFeedback=async id=>{if(!confirm('Delete?'))return;await deleteDoc(doc(db,'feedback',id));loadFeedback();};
