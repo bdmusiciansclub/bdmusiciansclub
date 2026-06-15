@@ -427,6 +427,15 @@ window.viewMemberDetail = async (id) => {
     ).join('');
 
   $('modalActions').innerHTML = `
+    <div style="margin-bottom:1rem;padding:1rem;background:#f9f9f9;border:1px solid #e5e7eb;">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:8px;">Update Photo</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <input type="file" id="memberPhotoInput_${id}" accept="image/*"
+          style="font-size:12px;font-family:Inter,sans-serif;flex:1;min-width:0;">
+        <button class="add-btn" style="white-space:nowrap;padding:8px 14px;font-size:11px;" onclick="uploadMemberPhoto('${id}')">📷 Upload Photo</button>
+      </div>
+      <p id="photoUploadStatus_${id}" style="font-size:11px;margin-top:6px;color:#888;"></p>
+    </div>
     <button class="add-btn" onclick="printMember('${id}')">🖨 Print</button>
     <button class="add-btn" style="background:#B8111A;" onclick="downloadMemberPDF('${id}')">⬇ Download PDF</button>
     <button class="abtn btn-delete" onclick="delMember('${id}');closeMemberModal()">Delete Member</button>
@@ -769,4 +778,27 @@ window.delFeedback = async id => {
   if (!confirm('Delete?')) return;
   await deleteDoc(doc(db,'feedback',id));
   loadFeedback();
+};
+
+/* ═══════════════════════════════════════
+   MEMBER PHOTO UPLOAD (from modal)
+═══════════════════════════════════════ */
+window.uploadMemberPhoto = async (id) => {
+  const fileInput = document.getElementById(`memberPhotoInput_${id}`);
+  const st = document.getElementById(`photoUploadStatus_${id}`);
+  if (!fileInput?.files[0]) { st.textContent = 'Please select a photo.'; return; }
+  st.textContent = 'Uploading...'; st.style.color = '#888';
+  try {
+    const url = await uploadToCloudinary(fileInput.files[0]);
+    await updateDoc(doc(db,'members',id), { photoURL: url });
+    st.textContent = '✓ Photo updated!'; st.style.color = '#157040';
+    // modal header refresh
+    const init = (allMembersData[id]?.fullname||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const avatarEl = document.querySelector('.a-modal-avatar');
+    if (avatarEl) avatarEl.innerHTML = `<img src="${url}" alt="photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    // update local cache
+    if (allMembersData[id]) allMembersData[id].photoURL = url;
+    loadMembers();
+    setTimeout(() => { st.textContent = ''; }, 3000);
+  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
 };
