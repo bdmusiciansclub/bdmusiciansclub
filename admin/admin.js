@@ -210,56 +210,117 @@ window.showCategoryModal = (memberId) => {
   overlay.id = 'categoryModalOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;display:flex;align-items:center;justify-content:center;';
   overlay.innerHTML = `
-    <div style="background:#fff;padding:2rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-      <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#111;margin:0 0 0.5rem;">Approve Member</h3>
-      <p style="font-size:12px;color:#888;margin:0 0 1.2rem;">Select membership category before approving.</p>
-      <select id="catSelect" style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:'Inter',sans-serif;background:#fafafa;margin-bottom:1rem;outline:none;">
-        <option value="">— Select Category —</option>
-        <option value="General Member">General Member</option>
-        <option value="Founding Member">Founding Member</option>
-        <option value="Honorary Member">Honorary Member</option>
-      </select>
-      <div style="display:flex;gap:0.75rem;">
-        <button onclick="confirmApprove('${memberId}')" style="flex:1;padding:11px;background:#157040;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;">✓ Approve</button>
-        <button onclick="document.getElementById('categoryModalOverlay').remove()" style="padding:11px 16px;background:#555;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;">Cancel</button>
+    <div style="background:#fff;padding:2rem;width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.3);max-height:90vh;overflow-y:auto;">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.2rem;color:#0B3D20;margin:0 0 1.5rem;padding-bottom:0.75rem;border-bottom:2px solid #f0f0f0;">
+        ✓ Approve Member
+      </h3>
+
+      <!-- Step 1: Membership Type -->
+      <div style="margin-bottom:1.2rem;">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#555;margin-bottom:8px;">
+          Step 1 — Membership Type *
+        </label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <label style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #e5e7eb;cursor:pointer;transition:all 0.2s;" id="lbl_paid">
+            <input type="radio" name="memType" value="General Member" onchange="highlightType()" style="accent-color:#0B3D20;">
+            <div>
+              <div style="font-weight:700;font-size:13px;color:#0B3D20;">General Member</div>
+              <div style="font-size:11px;color:#888;">Paid (Monthly/Annual)</div>
+            </div>
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;padding:12px;border:2px solid #e5e7eb;cursor:pointer;transition:all 0.2s;" id="lbl_unpaid">
+            <input type="radio" name="memType" value="Honorary Member" onchange="highlightType()" style="accent-color:#C9A84C;">
+            <div>
+              <div style="font-weight:700;font-size:13px;color:#C9A84C;">Honorary Member</div>
+              <div style="font-size:11px;color:#888;">Unpaid / Free Membership</div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Step 2: Committee Assign (Optional) -->
+      <div style="margin-bottom:1.2rem;">
+        <label style="display:block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#555;margin-bottom:8px;">
+          Step 2 — Committee Assignment (optional)
+        </label>
+        <select id="committeeSelect" style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:'Inter',sans-serif;background:#fafafa;margin-bottom:8px;outline:none;">
+          <option value="">— None (General/Honorary Member only) —</option>
+          <option value="founder">👑 Founding Member</option>
+          <option value="executive">📌 Executive Committee</option>
+        </select>
+        <div id="execRoleWrap" style="display:none;">
+          <input type="text" id="execRoleInput" placeholder="Executive Role (e.g. President, Secretary...)"
+            style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:13px;font-family:'Inter',sans-serif;background:#fafafa;outline:none;box-sizing:border-box;">
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button onclick="confirmApprove('${memberId}')" style="flex:1;padding:12px;background:#0B3D20;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;">✓ Approve</button>
+        <button onclick="document.getElementById('categoryModalOverlay').remove()" style="padding:12px 16px;background:#888;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;">Cancel</button>
       </div>
     </div>`;
   document.body.appendChild(overlay);
+
+  // committee select toggle
+  document.getElementById('committeeSelect').addEventListener('change', function() {
+    document.getElementById('execRoleWrap').style.display = this.value === 'executive' ? 'block' : 'none';
+  });
+};
+
+window.highlightType = () => {
+  const paid   = document.querySelector('input[value="General Member"]')?.checked;
+  const unpaid = document.querySelector('input[value="Honorary Member"]')?.checked;
+  if (document.getElementById('lbl_paid'))
+    document.getElementById('lbl_paid').style.borderColor = paid ? '#0B3D20' : '#e5e7eb';
+  if (document.getElementById('lbl_unpaid'))
+    document.getElementById('lbl_unpaid').style.borderColor = unpaid ? '#C9A84C' : '#e5e7eb';
 };
 
 window.confirmApprove = async (id) => {
-  const cat = document.getElementById('catSelect')?.value;
-  if (!cat) { alert('Please select a category.'); return; }
+  // Step 1: Paid/Unpaid
+  const memTypeEl = document.querySelector('input[name="memType"]:checked');
+  if (!memTypeEl) { alert('Please select membership type (Paid or Honorary).'); return; }
+  const memType = memTypeEl.value; // 'General Member' or 'Honorary Member'
+
+  // Step 2: Committee
+  const committee   = document.getElementById('committeeSelect')?.value || '';
+  const execRole    = document.getElementById('execRoleInput')?.value?.trim() || '';
+
+  if (committee === 'executive' && !execRole) {
+    alert('Please enter the Executive Role (e.g. President, Secretary).');
+    return;
+  }
+
   try {
-    // 1. members collection update
-    const memberRef = doc(db,'members',id);
+    const memberRef  = doc(db,'members',id);
     const memberSnap = await getDoc(memberRef);
-    const m = memberSnap.data();
+    const m          = memberSnap.data();
+    const nextId     = await getNextBmcId();
 
-    const nextId = await getNextBmcId();
-    await updateDoc(memberRef, {
-      status: 'approved',
-      category: cat,
-      bmcId: nextId,
+    // Final category — founder overrides memType
+    const finalCat = committee === 'founder' ? 'Founding Member' : memType;
+
+    const updateData = {
+      status:     'approved',
+      category:   finalCat,
+      bmcId:      nextId,
       approvedAt: serverTimestamp()
-    });
+    };
 
-    // 2. Founding Member হলে founders collection এ add
-    if (cat === 'Founding Member') {
-      await addDoc(collection(db,'founders'), {
-        name: m.fullname || m.name || '',
-        role: 'Founding Member',
-        sector: m.sector || '',
-        photoURL: m.photoURL || '',
-        memberId: id,
-        order: 99,
-        createdAt: serverTimestamp()
-      });
+    // Executive role assign
+    if (committee === 'executive' && execRole) {
+      updateData.executiveRole  = execRole;
+      updateData.executiveOrder = 99;
     }
+
+    await updateDoc(memberRef, updateData);
 
     document.getElementById('categoryModalOverlay')?.remove();
     loadApplications(); loadDashboard();
-    alert('✓ Member approved as ' + cat + '!');
+
+    let msg = `✓ Approved as ${finalCat}`;
+    if (committee === 'executive') msg += ` + Executive: ${execRole}`;
+    alert(msg);
   } catch(e) { alert('Error: ' + e.message); }
 };
 
@@ -432,11 +493,13 @@ window.addMemberByAdmin = async () => {
     let photoURL=null;
     if(photoInput?.files[0])photoURL=await uploadToCloudinary(photoInput.files[0]);
     const newBmcId = await getNextBmcId();
-    await addDoc(collection(db,"members"),{fullname:name,mobile:mobile||"",sector:sector||"",category,email:email||"",experience:exp||"",dist_c:dist||"",status:"approved",bmcId:newBmcId,addedByAdmin:true,createdAt:serverTimestamp(),approvedAt:serverTimestamp(),...(photoURL&&{photoURL})});
+    const specialty = document.getElementById('adm_specialty')?.value || '';
+    await addDoc(collection(db,"members"),{fullname:name,mobile:mobile||"",sector:sector||"",specialty,category,email:email||"",experience:exp||"",dist_c:dist||"",status:"approved",bmcId:newBmcId,addedByAdmin:true,createdAt:serverTimestamp(),approvedAt:serverTimestamp(),...(photoURL&&{photoURL})});
     st.textContent="✓ Member added!";st.style.color="#157040";
-    ["adm_name","adm_mobile","adm_sector","adm_email","adm_experience","adm_district"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+    ["adm_name","adm_mobile","adm_sector","adm_specialty","adm_email","adm_experience","adm_district"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
     document.getElementById("adm_category").value="";
     if(photoInput)photoInput.value="";
+    closeAddMemberModal();
     loadMembers();
     setTimeout(()=>{st.textContent="";},3000);
   }catch(e){st.textContent="Error: "+e.message;st.style.color="#B8111A";}
@@ -692,17 +755,35 @@ async function loadEvents() {
 
 window.addEvent = async () => {
   const title = val('ev_title');
-  if (!title) { alert('Title is required.'); return; }
+  if (!title) { alert('Event title is required.'); return; }
+  const st = $('evStatus');
+  if (st) { st.textContent = 'Saving...'; st.style.color = '#888'; }
   try {
+    let imageURL = null;
+    const imgInput = $('ev_image');
+    if (imgInput?.files[0]) {
+      if (st) st.textContent = 'Uploading image...';
+      try { imageURL = await uploadToCloudinary(imgInput.files[0]); } catch(ue) { console.warn('Image upload failed:', ue); }
+    }
     await addDoc(collection(db,'events'), {
-      title, location: val('ev_location'), date: val('ev_date'),
-      tag: val('ev_tag'), upcoming: $('ev_upcoming').checked,
-      createdAt: serverTimestamp()
+      title,
+      location:    val('ev_location'),
+      date:        val('ev_date'),
+      tag:         val('ev_tag'),
+      description: val('ev_description') || '',
+      upcoming:    $('ev_upcoming')?.checked || false,
+      ...(imageURL && { imageURL }),
+      createdAt:   serverTimestamp()
     });
-    alert('✓ Event added!');
-    ['ev_title','ev_location','ev_date','ev_tag'].forEach(id => { const el=$(id); if(el) el.value=''; });
+    ['ev_title','ev_location','ev_date','ev_tag','ev_description'].forEach(id => { const el=$(id); if(el) el.value=''; });
+    if ($('ev_upcoming')) $('ev_upcoming').checked = false;
+    if (imgInput) imgInput.value = '';
+    if (st) { st.textContent = '✓ Event added!'; st.style.color = '#157040'; setTimeout(()=>{st.textContent='';},3000); }
     loadEvents();
-  } catch(e) { alert('Error: ' + e.message); }
+  } catch(e) {
+    if (st) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
+    else alert('Error: ' + e.message);
+  }
 };
 window.delEvent = async id => {
   if (!confirm('Delete?')) return;
@@ -1081,3 +1162,19 @@ window.removeExecutiveRole = async (id) => {
     loadExecutiveAssign();
   } catch(e) { alert('Error: ' + e.message); }
 };
+
+/* ═══════════════════════════════════════
+   ADD MEMBER MODAL CONTROLS
+═══════════════════════════════════════ */
+window.openAddMemberModal = () => {
+  const modal = document.getElementById('addMemberModal');
+  if (modal) { modal.style.display = 'block'; document.body.style.overflow = 'hidden'; }
+};
+window.closeAddMemberModal = () => {
+  const modal = document.getElementById('addMemberModal');
+  if (modal) { modal.style.display = 'none'; document.body.style.overflow = ''; }
+};
+
+/* ═══════════════════════════════════════
+   EVENT IMAGE UPLOAD FIX
+═══════════════════════════════════════ */
