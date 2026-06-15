@@ -304,13 +304,47 @@
     <div class="container">
       <div class="members-filter">
         <input type="text" id="memberSearch" class="search-input"
-               placeholder="নাম বা পেশা দিয়ে খুঁজুন..."
+               placeholder="নাম বা instrument দিয়ে খুঁজুন..."
                oninput="filterMembers()">
         <select id="sectorFilter" class="filter-select" onchange="filterMembers()">
-          <option value="">সব সেক্টর</option>
-          <option value="Musicians">🎵 Musicians</option>
-          <option value="Sound Engineers">🔊 Sound Engineers</option>
-          <option value="Logistic Supporters">🎬 Logistic Supporters</option>
+          <option value="">সব Instrument</option>
+          <optgroup label="🎤 Vocal">
+            <option>Singer (Classical)</option><option>Singer (Folk / Baul)</option>
+            <option>Singer (Modern / Pop)</option><option>Singer (Rabindra Sangeet)</option>
+            <option>Singer (Nazrul Sangeet)</option><option>Singer (Band / Rock)</option>
+            <option>Singer (Devotional)</option><option>Singer (Other)</option>
+          </optgroup>
+          <optgroup label="🎸 String">
+            <option>Guitar (Acoustic)</option><option>Guitar (Electric)</option>
+            <option>Guitar (Bass)</option><option>Sitar</option>
+            <option>Violin / Fiddle</option><option>Dotara</option><option>Esraj</option>
+          </optgroup>
+          <optgroup label="🥁 Percussion">
+            <option>Tabla</option><option>Dhol</option><option>Drum Kit</option>
+            <option>Cajon</option><option>Khol</option><option>Mridanga</option>
+          </optgroup>
+          <optgroup label="🎹 Keys">
+            <option>Harmonium</option><option>Piano</option>
+            <option>Keyboard / Synthesizer</option><option>Accordion</option>
+          </optgroup>
+          <optgroup label="🎺 Wind">
+            <option>Bansuri / Flute</option><option>Shehnai</option>
+            <option>Saxophone</option><option>Trumpet</option><option>Clarinet</option>
+          </optgroup>
+          <optgroup label="🔊 Technical">
+            <option>Sound Engineer</option><option>Mixing Engineer</option>
+            <option>Audio Technician</option><option>Live Sound Operator</option>
+          </optgroup>
+          <optgroup label="🎬 Production">
+            <option>Stage Manager</option><option>Lighting Operator</option>
+            <option>Production Manager</option>
+          </optgroup>
+        </select>
+        <select id="categoryFilter" class="filter-select" onchange="filterMembers()">
+          <option value="">সব Category</option>
+          <option value="Founding Member">Founding Member</option>
+          <option value="Honorary Member">Honorary Member</option>
+          <option value="General Member">General Member</option>
         </select>
       </div>
       <div id="membersGrid" class="members-grid"><div class="loading">লোড হচ্ছে...</div></div>
@@ -794,6 +828,37 @@
               সদস্যপদের আবেদন বা যেকোনো প্রশ্নের জন্য উপরের যেকোনো মাধ্যমে আমাদের সাথে যোগাযোগ করুন।
               আমরা সাধারণত ২৪ ঘণ্টার মধ্যে উত্তর দিই।
             </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feedback Form -->
+      <div style="margin-top:3rem;">
+        <div class="sec-header" style="margin-bottom:1.5rem;">
+          <span class="sec-tag on-light">Feedback</span>
+          <h2 class="sec-title on-light" style="margin-top:0.5rem;">মতামত ও অভিযোগ</h2>
+          <div class="sec-divider"></div>
+        </div>
+        <div style="max-width:600px;margin:0 auto;">
+          <div id="feedbackForm">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+              <input type="text" id="fbName" class="form-input" placeholder="আপনার নাম">
+              <select id="fbType" class="form-select">
+                <option value="Suggestion">💡 Suggestion / পরামর্শ</option>
+                <option value="Complaint">⚠️ Complaint / অভিযোগ</option>
+                <option value="Query">❓ Query / জিজ্ঞাসা</option>
+              </select>
+            </div>
+            <input type="text" id="fbSubject" class="form-input" placeholder="বিষয় *" style="width:100%;margin-bottom:1rem;box-sizing:border-box;">
+            <textarea id="fbMessage" class="form-input" placeholder="বিস্তারিত লিখুন *" rows="5"
+              style="width:100%;resize:vertical;font-family:'Inter',sans-serif;box-sizing:border-box;"></textarea>
+            <button class="btn-primary" onclick="submitFeedback()" style="margin-top:1rem;width:100%;">পাঠান →</button>
+            <p id="fbStatus" style="font-size:13px;margin-top:8px;text-align:center;"></p>
+          </div>
+          <div id="feedbackSuccess" style="display:none;text-align:center;padding:2rem;">
+            <div style="font-size:3rem;">✅</div>
+            <h3 style="font-family:'Playfair Display',serif;color:#0B3D20;margin:1rem 0 0.5rem;">ধন্যবাদ!</h3>
+            <p style="color:#888;">আপনার মতামত পাঠানো হয়েছে।</p>
           </div>
         </div>
       </div>
