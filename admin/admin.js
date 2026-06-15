@@ -672,13 +672,9 @@ window.uploadGallery = async () => {
   let uploaded = 0;
   for (const file of Array.from(files)) {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', 'bmc_unsigned');
-      const res = await fetch('https://api.cloudinary.com/v1_1/democloud/image/upload', { method:'POST', body:formData });
-      const data = await res.json();
-      if (data.secure_url) {
-        await addDoc(collection(db,'gallery'), { url: data.secure_url, caption: val('galleryCaption'), showInSlideshow: false, createdAt: serverTimestamp() });
+      const url = await uploadToCloudinary(file);
+      if (url) {
+        await addDoc(collection(db,'gallery'), { url, caption: val('galleryCaption'), showInSlideshow: false, createdAt: serverTimestamp() });
         uploaded++;
         st.textContent = `Uploading ${uploaded} / ${files.length}...`;
       }
