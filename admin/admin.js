@@ -50,12 +50,9 @@ window.showSec = (id, el) => {
 
 // Committee collection mapping
 const COMM_MAP = {
-  founders:     { col: 'founders',     title: 'Founders',           wrap: 'mgr-founders'     },
-  president:    { col: 'president',    title: 'President',          wrap: 'mgr-president'    },
-  secretary:    { col: 'secretary',    title: 'General Secretary',  wrap: 'mgr-secretary'    },
-  treasurer:    { col: 'treasurer',    title: 'Treasurer',          wrap: 'mgr-treasurer'    },
-  executive:    { col: 'executive',    title: 'Executive Committee',wrap: 'mgr-executive'    },
-  subcommittee: { col: 'subcommittee', title: 'Sub-Committees',     wrap: 'mgr-subcommittee' },
+  founders:  { col: 'founders',  title: 'Founding Members',   wrap: 'mgr-founders'  },
+  advisers:  { col: 'advisers',  title: 'Advisers',           wrap: 'mgr-advisers'  },
+  executive: { col: 'executive', title: 'Executive Committee',wrap: 'mgr-executive' },
 };
 
 function loadSec(id) {
@@ -71,6 +68,7 @@ function loadSec(id) {
     events:       loadEvents,
     gallery:      loadGallery,
     videos:       loadVideos,
+    notice:       loadNotice,
     feedback:     loadFeedback,
   };
   if (map[id]) map[id]();
