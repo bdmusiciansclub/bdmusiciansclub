@@ -65,7 +65,9 @@ function loadPageData(pageId) {
   switch(pageId) {
     case 'home':      loadHomeData();  break;
     case 'members':   loadMembers();   break;
-    case 'committee': loadCommittee(); break;
+    case 'founders':  loadCommitteePage('founders',  'foundersGrid');  break;
+    case 'advisers':  loadCommitteePage('advisers',  'advisersGrid');  break;
+    case 'executive': loadCommitteePage('executive', 'executiveGrid'); break;
     case 'events':    loadEvents();    break;
     case 'news':      loadNews();      break;
     case 'gallery':   loadGallery();   break;
@@ -205,16 +207,17 @@ function renderMembers(list) {
   if (!list.length) { grid.innerHTML = emptyState('🎵', 'No members found'); return; }
   grid.innerHTML = list.map(m => {
     const name = m.fullname||m.name||'—';
-    const avatarHTML = m.photoURL
-      ? `<img src="${m.photoURL}" alt="${name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-      : initials(name);
+    const photoHTML = m.photoURL
+      ? `<img src="${m.photoURL}" alt="${name}" loading="lazy">`
+      : `<span>${initials(name)}</span>`;
     const cat = m.category || 'General Member';
-    return `
-    <div class="member-card" onclick="openMemberModal('${m.id}')">
-      <div class="member-avatar">${avatarHTML}</div>
-      <div class="member-name">${name}</div>
-      <div class="member-role">${m.sector||m.specialty||m.specialization||'—'}</div>
-      <span class="member-badge">${cat}</span>
+    return `<div class="member-card" onclick="openMemberModal('${m.id}')">
+      <div class="member-photo">${photoHTML}</div>
+      <div class="member-info">
+        <div class="member-name">${name}</div>
+        <div class="member-role">${m.sector||m.specialty||'—'}</div>
+        <span class="member-badge">${cat}</span>
+      </div>
     </div>`;
   }).join('');
 }
@@ -265,39 +268,19 @@ window.closeMemberModal = function() {
 /* ═══════════════════════════════════════
    COMMITTEE
 ═══════════════════════════════════════ */
-async function loadCommittee() {
-  await Promise.all([
-    loadCommitteeSection('founders',  'foundersGrid'),
-    loadCommitteeSection('advisers',  'advisersGrid'),
-    loadCommitteeSection('executive', 'executiveGrid'),
-  ]);
-}
-async function loadCommitteeSection(col, elId) {
-  const el = document.getElementById(elId);
+async function loadCommitteePage(col, gridId) {
+  const el = document.getElementById(gridId);
   if (!el) return;
+  el.innerHTML = loadingHTML();
   try {
-    const snap = await getDocs(query(collection(db, col), orderBy('order','asc')));
+    const snap = await getDocs(collection(db, col));
+    const docs = snap.docs.sort((a,b) => (a.data().order||99) - (b.data().order||99));
     if (snap.empty) { el.innerHTML = emptyState('👤', 'No members added yet'); return; }
     el.innerHTML = `<div class="committee-grid">` +
-      snap.docs.map(d => personCardHTML(d.data())).join('') + `</div>`;
-  } catch(e) {
-    // try without orderBy if index missing
-    try {
-      const snap2 = await getDocs(collection(db, col));
-      if (snap2.empty) { el.innerHTML = emptyState('👤', 'No members added yet'); return; }
-      el.innerHTML = `<div class="committee-grid">` +
-        snap2.docs.map(d => personCardHTML(d.data())).join('') + `</div>`;
-    } catch(e2) { el.innerHTML = emptyState('⚠️', 'Failed to load'); }
-  }
+      docs.map(d => personCardHTML(d.data())).join('') + `</div>`;
+  } catch(e) { el.innerHTML = emptyState('⚠️', 'Failed to load'); }
 }
-window.switchTab = function(tabId) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  const btn = document.querySelector(`[data-tab="${tabId}"]`);
-  const panel = document.getElementById('tab-' + tabId);
-  if (btn) btn.classList.add('active');
-  if (panel) panel.classList.add('active');
-};
+
 
 /* ═══════════════════════════════════════
    NEWS
@@ -610,13 +593,15 @@ function eventItemHTML(e, isPast = false) {
 }
 function personCardHTML(p) {
   const name = p.name || '—';
-  const avatarHTML = p.photoURL
-    ? `<img src="${p.photoURL}" alt="${name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`
-    : initials(name);
+  const photoHTML = p.photoURL
+    ? `<img src="${p.photoURL}" alt="${name}" loading="lazy">`
+    : `<span>${initials(name)}</span>`;
   return `<div class="person-card">
-    <div class="person-avatar">${avatarHTML}</div>
-    <div class="person-name">${name}</div>
-    <div class="person-role">${p.role||'Founding Member'}</div>
+    <div class="person-photo">${photoHTML}</div>
+    <div class="person-info">
+      <div class="person-name">${name}</div>
+      <div class="person-role">${p.role||'Member'}</div>
+    </div>
   </div>`;
 }
 
