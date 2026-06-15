@@ -196,8 +196,10 @@ async function loadMembers() {
   if (!grid) return;
   grid.innerHTML = loadingHTML();
   try {
-    const snap = await getDocs(query(collection(db, 'members'), where('status','==','approved')));
-    allMembers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await getDocs(collection(db, 'members'));
+    allMembers = snap.docs
+      .filter(d => d.data().status === 'approved')
+      .map(d => ({ id: d.id, ...d.data() }));
     renderMembers(allMembers);
   } catch(e) { grid.innerHTML = emptyState('⚠️', 'Failed to load'); }
 }
@@ -211,25 +213,34 @@ function renderMembers(list) {
       ? `<img src="${m.photoURL}" alt="${name}" loading="lazy">`
       : `<span>${initials(name)}</span>`;
     const cat = m.category || 'General Member';
+    const catColors = {
+      'Founding Member': 'background:#B8111A;color:#fff;',
+      'Honorary Member': 'background:#C9A84C;color:#0B3D20;',
+      'General Member':  'background:#0B3D20;color:#fff;'
+    };
+    const badgeStyle = catColors[cat] || catColors['General Member'];
     return `<div class="member-card" onclick="openMemberModal('${m.id}')">
       <div class="member-photo">${photoHTML}</div>
       <div class="member-info">
         <div class="member-name">${name}</div>
-        <div class="member-role">${m.sector||m.specialty||'—'}</div>
-        <span class="member-badge">${cat}</span>
+        <div class="member-role">${m.sector||'—'}</div>
+        ${m.bmcId ? `<div style="font-size:10px;color:#C9A84C;font-family:'Cinzel',serif;font-weight:700;letter-spacing:1px;margin:3px 0;">${m.bmcId}</div>` : ''}
+        <span class="member-badge" style="${badgeStyle}border:none;font-size:10px;padding:4px 12px;">${cat}</span>
       </div>
     </div>`;
   }).join('');
 }
 window.filterMembers = function() {
-  const search = document.getElementById('memberSearch').value.toLowerCase();
-  const sector = document.getElementById('sectorFilter').value;
+  const search = document.getElementById('memberSearch')?.value?.toLowerCase() || '';
+  const sector = document.getElementById('sectorFilter')?.value || '';
+  const cat    = document.getElementById('categoryFilter')?.value || '';
   const filtered = allMembers.filter(m => {
     const name = (m.fullname||m.name||'').toLowerCase();
-    const spec = (m.specialty||m.specialization||'').toLowerCase();
-    const matchSearch = !search || name.includes(search) || spec.includes(search);
-    const matchSector = !sector || m.sector === sector;
-    return matchSearch && matchSector;
+    const sec  = (m.sector||'').toLowerCase();
+    const matchSearch = !search || name.includes(search) || sec.includes(search);
+    const matchSector = !sector || (m.sector||'') === sector;
+    const matchCat    = !cat    || (m.category||'General Member') === cat;
+    return matchSearch && matchSector && matchCat;
   });
   renderMembers(filtered);
 };
@@ -237,28 +248,29 @@ window.openMemberModal = function(memberId) {
   const m = allMembers.find(x => x.id === memberId);
   if (!m) return;
   const name = m.fullname||m.name||'—';
+  const cat  = m.category || 'General Member';
+
   document.getElementById('modalAvatar').innerHTML =
-    m.photoURL ? `<img src="${m.photoURL}" alt="${name}">` : initials(name);
+    m.photoURL ? `<img src="${m.photoURL}" alt="${name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : initials(name);
   document.getElementById('modalName').textContent = name;
-  document.getElementById('modalRole').textContent = m.specialty||m.specialization||m.sector||'—';
+  document.getElementById('modalRole').textContent = m.sector || '—';
+
   document.getElementById('modalPublicInfo').innerHTML = `
-    <div class="modal-row"><span class="modal-label">Sector</span><span class="modal-value">${sectorLabel(m.sector)}</span></div>
-    <div class="modal-row"><span class="modal-label">Specialization</span><span class="modal-value">${m.specialty||m.specialization||'—'}</span></div>
-    <div class="modal-row"><span class="modal-label">Experience</span><span class="modal-value">${m.experience||'—'}</span></div>
-    <div class="modal-row"><span class="modal-label">Membership</span><span class="modal-value">${m.membership==='Lifetime'||m.membershipType==='Lifetime'?'Lifetime Member':'General Member'}</span></div>
+    ${m.bmcId ? `<div class="modal-row"><span class="modal-label">BMC-ID</span><span class="modal-value" style="font-family:'Cinzel',serif;font-weight:700;color:#C9A84C;letter-spacing:1px;">${m.bmcId}</span></div>` : ''}
+    <div class="modal-row"><span class="modal-label">Category</span><span class="modal-value">${cat}</span></div>
+    <div class="modal-row"><span class="modal-label">Instrument / Vocal</span><span class="modal-value">${m.sector||'—'}</span></div>
+    ${m.specialty ? `<div class="modal-row"><span class="modal-label">Also Plays</span><span class="modal-value">${m.specialty}</span></div>` : ''}
+    ${m.experience ? `<div class="modal-row"><span class="modal-label">Experience</span><span class="modal-value">${m.experience}</span></div>` : ''}
+    ${m.mobile ? `<div class="modal-row"><span class="modal-label">Mobile</span><span class="modal-value">${m.mobile}</span></div>` : ''}
+    ${m.dist_c ? `<div class="modal-row"><span class="modal-label">District</span><span class="modal-value">${m.dist_c}</span></div>` : ''}
+    <div class="modal-row" style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f0f0f0;">
+      <span style="font-size:12px;color:#888;font-style:italic;">For more details, please contact admin.</span>
+    </div>
   `;
+
   const privateEl = document.getElementById('modalPrivateInfo');
-  if (currentUser) {
-    privateEl.innerHTML = `
-      <div class="modal-row"><span class="modal-label">Mobile</span><span class="modal-value">${m.mobile||'—'}</span></div>
-      <div class="modal-row"><span class="modal-label">Email</span><span class="modal-value">${m.email||'—'}</span></div>
-      <div class="modal-row"><span class="modal-label">District</span><span class="modal-value">${m.dist_c||m.district||'—'}</span></div>
-      <div class="modal-row"><span class="modal-label">Address</span><span class="modal-value">${m.addr_c||m.currentAddress||'—'}</span></div>
-      ${m.facebook?`<div class="modal-row"><span class="modal-label">Facebook</span><span class="modal-value"><a href="${m.facebook}" target="_blank">View Profile</a></span></div>`:''}
-    `;
-  } else {
-    privateEl.innerHTML = `<div class="modal-locked"><span class="lock-icon">🔒</span>Login as member to view contact details</div>`;
-  }
+  if (privateEl) privateEl.innerHTML = '';
+
   document.getElementById('memberModal').classList.add('open');
 };
 window.closeMemberModal = function() {
@@ -673,3 +685,29 @@ async function loadNotice() {
     }).join('');
   } catch(e) { el.innerHTML = '<div class="loading">লোড করতে সমস্যা হয়েছে।</div>'; }
 }
+
+/* ═══════════════════════════════════════
+   FEEDBACK FORM (Contact Page)
+═══════════════════════════════════════ */
+window.submitFeedback = async function() {
+  const name    = document.getElementById('fbName')?.value?.trim() || 'Anonymous';
+  const type    = document.getElementById('fbType')?.value || 'Suggestion';
+  const subject = document.getElementById('fbSubject')?.value?.trim();
+  const message = document.getElementById('fbMessage')?.value?.trim();
+  const st      = document.getElementById('fbStatus');
+
+  if (!subject) { st.textContent = '⚠️ বিষয় লিখুন।'; st.style.color='#B8111A'; return; }
+  if (!message) { st.textContent = '⚠️ বিস্তারিত লিখুন।'; st.style.color='#B8111A'; return; }
+
+  st.textContent = 'পাঠানো হচ্ছে...'; st.style.color = '#888';
+  try {
+    await addDoc(collection(db,'feedback'), {
+      name, type, subject, message,
+      createdAt: serverTimestamp()
+    });
+    document.getElementById('feedbackForm').style.display = 'none';
+    document.getElementById('feedbackSuccess').style.display = 'block';
+  } catch(e) {
+    st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A';
+  }
+};
