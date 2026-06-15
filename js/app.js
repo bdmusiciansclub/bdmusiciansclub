@@ -311,9 +311,8 @@ async function loadCommitteePage(col, gridId) {
     el.innerHTML = `<div class="committee-grid">` +
       docs.map(d => {
         const m = d.data();
-        // Executive এ role দেখাবে, otherwise category
         const role = col === 'executive' ? (m.executiveRole||'Executive') : (m.category||'Member');
-        return personCardHTML({ ...m, role });
+        return personCardHTML({ ...m, role }, d.id);
       }).join('') + `</div>`;
   } catch(e) {
     el.innerHTML = emptyState('⚠️', 'Failed to load: ' + e.message);
@@ -661,16 +660,18 @@ function eventItemHTML(e, isPast = false) {
     <span class="event-status ${isPast?'past':''}">${isPast?'Completed':'Upcoming'}</span>
   </div>`;
 }
-function personCardHTML(p) {
-  const name = p.name || '—';
+function personCardHTML(p, memberId) {
+  const name = p.fullname || p.name || '—';
   const photoHTML = p.photoURL
     ? `<img src="${p.photoURL}" alt="${name}" loading="lazy">`
     : `<span>${initials(name)}</span>`;
-  return `<div class="person-card">
+  const idAttr = memberId ? `onclick="openMemberModal('${memberId}')" style="cursor:pointer;"` : '';
+  return `<div class="person-card" ${idAttr}>
     <div class="person-photo">${photoHTML}</div>
     <div class="person-info">
       <div class="person-name">${name}</div>
-      <div class="person-role">${p.role||'Member'}</div>
+      <div class="person-role">${p.role||p.category||'Member'}</div>
+      ${p.bmcId ? `<div style="font-size:10px;color:#C9A84C;font-family:'Cinzel',serif;font-weight:700;letter-spacing:1px;margin-top:4px;">${p.bmcId}</div>` : ''}
     </div>
   </div>`;
 }
