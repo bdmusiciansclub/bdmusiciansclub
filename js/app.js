@@ -1,6 +1,6 @@
 import { db, auth } from './firebase-config.js';
 import {
-  collection, getDocs, query, orderBy, limit, where, addDoc, serverTimestamp
+  collection, getDocs, query, orderBy, limit, where, addDoc, serverTimestamp, setDoc, doc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   onAuthStateChanged, signInWithEmailAndPassword, signOut
@@ -64,6 +64,7 @@ window.showPage = function(pageId) {
 function loadPageData(pageId) {
   switch(pageId) {
     case 'home':      loadHomeData();  break;
+    case 'about':     loadAbout();     break;
     case 'members':   loadMembers();   break;
     case 'founders':  loadCommitteePage('founders',  'foundersGrid');  break;
     case 'advisers':  loadCommitteePage('advisers',  'advisersGrid');  break;
@@ -284,13 +285,39 @@ async function loadCommitteePage(col, gridId) {
   const el = document.getElementById(gridId);
   if (!el) return;
   el.innerHTML = loadingHTML();
+  // col → category mapping
+  const catMap = {
+    founders:  'Founding Member',
+    advisers:  'Honorary Member',
+    executive: '__executive__'   // special — executiveRole field দিয়ে
+  };
   try {
-    const snap = await getDocs(collection(db, col));
-    const docs = snap.docs.sort((a,b) => (a.data().order||99) - (b.data().order||99));
-    if (snap.empty) { el.innerHTML = emptyState('👤', 'No members added yet'); return; }
+    const snap = await getDocs(collection(db, 'members'));
+    let docs;
+    if (col === 'executive') {
+      // executiveRole field আছে এমন approved members
+      docs = snap.docs.filter(d => {
+        const m = d.data();
+        return m.status === 'approved' && m.executiveRole;
+      }).sort((a,b) => (a.data().executiveOrder||99) - (b.data().executiveOrder||99));
+    } else {
+      const cat = catMap[col];
+      docs = snap.docs.filter(d => {
+        const m = d.data();
+        return m.status === 'approved' && m.category === cat;
+      });
+    }
+    if (!docs.length) { el.innerHTML = emptyState('👤', 'No members yet'); return; }
     el.innerHTML = `<div class="committee-grid">` +
-      docs.map(d => personCardHTML(d.data())).join('') + `</div>`;
-  } catch(e) { el.innerHTML = emptyState('⚠️', 'Failed to load'); }
+      docs.map(d => {
+        const m = d.data();
+        // Executive এ role দেখাবে, otherwise category
+        const role = col === 'executive' ? (m.executiveRole||'Executive') : (m.category||'Member');
+        return personCardHTML({ ...m, role });
+      }).join('') + `</div>`;
+  } catch(e) {
+    el.innerHTML = emptyState('⚠️', 'Failed to load: ' + e.message);
+  }
 }
 
 
@@ -711,3 +738,47 @@ window.submitFeedback = async function() {
     st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A';
   }
 };
+
+/* ═══════════════════════════════════════
+   ABOUT PAGE — Firebase থেকে load
+═══════════════════════════════════════ */
+async function loadAbout() {
+  const el = document.getElementById('aboutContent');
+  if (!el) return;
+  el.innerHTML = '<div class="loading">লোড হচ্ছে...</div>';
+  try {
+    const snap = await getDocs(collection(db, 'settings'));
+    let about = null;
+    snap.docs.forEach(d => { if (d.id === 'about') about = d.data(); });
+
+    if (!about) {
+      // Default content — প্রথমবার
+      about = {
+        intro: 'Bangladesh Musician\'s Club (BMC) ২০২২ সালে প্রতিষ্ঠিত হয়েছে বাংলাদেশের সঙ্গীত শিল্পের সকল পেশাদারদের একটি ঐক্যবদ্ধ প্ল্যাটফর্মে আনার লক্ষ্যে।\n\nমঞ্চের শিল্পী থেকে সাউন্ড ইঞ্জিনিয়ার, লাইটিং ডিজাইনার থেকে প্রোডাকশন ম্যানেজার — BMC প্রতিটি পেশাদারকে সমান মর্যাদায় স্বীকৃতি দেয়।',
+        goals: 'সঙ্গীত শিল্পে শক্তিশালী পেশাদার নেটওয়ার্ক গড়ে তোলা\nউদীয়মান পেশাদারদের দক্ষতা উন্নয়নে সহায়তা\nযোগ্য পেশাদারদের ক্যারিয়ার সুযোগ খুঁজে পেতে সাহায্য\nসঙ্গীত শিল্প ও সংস্কৃতির মর্যাদা প্রতিষ্ঠা\nসারা বাংলাদেশে সঙ্গীতজ্ঞদের প্রতিনিধিত্বকারী জাতীয় সংগঠনে পরিণত হওয়া'
+      };
+    }
+
+    const introParas = (about.intro||'').split('\n\n').filter(p=>p.trim())
+      .map(p => `<p style="margin-bottom:1rem;line-height:1.9;color:var(--text-muted);">${p}</p>`).join('');
+
+    const goalItems = (about.goals||'').split('\n').filter(g=>g.trim())
+      .map(g => `<li>${g}</li>`).join('');
+
+    el.innerHTML = `
+      <div class="about-grid">
+        <div class="about-text">
+          <span class="sec-tag on-light" style="margin-bottom:1rem;display:inline-block;">আমাদের পরিচয়</span>
+          <h2 class="sec-title on-light" style="margin-bottom:1.5rem;">"We Are The Soul Of Music"</h2>
+          ${introParas}
+        </div>
+        <div>
+          <span class="sec-tag on-light" style="margin-bottom:1rem;display:inline-block;">আমাদের লক্ষ্য</span>
+          <h3 style="font-family:'Playfair Display',serif;font-size:1.4rem;margin-bottom:1.5rem;color:var(--text);">Our Goals</h3>
+          <ul class="goals-list">${goalItems}</ul>
+        </div>
+      </div>`;
+  } catch(e) {
+    el.innerHTML = '<p style="color:#888;">Content load করতে সমস্যা হয়েছে।</p>';
+  }
+}
