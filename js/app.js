@@ -205,13 +205,36 @@ async function loadMembers() {
   } catch(e) { grid.innerHTML = emptyState('⚠️', 'Failed to load'); }
 }
 
+const MEMBERS_PER_PAGE = 50;
+let currentMemberPage = 1;
+let currentMemberList = [];
+
+window.goMemberPage = function(page) {
+  const totalPages = Math.ceil(currentMemberList.length / MEMBERS_PER_PAGE);
+  if (page < 1 || page > totalPages) return;
+  currentMemberPage = page;
+  renderMemberPage();
+  window.scrollTo({ top: document.getElementById('membersGrid').offsetTop - 80, behavior: 'smooth' });
+};
+
 function renderMembers(list) {
+  currentMemberList = list;
+  currentMemberPage = 1;
+  renderMemberPage();
+}
+
+function renderMemberPage() {
   const grid = document.getElementById('membersGrid');
   if (!grid) return;
+  const list = currentMemberList;
   if (!list.length) { grid.innerHTML = emptyState('🎵', 'No members found'); return; }
 
+  const totalPages = Math.ceil(list.length / MEMBERS_PER_PAGE);
+  const start = (currentMemberPage - 1) * MEMBERS_PER_PAGE;
+  const pageItems = list.slice(start, start + MEMBERS_PER_PAGE);
+
   // ── Member Cards ──
-  grid.innerHTML = list.map(m => {
+  grid.innerHTML = pageItems.map(m => {
     const name = m.fullname||m.name||'—';
     const photoHTML = m.photoURL
       ? `<img src="${m.photoURL}" alt="${name}" loading="lazy">`
@@ -228,48 +251,35 @@ function renderMembers(list) {
       <div class="member-info">
         <div class="member-name">${name}</div>
         <div class="member-role">${m.sector||'—'}</div>
-        ${m.bmcId ? `<div style="font-size:10px;color:#C9A84C;font-family:'Cinzel',serif;font-weight:700;letter-spacing:1px;margin:3px 0;">${m.bmcId}</div>` : ''}
+        ${m.bmcId ? `<div style="font-size:10px;color:#2563eb;font-family:'Cinzel',serif;font-weight:700;letter-spacing:1px;margin:3px 0;">${m.bmcId}</div>` : ''}
         <span class="member-badge" style="${badgeStyle}border:none;font-size:10px;padding:4px 12px;">${cat}</span>
       </div>
     </div>`;
   }).join('');
 
-  // ── ID Directory — প্রতি line এ ১০টা ──
+  // ── Pagination ──
   const dirEl = document.getElementById('memberIdDirectory');
   if (!dirEl) return;
+  if (totalPages <= 1) { dirEl.innerHTML = ''; return; }
 
-  const withId = list.filter(m => m.bmcId);
-  if (!withId.length) { dirEl.innerHTML = ''; return; }
-
-  // ১০টা করে ভাগ করো
-  const rows = [];
-  for (let i = 0; i < withId.length; i += 10) {
-    rows.push(withId.slice(i, i + 10));
-  }
+  const pages = [];
+  for (let i = 1; i <= totalPages; i++) pages.push(i);
 
   dirEl.innerHTML = `
-    <div style="background:#fff;border-top:3px solid #0B3D20;padding:1.5rem 1.5rem 1rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);margin-top:2rem;">
-      <div style="font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:3px;color:#0B3D20;text-transform:uppercase;padding-bottom:0.8rem;border-bottom:1px solid #e5e7eb;margin-bottom:1rem;">
-        Member ID Directory
-        <span style="font-family:'Inter',sans-serif;font-size:11px;letter-spacing:0;font-weight:400;color:#999;margin-left:1rem;text-transform:none;">${withId.length} জন নিবন্ধিত</span>
-      </div>
-      ${rows.map(row => `
-        <div style="display:flex;flex-wrap:wrap;gap:6px 8px;margin-bottom:8px;">
-          ${row.map(m => `
-            <span
-              onclick="openMemberModal('${m.id}')"
-              title="${m.fullname||m.name||''}"
-              style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;letter-spacing:1px;
-                     color:#0B3D20;background:rgba(11,61,32,0.07);
-                     border:1px solid rgba(11,61,32,0.2);
-                     padding:4px 11px;cursor:pointer;white-space:nowrap;
-                     transition:background 0.15s;"
-              onmouseover="this.style.background='rgba(11,61,32,0.16)'"
-              onmouseout="this.style.background='rgba(11,61,32,0.07)'"
-            >${m.bmcId}</span>
-          `).join('')}
-        </div>
-      `).join('')}
+    <div style="display:flex;justify-content:center;align-items:center;gap:6px;flex-wrap:wrap;margin-top:2rem;">
+      <button onclick="goMemberPage(${currentMemberPage - 1})"
+        style="padding:7px 14px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;${currentMemberPage===1?'opacity:0.4;cursor:not-allowed;':''}"
+        ${currentMemberPage===1?'disabled':''}>‹ আগে</button>
+      ${pages.map(p => `
+        <button onclick="goMemberPage(${p})"
+          style="padding:7px 13px;border:1px solid ${p===currentMemberPage?'#0B3D20':'#ddd'};
+          background:${p===currentMemberPage?'#0B3D20':'#fff'};
+          color:${p===currentMemberPage?'#fff':'#333'};
+          cursor:pointer;font-family:'Cinzel',serif;font-size:12px;font-weight:700;">${p}</button>`).join('')}
+      <button onclick="goMemberPage(${currentMemberPage + 1})"
+        style="padding:7px 14px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:13px;${currentMemberPage===totalPages?'opacity:0.4;cursor:not-allowed;':''}"
+        ${currentMemberPage===totalPages?'disabled':''}>পরে ›</button>
+      <span style="font-size:12px;color:#888;margin-left:8px;">${list.length} জন মোট · পৃষ্ঠা ${currentMemberPage}/${totalPages}</span>
     </div>`;
 }
 
