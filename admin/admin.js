@@ -1,7 +1,7 @@
 import { db, auth } from '../js/firebase-config.js';
 import { uploadToCloudinary } from '../js/cloudinary.js';
 import {
-  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc,
+  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, setDoc, doc,
   query, orderBy, where, serverTimestamp, limit
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
@@ -62,14 +62,19 @@ function loadSec(id) {
     return;
   }
   const map = {
-    dashboard:    loadDashboard,
-    applications: loadApplications,
-    members:      loadMembers,
-    events:       loadEvents,
-    gallery:      loadGallery,
-    videos:       loadVideos,
-    notice:       loadNotice,
-    feedback:     loadFeedback,
+    dashboard:          loadDashboard,
+    applications:       loadApplications,
+    members:            loadMembers,
+    founders:           () => loadCommitteeAdmin('founders'),
+    advisers:           () => loadCommitteeAdmin('advisers'),
+    executive:          () => loadCommitteeAdmin('executive'),
+    events:             loadEvents,
+    gallery:            loadGallery,
+    videos:             loadVideos,
+    notice:             loadNotice,
+    feedback:           loadFeedback,
+    about:              loadAboutAdmin,
+    'executive-assign': loadExecutiveAssign,
   };
   if (map[id]) map[id]();
 }
@@ -946,4 +951,133 @@ window.delNotice = async id => {
   if (!confirm('Delete this notice?')) return;
   await deleteDoc(doc(db,'notices',id));
   loadNotice();
+};
+
+/* ═══════════════════════════════════════
+   COMMITTEE ADMIN VIEW (read-only info)
+   Members collection থেকে category দিয়ে
+═══════════════════════════════════════ */
+async function loadCommitteeAdmin(col) {
+  const catMap = { founders: 'Founding Member', advisers: 'Honorary Member', executive: '__executive__' };
+  const gridId = col === 'founders' ? 'mgr-founders' : col === 'advisers' ? 'mgr-advisers' : 'mgr-executive';
+  const con = $(gridId);
+  if (!con) return;
+  con.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
+  try {
+    const snap = await getDocs(collection(db,'members'));
+    let docs;
+    if (col === 'executive') {
+      docs = snap.docs.filter(d => d.data().status === 'approved' && d.data().executiveRole);
+    } else {
+      docs = snap.docs.filter(d => d.data().status === 'approved' && d.data().category === catMap[col]);
+    }
+    if (!docs.length) { con.innerHTML = '<p style="color:#888;padding:1rem;">No members in this category yet.</p>'; return; }
+    con.innerHTML = tbl(
+      ['Photo','Name','BMC-ID','Sector', col==='executive'?'Role':'Category','Action'],
+      docs.map(d => {
+        const m = d.data();
+        const roleLabel = col === 'executive' ? (m.executiveRole||'—') : (m.category||'—');
+        return `<tr>
+          <td>${avatarDiv(m.photoURL, m.fullname, 44)}</td>
+          <td><strong>${m.fullname||'—'}</strong></td>
+          <td style="font-family:'Cinzel',serif;font-size:11px;color:#C9A84C;">${m.bmcId||'—'}</td>
+          <td>${m.sector||'—'}</td>
+          <td><span class="status-badge status-approved">${roleLabel}</span></td>
+          <td>
+            <button class="abtn btn-view" onclick="viewMemberDetail('${d.id}')">👁 Details</button>
+            <button class="abtn" style="background:#C9A84C;color:#fff;" onclick="editCategory('${d.id}','${m.category||'General Member'}')">✎ Category</button>
+          </td>
+        </tr>`;
+      }).join('')
+    );
+  } catch(e) { con.innerHTML = `<p style="color:#B8111A;padding:1rem;">Error: ${e.message}</p>`; }
+}
+
+/* ═══════════════════════════════════════
+   ABOUT PAGE — Admin Edit
+═══════════════════════════════════════ */
+async function loadAboutAdmin() {
+  const st = $('aboutStatus');
+  try {
+    const snap = await getDocs(collection(db,'settings'));
+    let about = null;
+    snap.docs.forEach(d => { if (d.id === 'about') about = d.data(); });
+    if (about) {
+      if ($('aboutIntro')) $('aboutIntro').value = about.intro || '';
+      if ($('aboutGoals')) $('aboutGoals').value = about.goals || '';
+    }
+  } catch(e) { console.error(e); }
+}
+
+window.saveAbout = async () => {
+  const intro  = $('aboutIntro')?.value?.trim() || '';
+  const goals  = $('aboutGoals')?.value?.trim() || '';
+  const st     = $('aboutStatus');
+  st.textContent = 'Saving...'; st.style.color = '#888';
+  try {
+    await setDoc(doc(db,'settings','about'), { intro, goals, updatedAt: serverTimestamp() });
+    st.textContent = '✓ About page saved!'; st.style.color = '#157040';
+    setTimeout(() => { st.textContent = ''; }, 3000);
+  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
+};
+
+/* ═══════════════════════════════════════
+   EXECUTIVE ROLE ASSIGN
+═══════════════════════════════════════ */
+async function loadExecutiveAssign() {
+  // Member dropdown populate
+  const sel = $('execMemberId');
+  const listEl = $('execList');
+  if (!sel || !listEl) return;
+  try {
+    const snap = await getDocs(collection(db,'members'));
+    const approved = snap.docs.filter(d => d.data().status === 'approved');
+    sel.innerHTML = '<option value="">— Select Approved Member —</option>' +
+      approved.map(d => {
+        const m = d.data();
+        return `<option value="${d.id}">${m.fullname||'—'} ${m.bmcId?'('+m.bmcId+')':''}${m.executiveRole?' ✓ '+m.executiveRole:''}</option>`;
+      }).join('');
+
+    // Current executive list
+    const execs = approved.filter(d => d.data().executiveRole);
+    if (!execs.length) { listEl.innerHTML = '<p style="color:#888;padding:1rem;">No executive roles assigned yet.</p>'; return; }
+    listEl.innerHTML = tbl(
+      ['Name','BMC-ID','Role','Action'],
+      execs.map(d => {
+        const m = d.data();
+        return `<tr>
+          <td><strong>${m.fullname||'—'}</strong></td>
+          <td style="font-family:'Cinzel',serif;font-size:11px;color:#C9A84C;">${m.bmcId||'—'}</td>
+          <td><span class="status-badge status-approved">${m.executiveRole}</span></td>
+          <td>
+            <button class="abtn btn-delete" onclick="removeExecutiveRole('${d.id}')">✕ Remove Role</button>
+          </td>
+        </tr>`;
+      }).join('')
+    );
+  } catch(e) { console.error(e); }
+}
+
+window.assignExecutiveRole = async () => {
+  const memberId = $('execMemberId')?.value;
+  const role     = $('execRole')?.value?.trim();
+  const st       = $('execStatus');
+  if (!memberId) { alert('Please select a member.'); return; }
+  if (!role)     { alert('Please enter a role (e.g. President).'); return; }
+  st.textContent = 'Saving...'; st.style.color = '#888';
+  try {
+    await updateDoc(doc(db,'members',memberId), { executiveRole: role, executiveOrder: 99 });
+    st.textContent = '✓ Role assigned!'; st.style.color = '#157040';
+    $('execRole').value = '';
+    setTimeout(() => { st.textContent = ''; }, 2000);
+    loadExecutiveAssign();
+  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
+};
+
+window.removeExecutiveRole = async (id) => {
+  if (!confirm('Remove this member from Executive Committee?')) return;
+  try {
+    await updateDoc(doc(db,'members',id), { executiveRole: null, executiveOrder: null });
+    loadExecutiveAssign();
+  } catch(e) { alert('Error: ' + e.message); }
 };
