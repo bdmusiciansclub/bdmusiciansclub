@@ -25,7 +25,14 @@
   <ul class="nav-links">
     <li><a href="#" onclick="showPage('home')">Home</a></li>
     <li><a href="#" onclick="showPage('about')">About</a></li>
-    <li><a href="#" onclick="showPage('committee')">Committee</a></li>
+    <li class="dropdown">
+      <a href="#">Committee ▾</a>
+      <div class="dropdown-menu">
+        <a href="#" onclick="showPage('founders')">👑 Founding Members</a>
+        <a href="#" onclick="showPage('advisers')">🎓 Advisers</a>
+        <a href="#" onclick="showPage('executive')">📌 Executive Committee</a>
+      </div>
+    </li>
     <li><a href="#" onclick="showPage('members')">Members</a></li>
     <li class="dropdown">
       <a href="#">More ▾</a>
@@ -49,7 +56,9 @@
 <div class="mobile-menu" id="mobileMenu">
   <a href="#" onclick="showPage('home')">Home</a>
   <a href="#" onclick="showPage('about')">About</a>
-  <a href="#" onclick="showPage('committee')">Committee</a>
+  <a href="#" onclick="showPage('founders')">👑 Founding Members</a>
+  <a href="#" onclick="showPage('advisers')">🎓 Advisers</a>
+  <a href="#" onclick="showPage('executive')">📌 Executive Committee</a>
   <a href="#" onclick="showPage('members')">Members</a>
   <a href="#" onclick="showPage('events')">Events</a>
   <a href="#" onclick="showPage('notice')">Notice</a>
@@ -237,46 +246,51 @@
 <!-- ═══════════════════════════════════
      PAGE: COMMITTEE
 ════════════════════════════════════ -->
-<div id="page-committee" class="page">
+
+<!-- ═══════════════════════════════════
+     PAGE: FOUNDING MEMBERS
+════════════════════════════════════ -->
+<div id="page-founders" class="page">
   <div class="page-hero">
-    <h1>Committee</h1>
-    <p>আমাদের নেতৃত্ব ও পরিচালনা পর্ষদ</p>
+    <h1>Founding Members</h1>
+    <p>The visionaries who established Bangladesh Musician's Club</p>
   </div>
   <section class="section sec-white">
     <div class="container">
-      <div class="tab-nav">
-        <button class="tab-btn active" data-tab="founders"  onclick="switchTab('founders')">👑 Founding Members</button>
-        <button class="tab-btn"        data-tab="advisers"  onclick="switchTab('advisers')">🎓 Advisers</button>
-        <button class="tab-btn"        data-tab="executive" onclick="switchTab('executive')">📌 Executive Committee</button>
-      </div>
-
-      <div id="tab-founders" class="tab-panel active">
-        <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">Founding Members</h2>
-          <p class="sec-desc on-light">The visionaries who established Bangladesh Musician's Club</p>
-        </div>
-        <div id="foundersGrid"><div class="loading">Loading...</div></div>
-      </div>
-
-      <div id="tab-advisers" class="tab-panel">
-        <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">Advisers</h2>
-          <p class="sec-desc on-light">উপদেষ্টা পরিষদ — BMC-র দিকনির্দেশনায় যাঁরা আলো দেন</p>
-        </div>
-        <div id="advisersGrid"><div class="loading">Loading...</div></div>
-      </div>
-
-      <div id="tab-executive" class="tab-panel">
-        <div class="sec-header" style="margin-bottom:2rem;">
-          <h2 class="sec-title on-light">Executive Committee</h2>
-          <p class="sec-desc on-light">পরিচালনা কমিটি — ক্লাবের দৈনন্দিন পরিচালনায় নিয়োজিত</p>
-        </div>
-        <div id="executiveGrid"><div class="loading">Loading...</div></div>
-      </div>
+      <div id="foundersGrid"><div class="loading">Loading...</div></div>
     </div>
   </section>
 </div>
 
+<!-- ═══════════════════════════════════
+     PAGE: ADVISERS
+════════════════════════════════════ -->
+<div id="page-advisers" class="page">
+  <div class="page-hero">
+    <h1>Advisers</h1>
+    <p>উপদেষ্টা পরিষদ — BMC-র দিকনির্দেশনায় যাঁরা আলো দেন</p>
+  </div>
+  <section class="section sec-white">
+    <div class="container">
+      <div id="advisersGrid"><div class="loading">Loading...</div></div>
+    </div>
+  </section>
+</div>
+
+<!-- ═══════════════════════════════════
+     PAGE: EXECUTIVE COMMITTEE
+════════════════════════════════════ -->
+<div id="page-executive" class="page">
+  <div class="page-hero">
+    <h1>Executive Committee</h1>
+    <p>পরিচালনা কমিটি — ক্লাবের দৈনন্দিন পরিচালনায় নিয়োজিত</p>
+  </div>
+  <section class="section sec-white">
+    <div class="container">
+      <div id="executiveGrid"><div class="loading">Loading...</div></div>
+    </div>
+  </section>
+</div>
 
 <!-- ═══════════════════════════════════
      PAGE: MEMBERS
@@ -751,7 +765,9 @@
       <div class="footer-col">
         <h4>Organization</h4>
         <a href="#" onclick="showPage('about')">About Us</a>
-        <a href="#" onclick="showPage('committee')">Committee</a>
+        <a href="#" onclick="showPage('founders')">👑 Founding Members</a>
+  <a href="#" onclick="showPage('advisers')">🎓 Advisers</a>
+  <a href="#" onclick="showPage('executive')">📌 Executive Committee</a>
         <a href="#" onclick="showPage('members')">Members</a>
       </div>
       <div class="footer-col">
