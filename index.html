@@ -546,31 +546,165 @@
           <!-- Professional Info -->
           <div class="form-section-title" style="margin-top:1.5rem;">Professional Information</div>
           <div class="form-gap">
-            <div class="form-group">
-              <label class="form-label">Select Your Sector <span>*</span></label>
-              <div class="sector-options">
-                <div class="sector-option selected" data-sector="Musicians" onclick="selectSector('Musicians')">
-                  <input type="radio" name="sector">
-                  <span class="sector-option-icon">🎵</span>
-                  <div class="sector-option-name">Musicians</div>
-                </div>
-                <div class="sector-option" data-sector="Sound Engineers" onclick="selectSector('Sound Engineers')">
-                  <input type="radio" name="sector">
-                  <span class="sector-option-icon">🔊</span>
-                  <div class="sector-option-name">Sound Engineers</div>
-                </div>
-                <div class="sector-option" data-sector="Logistic Supporters" onclick="selectSector('Logistic Supporters')">
-                  <input type="radio" name="sector">
-                  <span class="sector-option-icon">🎬</span>
-                  <div class="sector-option-name">Logistic Supporters</div>
-                </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Main Instrument / Vocal Type <span>*</span></label>
+                <select id="sector" class="form-select">
+                  <option value="">— Select Main —</option>
+                  <optgroup label="🎤 Vocal">
+                    <option>Singer (Classical)</option>
+                    <option>Singer (Folk / Baul)</option>
+                    <option>Singer (Modern / Pop)</option>
+                    <option>Singer (Rabindra Sangeet)</option>
+                    <option>Singer (Nazrul Sangeet)</option>
+                    <option>Singer (Band / Rock)</option>
+                    <option>Singer (Devotional)</option>
+                    <option>Singer (Jazz / Blues)</option>
+                    <option>Singer (Other)</option>
+                  </optgroup>
+                  <optgroup label="🎸 String">
+                    <option>Guitar (Acoustic)</option>
+                    <option>Guitar (Electric)</option>
+                    <option>Guitar (Bass)</option>
+                    <option>Sitar</option>
+                    <option>Esraj</option>
+                    <option>Violin / Fiddle</option>
+                    <option>Sarod</option>
+                    <option>Dotara</option>
+                    <option>Ektara</option>
+                    <option>Banjo</option>
+                    <option>Ukulele</option>
+                    <option>Mandolin</option>
+                  </optgroup>
+                  <optgroup label="🥁 Percussion">
+                    <option>Tabla</option>
+                    <option>Dhol</option>
+                    <option>Dhak</option>
+                    <option>Khol</option>
+                    <option>Mridanga</option>
+                    <option>Drum Kit</option>
+                    <option>Cajon</option>
+                    <option>Darbuka</option>
+                    <option>Congas</option>
+                  </optgroup>
+                  <optgroup label="🎹 Keys">
+                    <option>Harmonium</option>
+                    <option>Piano</option>
+                    <option>Keyboard / Synthesizer</option>
+                    <option>Organ</option>
+                    <option>Accordion</option>
+                  </optgroup>
+                  <optgroup label="🎺 Wind">
+                    <option>Bansuri / Flute</option>
+                    <option>Shehnai</option>
+                    <option>Trumpet</option>
+                    <option>Saxophone</option>
+                    <option>Clarinet</option>
+                    <option>Harmonica</option>
+                  </optgroup>
+                  <optgroup label="🔊 Technical">
+                    <option>Sound Engineer</option>
+                    <option>Audio Technician</option>
+                    <option>Mixing Engineer</option>
+                    <option>Live Sound Operator</option>
+                    <option>Recording Engineer</option>
+                  </optgroup>
+                  <optgroup label="🎬 Production">
+                    <option>Stage Manager</option>
+                    <option>Lighting Operator</option>
+                    <option>LED / Visual Operator</option>
+                    <option>Production Manager</option>
+                    <option>Set Designer</option>
+                  </optgroup>
+                  <optgroup label="🎵 Other">
+                    <option>Music Composer</option>
+                    <option>Lyricist</option>
+                    <option>Music Director</option>
+                    <option>Music Teacher</option>
+                    <option>Other</option>
+                  </optgroup>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Sub / Additional Instrument (optional)</label>
+                <select id="specialization" class="form-select">
+                  <option value="">— None / Select —</option>
+                  <optgroup label="🎤 Vocal">
+                    <option>Singer (Classical)</option>
+                    <option>Singer (Folk / Baul)</option>
+                    <option>Singer (Modern / Pop)</option>
+                    <option>Singer (Rabindra Sangeet)</option>
+                    <option>Singer (Nazrul Sangeet)</option>
+                    <option>Singer (Band / Rock)</option>
+                    <option>Singer (Devotional)</option>
+                    <option>Singer (Jazz / Blues)</option>
+                    <option>Singer (Other)</option>
+                  </optgroup>
+                  <optgroup label="🎸 String">
+                    <option>Guitar (Acoustic)</option>
+                    <option>Guitar (Electric)</option>
+                    <option>Guitar (Bass)</option>
+                    <option>Sitar</option>
+                    <option>Esraj</option>
+                    <option>Violin / Fiddle</option>
+                    <option>Sarod</option>
+                    <option>Dotara</option>
+                    <option>Ektara</option>
+                    <option>Banjo</option>
+                    <option>Ukulele</option>
+                    <option>Mandolin</option>
+                  </optgroup>
+                  <optgroup label="🥁 Percussion">
+                    <option>Tabla</option>
+                    <option>Dhol</option>
+                    <option>Dhak</option>
+                    <option>Khol</option>
+                    <option>Mridanga</option>
+                    <option>Drum Kit</option>
+                    <option>Cajon</option>
+                    <option>Darbuka</option>
+                    <option>Congas</option>
+                  </optgroup>
+                  <optgroup label="🎹 Keys">
+                    <option>Harmonium</option>
+                    <option>Piano</option>
+                    <option>Keyboard / Synthesizer</option>
+                    <option>Organ</option>
+                    <option>Accordion</option>
+                  </optgroup>
+                  <optgroup label="🎺 Wind">
+                    <option>Bansuri / Flute</option>
+                    <option>Shehnai</option>
+                    <option>Trumpet</option>
+                    <option>Saxophone</option>
+                    <option>Clarinet</option>
+                    <option>Harmonica</option>
+                  </optgroup>
+                  <optgroup label="🔊 Technical">
+                    <option>Sound Engineer</option>
+                    <option>Audio Technician</option>
+                    <option>Mixing Engineer</option>
+                    <option>Live Sound Operator</option>
+                    <option>Recording Engineer</option>
+                  </optgroup>
+                  <optgroup label="🎬 Production">
+                    <option>Stage Manager</option>
+                    <option>Lighting Operator</option>
+                    <option>LED / Visual Operator</option>
+                    <option>Production Manager</option>
+                    <option>Set Designer</option>
+                  </optgroup>
+                  <optgroup label="🎵 Other">
+                    <option>Music Composer</option>
+                    <option>Lyricist</option>
+                    <option>Music Director</option>
+                    <option>Music Teacher</option>
+                    <option>Other</option>
+                  </optgroup>
+                </select>
               </div>
             </div>
             <div class="form-row">
-              <div class="form-group">
-                <label class="form-label">Specialization / Profession <span>*</span></label>
-                <input type="text" id="specialization" class="form-input" placeholder="e.g. Guitarist, Sound Engineer...">
-              </div>
               <div class="form-group">
                 <label class="form-label">Years of Experience</label>
                 <select id="experience" class="form-select">
@@ -582,10 +716,10 @@
                   <option>10+ years</option>
                 </select>
               </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Current Organization</label>
-              <input type="text" id="organization" class="form-input" placeholder="Band / Organization name (if any)">
+              <div class="form-group">
+                <label class="form-label">Current Organization / Band</label>
+                <input type="text" id="organization" class="form-input" placeholder="Band / Organization name (if any)">
+              </div>
             </div>
           </div>
 
