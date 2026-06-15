@@ -231,9 +231,11 @@ window.confirmApprove = async (id) => {
     const memberSnap = await getDoc(memberRef);
     const m = memberSnap.data();
 
+    const nextId = await getNextBmcId();
     await updateDoc(memberRef, {
       status: 'approved',
       category: cat,
+      bmcId: nextId,
       approvedAt: serverTimestamp()
     });
 
@@ -265,12 +267,14 @@ async function loadMembers() {
   const con = $('membersList');
   con.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
   try {
-    const snap = await getDocs(query(collection(db,'members'), where('status','==','approved')));
-    if (snap.empty) {
+    // সব members load করে client-side filter — index সমস্যা এড়াতে
+    const snap = await getDocs(collection(db,'members'));
+    const approved = snap.docs.filter(d => d.data().status === 'approved');
+    if (!approved.length) {
       con.innerHTML = '<p style="color:#888;padding:1rem;">No approved members yet.</p>';
       return;
     }
-    snap.docs.forEach(d => { allMembersData[d.id] = { ...d.data(), id: d.id }; });
+    approved.forEach(d => { allMembersData[d.id] = { ...d.data(), id: d.id }; });
     const catColor = {
       'Founding Member': 'background:rgba(184,17,26,0.1);color:#B8111A;border:1px solid rgba(184,17,26,0.25);',
       'Honorary Member': 'background:rgba(201,168,76,0.15);color:#7A6020;border:1px solid rgba(201,168,76,0.4);',
@@ -278,26 +282,31 @@ async function loadMembers() {
     };
     con.innerHTML = tbl(
       ['Photo','Name','Sector','Category','Mobile','District','Action'],
-      snap.docs.map(d => {
+      approved.map(d => {
         const m = d.data();
         const cat = m.category || 'General Member';
         const badge = `<span class="status-badge" style="${catColor[cat]||catColor['General Member']}">${cat}</span>`;
+        const bmcId = m.bmcId ? `<br><small style="color:#C9A84C;font-weight:600;">${m.bmcId}</small>` : '';
         return `<tr style="cursor:pointer;" onclick="viewMemberDetail('${d.id}')">
           <td>${avatarDiv(m.photoURL, m.fullname, 44)}</td>
-          <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.specialty||m.sector||''}</small></td>
-          <td>${m.sector||''}</td>
+          <td><strong>${m.fullname||'—'}</strong>${bmcId}</td>
+          <td>${m.sector||'—'}</td>
           <td>${badge}</td>
-          <td>${m.mobile||''}</td>
-          <td>${m.dist_c||''}</td>
+          <td>${m.mobile||'—'}</td>
+          <td>${m.dist_c||'—'}</td>
           <td>
             <button class="abtn btn-view" onclick="event.stopPropagation();viewMemberDetail('${d.id}')">👁 Details</button>
             <button class="abtn" style="background:#C9A84C;color:#fff;" onclick="event.stopPropagation();editCategory('${d.id}','${cat}')">✎ Category</button>
+            <button class="abtn" style="background:#0B3D20;color:#fff;" onclick="event.stopPropagation();editBmcId('${d.id}','${m.bmcId||''}')">🪪 ID</button>
             ${delBtn('delMember', d.id)}
           </td>
         </tr>`;
       }).join('')
     );
-  } catch(e) { console.error(e); }
+  } catch(e) {
+    con.innerHTML = `<p style="color:#B8111A;padding:1rem;">Error loading members: ${e.message}</p>`;
+    console.error('loadMembers error:', e);
+  }
 }
 
 window.delMember = async id => {
@@ -306,6 +315,60 @@ window.delMember = async id => {
   delete allMembersData[id];
   loadMembers();
 };
+/* ═══════════════════════════════════════
+   BMC-ID SYSTEM
+═══════════════════════════════════════ */
+window.editBmcId = (id, currentId) => {
+  const existing = document.getElementById('bmcIdOverlay');
+  if (existing) existing.remove();
+  const overlay = document.createElement('div');
+  overlay.id = 'bmcIdOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:3000;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `
+    <div style="background:#fff;padding:2rem;width:360px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h3 style="font-family:'Playfair Display',serif;font-size:1.1rem;color:#111;margin:0 0 0.5rem;">Assign BMC-ID</h3>
+      <p style="font-size:12px;color:#888;margin:0 0 1rem;">Format: BMC-YYYY-NNN (e.g. BMC-2022-001)</p>
+      <input id="bmcIdInput" type="text" value="${currentId}"
+        placeholder="BMC-2022-001"
+        style="width:100%;padding:10px 13px;border:1.5px solid #d1d5db;font-size:14px;font-family:'Cinzel',serif;font-weight:700;letter-spacing:2px;color:#0B3D20;margin-bottom:1rem;box-sizing:border-box;outline:none;">
+      <div style="display:flex;gap:0.75rem;">
+        <button onclick="saveBmcId('${id}')" style="flex:1;padding:11px;background:#0B3D20;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;font-family:'Inter',sans-serif;">Save ID</button>
+        <button onclick="document.getElementById('bmcIdOverlay').remove()" style="padding:11px 16px;background:#555;color:#fff;border:none;cursor:pointer;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;">Cancel</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('bmcIdInput')?.focus(), 100);
+};
+
+window.saveBmcId = async (id) => {
+  const val = document.getElementById('bmcIdInput')?.value?.trim();
+  if (!val) { alert('Please enter a BMC-ID.'); return; }
+  // format check
+  if (!/^BMC-\d{4}-\d{3,}$/.test(val)) {
+    alert('Format must be: BMC-YYYY-NNN\nExample: BMC-2022-001');
+    return;
+  }
+  try {
+    await updateDoc(doc(db,'members',id), { bmcId: val });
+    document.getElementById('bmcIdOverlay')?.remove();
+    if (allMembersData[id]) allMembersData[id].bmcId = val;
+    loadMembers();
+    alert('✓ BMC-ID assigned: ' + val);
+  } catch(e) { alert('Error: ' + e.message); }
+};
+
+// Auto-generate next BMC-ID
+window.getNextBmcId = async () => {
+  const snap = await getDocs(collection(db,'members'));
+  const ids = snap.docs
+    .map(d => d.data().bmcId)
+    .filter(id => id && /^BMC-\d{4}-\d+$/.test(id))
+    .map(id => parseInt(id.split('-')[2]))
+    .filter(n => !isNaN(n));
+  const next = ids.length ? Math.max(...ids) + 1 : 1;
+  return `BMC-2022-${String(next).padStart(3,'0')}`;
+};
+
 
 // ── Edit Category ──
 window.editCategory = (id, currentCat) => {
@@ -363,7 +426,8 @@ window.addMemberByAdmin = async () => {
     const photoInput=document.getElementById("adm_photo");
     let photoURL=null;
     if(photoInput?.files[0])photoURL=await uploadToCloudinary(photoInput.files[0]);
-    await addDoc(collection(db,"members"),{fullname:name,mobile:mobile||"",sector:sector||"",category,email:email||"",experience:exp||"",dist_c:dist||"",status:"approved",addedByAdmin:true,createdAt:serverTimestamp(),approvedAt:serverTimestamp(),...(photoURL&&{photoURL})});
+    const newBmcId = await getNextBmcId();
+    await addDoc(collection(db,"members"),{fullname:name,mobile:mobile||"",sector:sector||"",category,email:email||"",experience:exp||"",dist_c:dist||"",status:"approved",bmcId:newBmcId,addedByAdmin:true,createdAt:serverTimestamp(),approvedAt:serverTimestamp(),...(photoURL&&{photoURL})});
     st.textContent="✓ Member added!";st.style.color="#157040";
     ["adm_name","adm_mobile","adm_sector","adm_email","adm_experience","adm_district"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
     document.getElementById("adm_category").value="";
@@ -801,4 +865,85 @@ window.uploadMemberPhoto = async (id) => {
     loadMembers();
     setTimeout(() => { st.textContent = ''; }, 3000);
   } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
+};
+
+/* ═══════════════════════════════════════
+   NOTICE MANAGEMENT
+═══════════════════════════════════════ */
+async function loadNotice() {
+  const con = $('noticeList');
+  if (!con) return;
+  con.innerHTML = '<div style="color:#888;font-size:13px;padding:1rem;">Loading...</div>';
+  try {
+    const snap = await getDocs(collection(db,'notices'));
+    const docs = snap.docs.sort((a,b) => (b.data().createdAt?.seconds||0) - (a.data().createdAt?.seconds||0));
+    if (!docs.length) {
+      con.innerHTML = '<p style="color:#888;font-size:13px;padding:1rem;">No notices yet.</p>';
+      return;
+    }
+    con.innerHTML = tbl(
+      ['Title','Body','Date','Action'],
+      docs.map(d => {
+        const n = d.data();
+        const date = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleDateString('en-GB') : '—';
+        const safeTitle = (n.title||'').replace(/'/g,"\\'");
+        const safeBody  = (n.body||'').replace(/'/g,"\\'");
+        return `<tr>
+          <td><strong>${n.title||'—'}</strong></td>
+          <td style="font-size:12px;max-width:260px;white-space:pre-wrap;">${n.body||''}</td>
+          <td style="font-size:12px;color:#888;white-space:nowrap;">${date}</td>
+          <td style="white-space:nowrap;">
+            <button class="abtn btn-view" onclick="editNotice('${d.id}','${safeTitle}','${safeBody}')">✎ Edit</button>
+            ${delBtn('delNotice', d.id)}
+          </td>
+        </tr>`;
+      }).join('')
+    );
+  } catch(e) {
+    console.error('loadNotice error:', e);
+    con.innerHTML = `<p style="color:#B8111A;padding:1rem;">Error: ${e.message}</p>`;
+  }
+}
+
+window.addNotice = async () => {
+  const title = val('noticeTitle');
+  const body  = val('noticeBody');
+  const st    = $('noticeStatus');
+  if (!title) { alert('Notice title is required.'); return; }
+  st.textContent = 'Saving...'; st.style.color = '#888';
+  try {
+    await addDoc(collection(db,'notices'), { title, body, createdAt: serverTimestamp() });
+    st.textContent = '✓ Notice published!'; st.style.color = '#157040';
+    $('noticeTitle').value = ''; $('noticeBody').value = '';
+    const btn = $('noticeAddBtn');
+    if (btn) { btn.textContent = '+ Publish Notice'; btn.onclick = addNotice; }
+    setTimeout(() => { st.textContent = ''; }, 3000);
+    loadNotice();
+  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A'; }
+};
+
+window.editNotice = (id, title, body) => {
+  if ($('noticeTitle')) $('noticeTitle').value = title;
+  if ($('noticeBody'))  $('noticeBody').value  = body;
+  const btn = $('noticeAddBtn');
+  if (btn) {
+    btn.textContent = '💾 Update Notice';
+    btn.onclick = async () => {
+      const newTitle = val('noticeTitle');
+      const newBody  = val('noticeBody');
+      if (!newTitle) { alert('Title required.'); return; }
+      try {
+        await updateDoc(doc(db,'notices',id), { title: newTitle, body: newBody });
+        $('noticeTitle').value = ''; $('noticeBody').value = '';
+        btn.textContent = '+ Publish Notice'; btn.onclick = addNotice;
+        loadNotice();
+      } catch(e) { alert('Error: ' + e.message); }
+    };
+  }
+};
+
+window.delNotice = async id => {
+  if (!confirm('Delete this notice?')) return;
+  await deleteDoc(doc(db,'notices',id));
+  loadNotice();
 };
