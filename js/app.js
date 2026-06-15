@@ -478,8 +478,30 @@ window.copyCurrAddress = function() {
 
 window.submitApplication = async function() {
   const get = id => document.getElementById(id)?.value?.trim() || '';
-  const membershipEl = document.querySelector('.membership-option.selected');
-  const sectorEl     = document.querySelector('.sector-option.selected');
+
+  // ── Validation ──
+  const required = [
+    { id: 'fullName',  label: 'Full Name' },
+    { id: 'dob',       label: 'Date of Birth' },
+    { id: 'nid',       label: 'National ID Number' },
+    { id: 'div_c',     label: 'Current Division' },
+    { id: 'dist_c',    label: 'Current District' },
+    { id: 'mobile',    label: 'Mobile Number' },
+    { id: 'sector',    label: 'Main Instrument / Vocal Type' },
+  ];
+  const missing = required.filter(f => !get(f.id));
+  if (missing.length) {
+    // highlight missing fields
+    required.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (el) el.style.borderColor = get(f.id) ? '' : '#B8111A';
+    });
+    alert('Please fill in the following required fields:\n\n' + missing.map(f => '• ' + f.label).join('\n'));
+    return;
+  }
+  // clear red borders
+  required.forEach(f => { const el = document.getElementById(f.id); if (el) el.style.borderColor = ''; });
+
   const data = {
     fullname:     get('fullName'),
     dob:          get('dob'),
@@ -497,22 +519,17 @@ window.submitApplication = async function() {
     whatsapp:     get('whatsapp'),
     email:        get('email'),
     facebook:     get('facebook'),
-    sector:       sectorEl?.dataset.sector || '',
+    sector:       get('sector'),
     specialty:    get('specialization'),
     experience:   get('experience'),
     organization: get('organization'),
     status:       'pending',
     createdAt:    serverTimestamp(),
   };
-  if (!data.fullname || !data.mobile || !data.sector) {
-    alert('Full Name, Mobile Number and Sector are required.');
-    return;
-  }
-  // Show uploading state
+
   const btn = document.getElementById('joinSubmitBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
   try {
-    // Photo upload যদি দেওয়া থাকে
     const photoInput = document.getElementById('profilePhoto');
     if (photoInput?.files[0]) {
       try {
