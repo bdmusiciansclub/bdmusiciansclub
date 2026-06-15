@@ -501,7 +501,6 @@ window.submitApplication = async function() {
     specialty:    get('specialization'),
     experience:   get('experience'),
     organization: get('organization'),
-    membership:   membershipEl?.dataset.type || 'General',
     status:       'pending',
     createdAt:    serverTimestamp(),
   };
@@ -509,12 +508,27 @@ window.submitApplication = async function() {
     alert('Full Name, Mobile Number and Sector are required.');
     return;
   }
+  // Show uploading state
+  const btn = document.getElementById('joinSubmitBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting...'; }
   try {
+    // Photo upload যদি দেওয়া থাকে
+    const photoInput = document.getElementById('profilePhoto');
+    if (photoInput?.files[0]) {
+      try {
+        const { uploadToCloudinary } = await import('./cloudinary.js');
+        data.photoURL = await uploadToCloudinary(photoInput.files[0]);
+      } catch(uploadErr) {
+        console.warn('Photo upload failed, submitting without photo:', uploadErr);
+      }
+    }
     await addDoc(collection(db, 'members'), data);
     document.getElementById('joinForm').classList.add('hidden');
     document.getElementById('joinSuccess').classList.add('show');
   } catch(e) {
     alert('Something went wrong. Please try again.');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit Application'; }
   }
 };
 
