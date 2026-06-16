@@ -1,7 +1,7 @@
 import { db, auth } from '../js/firebase-config.js';
 import { uploadToCloudinary } from '../js/cloudinary.js';
 import {
-  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, doc,
+  collection, getDocs, getDoc, addDoc, updateDoc, deleteDoc, setDoc, doc,
   query, orderBy, where, serverTimestamp, limit
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import { signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
@@ -45,14 +45,17 @@ function loadSec(id) {
     dashboard: loadDashboard,
     applications: loadApplications,
     members: loadMembers,
-    founders: () => loadCategoryMgr('Founding Member', 'mgr-founders'),
+    founders:     () => loadCategoryMgr('Founder', 'mgr-founders'),
     advisers: () => loadCategoryMgr('Honorary Member', 'mgr-advisers'),
     executive: () => loadExecutiveMgr('mgr-executive'),
     committee: () => loadCommMgr('committee','mgr-committee'),
     subcommittee: () => loadCommMgr('subcommittee','mgr-subcommittee'),
-    news: loadNews, events: loadEvents,
-    gallery: loadGallery, videos: loadVideos,
-    feedback: loadFeedback
+    events: loadEvents,
+    gallery: loadGallery,
+    videos: loadVideos,
+    feedback: loadFeedback,
+    notice: loadNotice,
+    about: loadAbout
   };
   if (map[id]) map[id]();
 }
@@ -152,21 +155,22 @@ async function loadApplications() {
 }
 window.upStatus = async (id, status) => {
   if (status === 'approved') {
-    const category = prompt(
-      'Member category সিলেক্ট করুন:\n\n1. General Member (সাধারণ সদস্য)\n2. Honorary Member (সম্মানিত সদস্য)\n3. Founding Member (প্রতিষ্ঠাতা সদস্য)\n\nনম্বর টাইপ করুন (default: 1):',
+    const choice = prompt(
+      'Member category সিলেক্ট করুন:\n\n1 → General Member (Paid)\n2 → Honorary Member (Unpaid)\n\nনম্বর লিখুন (default: 1):',
       '1'
     );
-    if (category === null) return; // cancel
-    const catMap = { '1':'General Member', '2':'Honorary Member', '3':'Founding Member' };
-    const memberCategory = catMap[category] || 'General Member';
-    await updateDoc(doc(db,'members',id), { status, category: memberCategory });
-    alert(`✓ Member approved as ${memberCategory}!`);
+    if (choice === null) return;
+    const cat = choice.trim() === '2' ? 'Honorary Member' : 'General Member';
+    await updateDoc(doc(db,'members',id), { status, category: cat });
+    loadApplications(); loadDashboard();
+    alert('✓ Approved as ' + cat + '!');
   } else {
-    await updateDoc(doc(db,'members',id), {status});
+    await updateDoc(doc(db,'members',id), { status });
+    loadApplications(); loadDashboard();
     alert('✗ Application rejected.');
   }
-  loadApplications(); loadDashboard();
 };
+
 
 // ── MEMBERS ──
 let allMembersData = {};
@@ -1019,9 +1023,8 @@ window.openAddMemberModal = function() {
         <div class="fr2">
           <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Member Category *</label>
           <select id="am_category" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;">
-            <option value="General Member">General Member (সাধারণ)</option>
-            <option value="Honorary Member">Honorary Member (সম্মানিত)</option>
-            <option value="Founding Member">Founding Member (প্রতিষ্ঠাতা)</option>
+            <option value="General Member">General Member — Paid</option>
+            <option value="Honorary Member">Honorary Member — Unpaid</option>
           </select></div>
           <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">BMC-ID (optional)</label>
           <input type="text" id="am_bmcid" placeholder="BMC-2024-0001" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-family:'Cinzel',serif;font-size:13px;box-sizing:border-box;"></div>
@@ -1087,4 +1090,65 @@ window.submitAddMember = async () => {
   } catch(e) {
     st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A';
   }
+};
+
+// ── NOTICE ──
+async function loadNotice() {
+  const con = $('noticeList'); if(!con) return;
+  con.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
+  try {
+    const snap = await getDocs(query(collection(db,'notices'), orderBy('createdAt','desc')));
+    if(snap.empty){ con.innerHTML='<p style="color:#888;padding:1rem;">কোনো নোটিশ নেই।</p>'; return; }
+    con.innerHTML = snap.docs.map(d => {
+      const n = d.data();
+      const date = n.createdAt?.toDate ? n.createdAt.toDate().toLocaleDateString('en-GB') : '';
+      return `<div style="padding:1.2rem;border-bottom:1px solid #f0f0f0;">
+        <div style="font-size:10px;color:#888;margin-bottom:4px;">${date}</div>
+        <div style="font-weight:700;font-size:14px;margin-bottom:6px;">${n.title||'—'}</div>
+        <div style="font-size:13px;color:#555;">${n.body||''}</div>
+      </div>`;
+    }).join('');
+  } catch(e){ con.innerHTML='<p style="color:#B8111A;padding:1rem;">Load error: '+e.message+'</p>'; }
+}
+window.addNotice = async () => {
+  const title = val('noticeTitle'); if(!title){alert('Title required.');return;}
+  try {
+    await addDoc(collection(db,'notices'),{title, body:val('noticeBody'), createdAt:serverTimestamp()});
+    alert('✓ Notice added!');
+    ['noticeTitle','noticeBody'].forEach(id=>{const el=$(id);if(el)el.value='';});
+    loadNotice();
+  } catch(e){alert('Error: '+e.message);}
+};
+window.delNotice = async id => {
+  if(!confirm('Delete?'))return;
+  await deleteDoc(doc(db,'notices',id));
+  loadNotice();
+};
+
+// ── ABOUT (Admin edit) ──
+async function loadAbout() {
+  const con = $('aboutEditContent'); if(!con) return;
+  con.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
+  try {
+    const snap = await getDocs(collection(db,'settings'));
+    let about = null;
+    snap.docs.forEach(d => { if(d.id==='about') about = d.data(); });
+    const intro = about?.intro || '';
+    const goals = about?.goals || '';
+    // index.html এ existing textarea গুলো populate করি
+  const introEl = $('aboutIntro'); if(introEl) introEl.value = intro;
+  const goalsEl = $('aboutGoals'); if(goalsEl) goalsEl.value = goals;
+  con.innerHTML = '<p style="color:#157040;font-size:12px;padding:4px 0;">✓ Content loaded — edit করুন এবং Save করুন।</p>';
+  } catch(e){ con.innerHTML='<p style="color:#B8111A;padding:1rem;">Error: '+e.message+'</p>'; }
+}
+window.saveAbout = async () => {
+  const st = document.createElement('span'); st.textContent = 'Saving...';
+  try {
+    await setDoc(doc(db,'settings','about'), {
+      intro: $('aboutIntro')?.value || '',
+      goals: $('aboutGoals')?.value || '',
+      updatedAt: serverTimestamp()
+    });
+    st.textContent = '✓ Saved!'; st.style.color = '#157040'; const as=$('aboutStatus'); if(as){as.textContent='✓ Saved!';as.style.color='#157040';}
+  } catch(e){ st.textContent = 'Error: '+e.message; st.style.color='#B8111A'; }
 };
