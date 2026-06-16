@@ -47,6 +47,7 @@ function loadSec(id) {
     members: loadMembers,
     founders: () => loadCategoryMgr('Founding Member', 'mgr-founders'),
     advisers: () => loadCategoryMgr('Honorary Member', 'mgr-advisers'),
+    executive: () => loadExecutiveMgr('mgr-executive'),
     committee: () => loadCommMgr('committee','mgr-committee'),
     subcommittee: () => loadCommMgr('subcommittee','mgr-subcommittee'),
     news: loadNews, events: loadEvents,
@@ -76,14 +77,18 @@ async function upload(fileInputId) {
 // ── DASHBOARD ──
 async function loadDashboard() {
   try {
-    const [p,m,e] = await Promise.all([
+    const [p,m,e,g,v] = await Promise.all([
       getDocs(query(collection(db,'members'),where('status','==','pending'))),
       getDocs(query(collection(db,'members'),where('status','==','approved'))),
       getDocs(collection(db,'events')),
+      getDocs(collection(db,'gallery')),
+      getDocs(collection(db,'videos')),
     ]);
     const el1=$('sPending'); if(el1) el1.textContent=p.size;
     const el2=$('sMembers'); if(el2) el2.textContent=m.size;
     const el3=$('sEvents');  if(el3) el3.textContent=e.size;
+    const el4=$('sGallery'); if(el4) el4.textContent=g.size;
+    const el5=$('sVideos');  if(el5) el5.textContent=v.size;
     const con = $('dashApps');
     if (!con) return;
     if (p.empty) {
@@ -238,6 +243,8 @@ window.viewMemberDetail = async (id) => {
   ).join('');
 
   $('modalActions').innerHTML = `
+    <button class="add-btn" onclick="editMember('${id}')">✏️ Edit Info</button>
+    <button class="add-btn" style="background:#C9A84C;color:#0B3D20;" onclick="editBmcId('${id}')">🪪 Assign BMC-ID</button>
     <button class="add-btn" onclick="printMember('${id}')">🖨 Print</button>
     <button class="abtn btn-delete" onclick="event.stopPropagation();delMember('${id}');closeMemberModal()">Delete Member</button>
   `;
@@ -625,3 +632,283 @@ async function loadFeedback(){
   }catch(e){console.error(e);}
 }
 window.delFeedback=async id=>{if(!confirm('Delete?'))return;await deleteDoc(doc(db,'feedback',id));loadFeedback();};
+
+// ═══════════════════════════════════════════════════════
+// ── Fix #3: EDIT MEMBER INFO ──
+// ═══════════════════════════════════════════════════════
+window.editMember = async (id) => {
+  const m = allMembersData[id];
+  if (!m) return;
+
+  $('modalBody').innerHTML = `
+    <div style="padding:1rem 0;">
+      <p style="font-size:12px;color:#888;margin-bottom:1rem;">যা edit করতে চান তা পরিবর্তন করুন, বাকিগুলো আগের মতো থাকবে।</p>
+      <div class="fi">
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px;">Full Name</label>
+          <input type="text" id="edit_fullname" value="${m.fullname||''}" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+          <div><label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px;">Sector / Instrument</label>
+          <input type="text" id="edit_sector" value="${m.sector||''}" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px;">Mobile</label>
+          <input type="text" id="edit_mobile" value="${m.mobile||''}" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+          <div><label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px;">WhatsApp</label>
+          <input type="text" id="edit_whatsapp" value="${m.whatsapp||''}" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px;">Email</label>
+          <input type="text" id="edit_email" value="${m.email||''}" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+          <div><label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px;">Facebook</label>
+          <input type="text" id="edit_facebook" value="${m.facebook||''}" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px;">Experience</label>
+          <input type="text" id="edit_experience" value="${m.experience||''}" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+          <div><label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px;">Organization / Band</label>
+          <input type="text" id="edit_organization" value="${m.organization||''}" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <p id="edit_status" style="font-size:12px;color:#888;"></p>
+      </div>
+    </div>`;
+
+  $('modalActions').innerHTML = `
+    <button class="add-btn" onclick="saveMemberEdit('${id}')">💾 Save Changes</button>
+    <button class="abtn btn-view" onclick="viewMemberDetail('${id}')">← Back</button>
+  `;
+};
+
+window.saveMemberEdit = async (id) => {
+  const st = $('edit_status');
+  st.textContent = 'Saving...';
+  try {
+    const updates = {
+      fullname:     $('edit_fullname')?.value?.trim() || allMembersData[id]?.fullname,
+      sector:       $('edit_sector')?.value?.trim()   || allMembersData[id]?.sector,
+      mobile:       $('edit_mobile')?.value?.trim()   || allMembersData[id]?.mobile,
+      whatsapp:     $('edit_whatsapp')?.value?.trim(),
+      email:        $('edit_email')?.value?.trim(),
+      facebook:     $('edit_facebook')?.value?.trim(),
+      experience:   $('edit_experience')?.value?.trim(),
+      organization: $('edit_organization')?.value?.trim(),
+    };
+    await updateDoc(doc(db,'members',id), updates);
+    // cache update
+    allMembersData[id] = {...allMembersData[id], ...updates};
+    st.textContent = '✓ Saved!';
+    st.style.color = '#157040';
+    setTimeout(() => viewMemberDetail(id), 800);
+  } catch(e) {
+    st.textContent = 'Error: ' + e.message;
+    st.style.color = '#B8111A';
+  }
+};
+
+// ── BMC-ID ASSIGN ──
+window.editBmcId = async (id) => {
+  const m = allMembersData[id];
+  if (!m) return;
+
+  $('modalBody').innerHTML = `
+    <div style="padding:1.5rem 0;">
+      <p style="font-size:13px;color:#888;margin-bottom:1.5rem;">
+        Member: <strong>${m.fullname||'—'}</strong><br>
+        Current BMC-ID: <strong style="color:#C9A84C;font-family:'Cinzel',serif;">${m.bmcId || 'Not assigned'}</strong>
+      </p>
+      <label style="font-size:10px;color:#888;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px;">New BMC-ID</label>
+      <input type="text" id="edit_bmcid"
+        value="${m.bmcId||''}"
+        placeholder="BMC-YYYY-NNNN"
+        style="width:100%;padding:11px 14px;border:2px solid #C9A84C;font-family:'Cinzel',serif;font-size:14px;font-weight:700;letter-spacing:2px;box-sizing:border-box;">
+      <p style="font-size:11px;color:#aaa;margin-top:6px;">Format: BMC-2024-0001</p>
+      <p id="bmcid_status" style="font-size:12px;margin-top:8px;"></p>
+    </div>`;
+
+  $('modalActions').innerHTML = `
+    <button class="add-btn" style="background:#C9A84C;color:#0B3D20;" onclick="saveBmcId('${id}')">💾 Save BMC-ID</button>
+    <button class="abtn btn-view" onclick="viewMemberDetail('${id}')">← Back</button>
+  `;
+};
+
+window.saveBmcId = async (id) => {
+  const bmcId = $('edit_bmcid')?.value?.trim();
+  const st = $('bmcid_status');
+  if (!bmcId) { st.textContent = 'BMC-ID লিখুন।'; st.style.color='#B8111A'; return; }
+  st.textContent = 'Saving...'; st.style.color = '#888';
+  try {
+    await updateDoc(doc(db,'members',id), { bmcId });
+    allMembersData[id] = {...allMembersData[id], bmcId};
+    st.textContent = '✓ BMC-ID assigned!'; st.style.color = '#157040';
+    setTimeout(() => viewMemberDetail(id), 800);
+  } catch(e) {
+    st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A';
+  }
+};
+
+// ═══════════════════════════════════════════════════════
+// ── Fix #5: EXECUTIVE COMMITTEE MANAGER ──
+// Founders/Advisers এর মতো assign + Role system
+// ═══════════════════════════════════════════════════════
+async function loadExecutiveMgr(wrapperId) {
+  const w = $(wrapperId);
+  if (!w) return;
+  w.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
+
+  try {
+    const snap = await getDocs(query(collection(db,'members'), where('status','==','approved')));
+    const allApproved = snap.docs.map(d => ({id:d.id, ...d.data()}));
+
+    // Executive role আছে এমন members
+    const assigned = allApproved.filter(m => m.executiveRole);
+    // Unassigned
+    const unassigned = allApproved.filter(m => !m.executiveRole);
+
+    // Existing roles from Firebase
+    const rolesSnap = await getDocs(collection(db,'executiveRoles')).catch(()=>null);
+    const roles = rolesSnap ? rolesSnap.docs.map(d => d.data().name).filter(Boolean) : [];
+
+    w.innerHTML = `
+      <!-- Role Create Panel -->
+      <div class="panel">
+        <div class="panel-title" style="color:#C9A84C;">⚙️ Manage Roles</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:1rem;">
+          <input type="text" id="new_role_input" placeholder="New role name (e.g. President)"
+            style="flex:1;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;">
+          <button class="add-btn" onclick="addExecutiveRole()">+ Add Role</button>
+        </div>
+        <div id="roles_list" style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${roles.length === 0
+            ? '<span style="font-size:12px;color:#aaa;">কোনো role তৈরি হয়নি।</span>'
+            : roles.map(r => `
+              <span style="background:#f0f9f4;border:1px solid #157040;color:#157040;padding:5px 14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;">
+                ${r}
+                <button onclick="deleteExecutiveRole('${r}')" style="background:none;border:none;color:#B8111A;cursor:pointer;font-size:14px;padding:0;line-height:1;">✕</button>
+              </span>`).join('')
+          }
+        </div>
+        <p id="role_status" style="font-size:12px;color:#888;margin-top:8px;"></p>
+      </div>
+
+      <!-- Assign Panel -->
+      <div class="panel">
+        <div class="panel-title" style="color:#0B3D20;">👥 Assign Executive Member</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1rem;">
+          <input type="text" id="exec_search" placeholder="নাম দিয়ে খুঁজুন..."
+            oninput="filterExecList()"
+            style="padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;">
+          <select id="exec_role_select" style="padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;">
+            <option value="">— Role সিলেক্ট করুন —</option>
+            ${roles.map(r=>`<option value="${r}">${r}</option>`).join('')}
+          </select>
+        </div>
+        <div id="exec_assign_list" style="max-height:300px;overflow-y:auto;border:1px solid #e5e7eb;">
+          ${unassigned.length === 0
+            ? '<p style="color:#888;padding:1rem;font-size:13px;">সব approved member ইতিমধ্যে assign করা আছে।</p>'
+            : unassigned.map(m => execAssignRow(m)).join('')
+          }
+        </div>
+        <p style="font-size:11px;color:#aaa;margin-top:8px;">* প্রথমে Role সিলেক্ট করুন, তারপর member এ Assign ক্লিক করুন।</p>
+      </div>
+
+      <!-- Current Executive Members -->
+      <div class="panel">
+        <div class="panel-title">
+          ✅ Current Executive Committee
+          <span style="background:#0B3D20;color:#fff;padding:3px 12px;font-size:10px;letter-spacing:1px;">${assigned.length} জন</span>
+        </div>
+        ${assigned.length === 0
+          ? '<p style="color:#888;font-size:13px;padding:1rem;">কেউ এখনো assign করা হয়নি।</p>'
+          : `<div style="overflow-x:auto;"><table class="table">
+              <tr><th>Photo</th><th>Name</th><th>Role</th><th>Sector</th><th>Action</th></tr>
+              ${assigned.map(m => {
+                const photo = m.photoURL
+                  ? `<img src="${m.photoURL}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;">`
+                  : `<div style="width:44px;height:44px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-weight:700;">${(m.fullname||'?').charAt(0)}</div>`;
+                return `<tr>
+                  <td>${photo}</td>
+                  <td><strong>${m.fullname||'—'}</strong><br><small style="color:#888;">${m.bmcId||''}</small></td>
+                  <td><span style="background:rgba(11,61,32,0.08);color:#0B3D20;padding:3px 10px;font-size:11px;font-weight:700;">${m.executiveRole||'—'}</span></td>
+                  <td>${m.sector||''}</td>
+                  <td><button class="abtn btn-delete" onclick="removeExecutiveRole('${m.id}')">Remove</button></td>
+                </tr>`;
+              }).join('')}
+            </table></div>`
+        }
+      </div>`;
+
+    // store for filter
+    window._execUnassigned = unassigned;
+
+  } catch(e) {
+    w.innerHTML = `<p style="color:#B8111A;padding:1rem;">Error: ${e.message}</p>`;
+  }
+}
+
+function execAssignRow(m) {
+  const photo = m.photoURL
+    ? `<img src="${m.photoURL}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #e5e7eb;">`
+    : `<div style="width:40px;height:40px;border-radius:50%;background:#0B3D20;display:flex;align-items:center;justify-content:center;color:#7EE8A2;font-weight:700;">${(m.fullname||'?').charAt(0)}</div>`;
+  return `<div class="exec-row" data-name="${(m.fullname||'').toLowerCase()}" data-id="${m.id}"
+    style="display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid #f0f0f0;"
+    onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background=''">
+    ${photo}
+    <div style="flex:1;">
+      <div style="font-weight:600;font-size:13px;">${m.fullname||'—'}</div>
+      <div style="font-size:11px;color:#888;">${m.sector||''} ${m.bmcId?'· '+m.bmcId:''}</div>
+    </div>
+    <button class="abtn btn-approve" onclick="assignExecutiveRole('${m.id}')">+ Assign</button>
+  </div>`;
+}
+
+window.filterExecList = function() {
+  const q = $('exec_search')?.value?.toLowerCase() || '';
+  const listEl = $('exec_assign_list');
+  if (!listEl || !window._execUnassigned) return;
+  const filtered = window._execUnassigned.filter(m =>
+    !q || (m.fullname||'').toLowerCase().includes(q) || (m.bmcId||'').toLowerCase().includes(q)
+  );
+  listEl.innerHTML = filtered.length
+    ? filtered.map(m => execAssignRow(m)).join('')
+    : '<p style="color:#888;padding:1rem;font-size:13px;">পাওয়া যায়নি।</p>';
+};
+
+window.assignExecutiveRole = async (memberId) => {
+  const role = $('exec_role_select')?.value;
+  if (!role) { alert('প্রথমে একটি Role সিলেক্ট করুন।'); return; }
+  try {
+    await updateDoc(doc(db,'members',memberId), { executiveRole: role });
+    alert(`✓ "${role}" হিসেবে assign করা হয়েছে!`);
+    loadExecutiveMgr('mgr-executive');
+  } catch(e) { alert('Error: ' + e.message); }
+};
+
+window.removeExecutiveRole = async (memberId) => {
+  if (!confirm('Executive role remove করবেন?')) return;
+  try {
+    await updateDoc(doc(db,'members',memberId), { executiveRole: '' });
+    alert('✓ Remove করা হয়েছে।');
+    loadExecutiveMgr('mgr-executive');
+  } catch(e) { alert('Error: ' + e.message); }
+};
+
+window.addExecutiveRole = async () => {
+  const name = $('new_role_input')?.value?.trim();
+  const st = $('role_status');
+  if (!name) { st.textContent = 'Role name লিখুন।'; st.style.color='#B8111A'; return; }
+  st.textContent = 'Saving...'; st.style.color='#888';
+  try {
+    await addDoc(collection(db,'executiveRoles'), { name, createdAt: serverTimestamp() });
+    st.textContent = `✓ "${name}" role যোগ হয়েছে!`; st.style.color='#157040';
+    $('new_role_input').value = '';
+    setTimeout(() => loadExecutiveMgr('mgr-executive'), 600);
+  } catch(e) { st.textContent = 'Error: ' + e.message; st.style.color='#B8111A'; }
+};
+
+window.deleteExecutiveRole = async (name) => {
+  if (!confirm(`"${name}" role delete করবেন?`)) return;
+  try {
+    const snap = await getDocs(query(collection(db,'executiveRoles'), where('name','==',name)));
+    for (const d of snap.docs) await deleteDoc(doc(db,'executiveRoles',d.id));
+    loadExecutiveMgr('mgr-executive');
+  } catch(e) { alert('Error: ' + e.message); }
+};
