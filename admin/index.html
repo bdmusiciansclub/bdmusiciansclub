@@ -61,15 +61,16 @@
     }
     .topbar-left { display:flex; align-items:center; gap:12px; }
     .topbar-logo-wrap {
-      width:42px; height:42px;
+      width:44px; height:44px;
       background:#fff;
       border-radius:50%;
       display:flex; align-items:center; justify-content:center;
-      padding:3px;
+      padding:6px;
       box-shadow:0 0 0 2px #C9A84C;
       overflow:hidden;
+      flex-shrink:0;
     }
-    .topbar-logo-wrap img { width:36px; height:36px; object-fit:contain; border-radius:50%; }
+    .topbar-logo-wrap img { width:32px; height:32px; object-fit:contain; }
     .topbar-title { font-family:'Cinzel',serif; font-size:12px; font-weight:700; color:#C9A84C; letter-spacing:1px; }
     .topbar-sub   { font-size:9px; color:rgba(255,255,255,0.35); letter-spacing:2px; text-transform:uppercase; }
     .topbar-right { display:flex; gap:0.75rem; align-items:center; }
@@ -326,47 +327,39 @@
       <!-- Content section -->
       <div class="section-title">Content</div>
       <div class="nav-cards" style="margin-bottom:2rem;">
-        <div class="nav-card c-gold" onclick="showSec('events')">
+        <div class="nav-card" onclick="showSec('events')">
           <span class="nav-card-icon">📅</span>
           <span class="nav-card-label">Events</span>
           <div class="nav-card-count">Manage events</div>
         </div>
-        <div class="nav-card c-green" onclick="showSec('gallery')">
+        <div class="nav-card" onclick="showSec('gallery')">
           <span class="nav-card-icon">🖼️</span>
           <span class="nav-card-label">Gallery</span>
           <div class="nav-card-count">Photo gallery</div>
         </div>
-        <div class="nav-card c-red" onclick="showSec('videos')">
+        <div class="nav-card" onclick="showSec('videos')">
           <span class="nav-card-icon">🎬</span>
           <span class="nav-card-label">Videos</span>
           <div class="nav-card-count">YouTube videos</div>
         </div>
-        <div class="nav-card" style="background:linear-gradient(135deg,#0B3D20,#1a6b3a);" onclick="showSec('notice')">
+        <div class="nav-card" onclick="showSec('notice')">
           <span class="nav-card-icon">📋</span>
           <span class="nav-card-label">Notice</span>
           <div class="nav-card-count">ঘোষণা ও নোটিশ</div>
         </div>
-        <div class="nav-card c-blue" onclick="showSec('feedback')">
+        <div class="nav-card" onclick="showSec('feedback')">
           <span class="nav-card-icon">💬</span>
           <span class="nav-card-label">Feedback</span>
           <div class="nav-card-count">User feedback</div>
         </div>
-        <div class="nav-card" style="background:linear-gradient(135deg,#4a1a6b,#7b2fa8);" onclick="showSec('about')">
+        <div class="nav-card" onclick="showSec('about')">
           <span class="nav-card-icon">ℹ️</span>
           <span class="nav-card-label">About Page</span>
           <div class="nav-card-count">Edit about content</div>
         </div>
       </div>
 
-      <!-- Site Settings -->
-      <div class="section-title">Settings</div>
-      <div class="nav-cards" style="margin-bottom:2rem;">
-        <div class="nav-card" style="background:linear-gradient(135deg,#1a3a6b,#2a5fa8);" onclick="showSec('executive-assign')">
-          <span class="nav-card-icon">🏅</span>
-          <span class="nav-card-label">Executive Roles</span>
-          <div class="nav-card-count">Assign roles to members</div>
-        </div>
-      </div>
+
 
       <!-- Pending preview -->
       <div class="panel">
