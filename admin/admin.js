@@ -151,9 +151,21 @@ async function loadApplications() {
   } catch(e) { console.error(e); }
 }
 window.upStatus = async (id, status) => {
-  await updateDoc(doc(db,'members',id), {status});
+  if (status === 'approved') {
+    const category = prompt(
+      'Member category সিলেক্ট করুন:\n\n1. General Member (সাধারণ সদস্য)\n2. Honorary Member (সম্মানিত সদস্য)\n3. Founding Member (প্রতিষ্ঠাতা সদস্য)\n\nনম্বর টাইপ করুন (default: 1):',
+      '1'
+    );
+    if (category === null) return; // cancel
+    const catMap = { '1':'General Member', '2':'Honorary Member', '3':'Founding Member' };
+    const memberCategory = catMap[category] || 'General Member';
+    await updateDoc(doc(db,'members',id), { status, category: memberCategory });
+    alert(`✓ Member approved as ${memberCategory}!`);
+  } else {
+    await updateDoc(doc(db,'members',id), {status});
+    alert('✗ Application rejected.');
+  }
   loadApplications(); loadDashboard();
-  alert(status==='approved' ? '✓ Member approved!' : '✗ Application rejected.');
 };
 
 // ── MEMBERS ──
@@ -911,4 +923,168 @@ window.deleteExecutiveRole = async (name) => {
     for (const d of snap.docs) await deleteDoc(doc(db,'executiveRoles',d.id));
     loadExecutiveMgr('mgr-executive');
   } catch(e) { alert('Error: ' + e.message); }
+};
+
+// ═══════════════════════════════════════════════════════
+// ── ADD MEMBER (Admin) ──
+// Public registration form এর মতো, auto-approved
+// ═══════════════════════════════════════════════════════
+window.openAddMemberModal = function() {
+  $('modalHeader').innerHTML = `
+    <div class="a-modal-avatar" style="font-size:1.5rem;">➕</div>
+    <div>
+      <div class="a-modal-name">Add New Member</div>
+      <div class="a-modal-role">Admin Entry · Auto Approved</div>
+    </div>`;
+
+  $('modalBody').innerHTML = `
+    <div style="padding:0.5rem 0;">
+      <p style="font-size:12px;color:#888;margin-bottom:1.2rem;background:#f0f9f4;padding:10px;border-left:3px solid #157040;">
+        এই form এর মাধ্যমে যোগ করা member সরাসরি <strong>approved</strong> হবে।
+      </p>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B8111A;margin:0 0 0.8rem;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">Personal Information</div>
+      <div class="fi">
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Full Name *</label>
+          <input type="text" id="am_fullname" placeholder="Full name" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Date of Birth</label>
+          <input type="date" id="am_dob" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Blood Group</label>
+          <select id="am_blood" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;">
+            <option value="">Select</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+          </select></div>
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">NID Number</label>
+          <input type="text" id="am_nid" placeholder="NID" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+      </div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B8111A;margin:1.2rem 0 0.8rem;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">Contact Information</div>
+      <div class="fi">
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Mobile *</label>
+          <input type="text" id="am_mobile" placeholder="01XXXXXXXXX" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">WhatsApp</label>
+          <input type="text" id="am_whatsapp" placeholder="01XXXXXXXXX" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Email</label>
+          <input type="email" id="am_email" placeholder="email@example.com" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Facebook</label>
+          <input type="text" id="am_facebook" placeholder="https://facebook.com/..." style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+      </div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B8111A;margin:1.2rem 0 0.8rem;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">Address</div>
+      <div class="fi">
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Division</label>
+          <select id="am_div" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;">
+            <option value="">Select Division</option>
+            <option>Dhaka</option><option>Chattagram</option><option>Rajshahi</option>
+            <option>Khulna</option><option>Barisal</option><option>Sylhet</option>
+            <option>Rangpur</option><option>Mymensingh</option>
+          </select></div>
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">District</label>
+          <input type="text" id="am_dist" placeholder="District" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+      </div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#B8111A;margin:1.2rem 0 0.8rem;padding-bottom:6px;border-bottom:1px solid #f0f0f0;">Professional Information</div>
+      <div class="fi">
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Main Instrument / Vocal *</label>
+          <select id="am_sector" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;">
+            <option value="">— Select —</option>
+            <optgroup label="🎤 Vocal"><option>Singer (Classical)</option><option>Singer (Folk / Baul)</option><option>Singer (Modern / Pop)</option><option>Singer (Rabindra Sangeet)</option><option>Singer (Nazrul Sangeet)</option><option>Singer (Band / Rock)</option><option>Singer (Devotional)</option><option>Singer (Other)</option></optgroup>
+            <optgroup label="🎸 String"><option>Guitar (Acoustic)</option><option>Guitar (Electric)</option><option>Guitar (Bass)</option><option>Sitar</option><option>Violin / Fiddle</option><option>Dotara</option><option>Esraj</option></optgroup>
+            <optgroup label="🥁 Percussion"><option>Tabla</option><option>Dhol</option><option>Drum Kit</option><option>Cajon</option><option>Khol</option><option>Mridanga</option></optgroup>
+            <optgroup label="🎹 Keys"><option>Harmonium</option><option>Piano</option><option>Keyboard / Synthesizer</option><option>Accordion</option></optgroup>
+            <optgroup label="🎺 Wind"><option>Bansuri / Flute</option><option>Shehnai</option><option>Saxophone</option><option>Trumpet</option><option>Clarinet</option></optgroup>
+            <optgroup label="🔊 Technical"><option>Sound Engineer</option><option>Mixing Engineer</option><option>Audio Technician</option><option>Live Sound Operator</option></optgroup>
+            <optgroup label="🎬 Production"><option>Stage Manager</option><option>Lighting Operator</option><option>Production Manager</option></optgroup>
+            <optgroup label="🎵 Other"><option>Music Composer</option><option>Lyricist</option><option>Music Director</option><option>Music Teacher</option><option>Other</option></optgroup>
+          </select></div>
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Experience</label>
+          <select id="am_experience" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;">
+            <option value="">Select</option>
+            <option>Less than 1 year</option><option>1–3 years</option>
+            <option>3–5 years</option><option>5–10 years</option><option>10+ years</option>
+          </select></div>
+        </div>
+        <div class="fr2">
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Member Category *</label>
+          <select id="am_category" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;">
+            <option value="General Member">General Member (সাধারণ)</option>
+            <option value="Honorary Member">Honorary Member (সম্মানিত)</option>
+            <option value="Founding Member">Founding Member (প্রতিষ্ঠাতা)</option>
+          </select></div>
+          <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">BMC-ID (optional)</label>
+          <input type="text" id="am_bmcid" placeholder="BMC-2024-0001" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-family:'Cinzel',serif;font-size:13px;box-sizing:border-box;"></div>
+        </div>
+        <div><label style="font-size:10px;color:#888;display:block;margin-bottom:3px;">Profile Photo</label>
+        <input type="file" id="am_photo" accept="image/*" style="width:100%;padding:9px 12px;border:1.5px solid #d1d5db;font-size:13px;box-sizing:border-box;"></div>
+      </div>
+
+      <p id="am_status" style="font-size:12px;margin-top:1rem;text-align:center;"></p>
+    </div>`;
+
+  $('modalActions').innerHTML = `
+    <button class="add-btn" onclick="submitAddMember()">✓ Add Member</button>
+    <button class="abtn btn-delete" onclick="closeMemberModal()">Cancel</button>
+  `;
+
+  $('memberModal').classList.add('open');
+};
+
+window.submitAddMember = async () => {
+  const g = id => $(id)?.value?.trim() || '';
+  const st = $('am_status');
+
+  // Validation
+  if (!g('am_fullname')) { st.textContent='⚠️ Full Name required.'; st.style.color='#B8111A'; return; }
+  if (!g('am_mobile'))   { st.textContent='⚠️ Mobile required.'; st.style.color='#B8111A'; return; }
+  if (!g('am_sector'))   { st.textContent='⚠️ Instrument/Vocal required.'; st.style.color='#B8111A'; return; }
+
+  st.textContent = 'Saving...'; st.style.color = '#888';
+
+  try {
+    const data = {
+      fullname:   g('am_fullname'),
+      dob:        g('am_dob'),
+      blood:      g('am_blood'),
+      nid:        g('am_nid'),
+      mobile:     g('am_mobile'),
+      whatsapp:   g('am_whatsapp'),
+      email:      g('am_email'),
+      facebook:   g('am_facebook'),
+      div_c:      g('am_div'),
+      dist_c:     g('am_dist'),
+      sector:     g('am_sector'),
+      experience: g('am_experience'),
+      category:   g('am_category') || 'General Member',
+      bmcId:      g('am_bmcid') || '',
+      status:     'approved', // auto approved
+      createdAt:  serverTimestamp(),
+    };
+
+    // Photo upload
+    const photoInput = $('am_photo');
+    if (photoInput?.files[0]) {
+      try {
+        const url = await uploadToCloudinary(photoInput.files[0]);
+        if (url) data.photoURL = url;
+      } catch(e) { console.warn('Photo upload failed:', e); }
+    }
+
+    await addDoc(collection(db,'members'), data);
+    st.textContent = '✓ Member added successfully!'; st.style.color = '#157040';
+    setTimeout(() => { closeMemberModal(); loadMembers(); }, 1000);
+  } catch(e) {
+    st.textContent = 'Error: ' + e.message; st.style.color = '#B8111A';
+  }
 };
