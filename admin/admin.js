@@ -1127,28 +1127,32 @@ window.delNotice = async id => {
 
 // ── ABOUT (Admin edit) ──
 async function loadAbout() {
-  const con = $('aboutEditContent'); if(!con) return;
-  con.innerHTML = '<div style="color:#888;padding:1rem;">Loading...</div>';
   try {
     const snap = await getDocs(collection(db,'settings'));
     let about = null;
     snap.docs.forEach(d => { if(d.id==='about') about = d.data(); });
-    const intro = about?.intro || '';
-    const goals = about?.goals || '';
-    // index.html এ existing textarea গুলো populate করি
-  const introEl = $('aboutIntro'); if(introEl) introEl.value = intro;
-  const goalsEl = $('aboutGoals'); if(goalsEl) goalsEl.value = goals;
-  con.innerHTML = '<p style="color:#157040;font-size:12px;padding:4px 0;">✓ Content loaded — edit করুন এবং Save করুন।</p>';
-  } catch(e){ con.innerHTML='<p style="color:#B8111A;padding:1rem;">Error: '+e.message+'</p>'; }
+    const introEl = $('aboutIntro');
+    const goalsEl = $('aboutGoals');
+    const st = $('aboutStatus');
+    if(introEl) introEl.value = about?.intro || '';
+    if(goalsEl) goalsEl.value = about?.goals || '';
+    if(st) { st.textContent = '✓ Content loaded.'; st.style.color = '#157040'; }
+  } catch(e) {
+    const st = $('aboutStatus');
+    if(st) { st.textContent = 'Load error: '+e.message; st.style.color='#B8111A'; }
+  }
 }
 window.saveAbout = async () => {
-  const st = document.createElement('span'); st.textContent = 'Saving...';
+  const st = $('aboutStatus');
+  if(st) { st.textContent = 'Saving...'; st.style.color = '#888'; }
   try {
     await setDoc(doc(db,'settings','about'), {
       intro: $('aboutIntro')?.value || '',
       goals: $('aboutGoals')?.value || '',
       updatedAt: serverTimestamp()
     });
-    st.textContent = '✓ Saved!'; st.style.color = '#157040'; const as=$('aboutStatus'); if(as){as.textContent='✓ Saved!';as.style.color='#157040';}
-  } catch(e){ st.textContent = 'Error: '+e.message; st.style.color='#B8111A'; }
+    if(st) { st.textContent = '✓ Saved!'; st.style.color = '#157040'; }
+  } catch(e) {
+    if(st) { st.textContent = 'Error: '+e.message; st.style.color='#B8111A'; }
+  }
 };
